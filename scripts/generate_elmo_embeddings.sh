@@ -1,4 +1,4 @@
-source activate allennlp
+source activate sentbias
 
 # ./generate_elmo_embeddings.sh weat1
 

@@ -1,0 +1,6 @@
+[submodule "SentEval"]
+	path = SentEval
+	url = git@github.com:facebookresearch/SentEval.git
+[submodule "src/models/senteval"]
+	path = src/models/senteval
+	url = git@github.com:facebookresearch/SentEval.git

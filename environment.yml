@@ -1,4 +1,4 @@
-name: allennlp
+name: sentbias
 channels:
 - defaults
 dependencies:
