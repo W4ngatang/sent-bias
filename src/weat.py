@@ -1,7 +1,8 @@
-import numpy as np
-import itertools as it
+import logging as log
 import math
 import random
+import itertools as it
+import numpy as np
 
 import glove
 import elmo
@@ -171,13 +172,13 @@ def run_test(A,B,X,Y):
   AB = A.copy()
   AB.update(B)
   COSSIMS = construct_cossim_lookup(XY,AB)
-  print("computing pval...")
+  log.info("computing pval...")
   pval = p_val_permutation_test(set(X),set(Y),set(A),set(B),COSSIMS=COSSIMS)
-  print("pval", pval)
+  log.info("pval", pval)
 
-  print("computing effect size...")
+  log.info("computing effect size...")
   esize = effect_size(set(X),set(Y),set(A),set(B),COSSIMS=COSSIMS)
-  print("esize",esize)
+  log.info("esize",esize)
   return esize, pval
 
 if __name__ == "__main__":
@@ -187,18 +188,18 @@ if __name__ == "__main__":
   B = {"b"+str(i):2*np.random.rand(10)-1 for i in range(25)}
   A = X
   B = Y
-  
+
   XY = X.copy()
   XY.update(Y)
   AB = A.copy()
   AB.update(B)
 
   COSSIMS = construct_cossim_lookup(XY,AB)
-  print("computing pval...")
+  log.info("computing pval...")
   pval = p_val_permutation_test(set(X),set(Y),set(A),set(B),COSSIMS=COSSIMS)
-  print("pval", pval)
+  log.info("pval", pval)
 
-  print("computing effect size...")
+  log.info("computing effect size...")
   esize = effect_size(set(X),set(Y),set(A),set(B),COSSIMS=COSSIMS)
-  print("esize",esize)
+  log.info("esize",esize)
 
