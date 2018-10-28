@@ -97,8 +97,8 @@ def p_val_permutation_test(X, Y, A, B, COSSIMS=None):
         assert len(X) == len(Y)
         assoc = s_XYAB(X, Y, A, B, COSSIMS=COSSIMS)
         XY = X.union(Y)
-        total_true = 1
-        total = 1
+        total_true = 1.0
+        total = 1.0
 
         # this way computes all subsets, which is prohibitive for large
         # set sizes
@@ -125,8 +125,8 @@ def p_val_permutation_test(X, Y, A, B, COSSIMS=None):
         assert len(X) == len(Y)
         assoc = s_XYAB(X, Y, A, B)
         XY = X+Y
-        total_true = 1
-        total = 0
+        total_true = 1.0
+        total = 0.0
         for subset in it.combinations(XY, len(X)):
             Xi, Yi = [], []
             for x_or_y in XY:
@@ -146,10 +146,12 @@ def p_val_permutation_test(X, Y, A, B, COSSIMS=None):
         return total_true / total
 
 def load_weat_test(weatname, path=None):
+    ''' Load pre-extracted GloVe vectors '''
     if path is None:
         path = "../tests/"
     else:
         path = path.rstrip('/')+'/'
+
     A = glove.load_glove_file(path+weatname+".A.vec")
     B = glove.load_glove_file(path+weatname+".B.vec")
     X = glove.load_glove_file(path+weatname+".X.vec")
@@ -157,6 +159,7 @@ def load_weat_test(weatname, path=None):
     return (A, B, X, Y)
 
 def load_elmo_weat_test(weatname, path=None):
+    ''' Load pre-computed ELMo vectors '''
     if path is None:
         path = "../elmo/"
     else:
@@ -198,9 +201,9 @@ if __name__ == "__main__":
     COSSIMS = construct_cossim_lookup(XY, AB)
     log.info("computing pval...")
     pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), COSSIMS=COSSIMS)
-    log.info("pval: %.5f", pval)
+    log.info("pval: %.9f", pval)
 
     log.info("computing effect size...")
     esize = effect_size(set(X), set(Y), set(A), set(B), COSSIMS=COSSIMS)
-    log.info("esize: %.5f", esize)
+    log.info("esize: %.9f", esize)
 
