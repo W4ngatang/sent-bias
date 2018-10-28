@@ -29,9 +29,16 @@ Download the model checkpoints from the [original repo](https://github.com/faceb
 
 ## Running Stuff
 
-#A minimum working example for running a weat test on glove and elmo:
-Create user-specific paths `${EXP_DIR}` and `${GLOVE_PATH}` in `user_config.sh` and put that config file in the top level directory.
-An example script to run things is in `scripts/weat.sh`.
+Create user-specific paths `${EXP_DIR}` and `${GLOVE_PATH}` in `user_config.sh`, e.g.: 
+
+```
+EXP_DIR=path/to/save/stuff
+GLOVE_PATH=path/to/glove/vectors
+```
+
+Put that config file in the top level directory.
+
+An example script to run things is in `scripts/weat.sh`. To change the test, change the `-t` flag. To change the model, change the `-m` flag (currently accepted: InferSent, GloVe, ELMo)..
 
 
 
