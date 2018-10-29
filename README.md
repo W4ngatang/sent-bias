@@ -44,6 +44,6 @@ An example script to run things is in `scripts/weat.sh`. To change the test, cha
 
 ## TODO
 
-- add programmatic way of loading GloVe embeddings
-- add support for other SentEval-included models: BoW, SkipThought, GenSen, Google USE (GUSE?)
-- add support for jiant-included models: CoVe, OpenAI GPT
+- [Shikha] add programmatic way of loading GloVe embeddings
+- [Shikha] add support for other SentEval-included models: BoW, SkipThought, GenSen, Google USE (GUSE?)
+- [Alex] add support for jiant-included models: CoVe, OpenAI GPT
