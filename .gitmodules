@@ -4,3 +4,6 @@
 [submodule "src/models/senteval"]
 	path = src/models/senteval
 	url = git@github.com:facebookresearch/SentEval.git
+[submodule "jiant"]
+	path = jiant
+	url = git@github.com:jsalt18-sentence-repl/jiant.git
