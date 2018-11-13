@@ -1,0 +1,4 @@
+EuropeanAmericanNames:Brad,Brendan,Geoffrey,Greg,Brett,Matthew,Neil,Todd,Allison,Anne,Carrie,Emily,Jill,Laurie,Meredith,Sarah
+AfricanAmericanNames:Darnell,Hakim,Jermaine,Kareem,Jamal,Leroy,Rasheed,Tyrone,Aisha,Ebony,Keisha,Kenya,Lakisha,Latoya,Tamika,Tanisha
+Pleasant:caress,freedom,health,love,peace,cheer,friend,heaven,loyal,pleasure,diamond,gentle,honest,lucky,rainbow,diploma,gift,honor,miracle,sunrise,family,happy,laughter,paradise,vacation
+Unpleasant:abuse,crash,filth,murder,sickness,accident,death,grief,poison,stink,assault,disaster,hatred,pollute,tragedy,bomb,divorce,jail,poverty,ugly,cancer,evil,kill,rotten,vomit
