@@ -9,8 +9,8 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from collections import OrderedDict
 
-from .gru import BayesianGRU, GRU
-from .dropout import EmbeddingDropout, SequentialDropout
+from gru import BayesianGRU, GRU
+from dropout import EmbeddingDropout, SequentialDropout
 
 
 urls = {}
@@ -417,3 +417,5 @@ if __name__ == '__main__':
 
     # # batch_size x seq_len x 2400
     # output_seq2seq = model(input)
+    
+    
