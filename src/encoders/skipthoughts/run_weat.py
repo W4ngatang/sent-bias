@@ -85,10 +85,12 @@ def save_encodings(encodings, enc_file):
         for split_name, split_encodings in zip(['A', 'B', 'X', 'Y'], encodings):
             split = enc_fh.create_group(split_name)
             for ex, enc in split_encodings.items():
-                split['%s' % ex] = enc
+                split['%s' % ex] = enc.detach().numpy()
+
     return
  
-    
+
+        
  
 def main(arguments):
     ''' Main logic: parse args for tests to run and which models to evaluate '''
@@ -123,28 +125,34 @@ def main(arguments):
             word_to_idx = {w: idx for (idx, w) in enumerate(read_vocab(vocab_path))}     
 
             array_of_sentences = load_single_word_sents(filepath)
+            #print(array_of_sentences)
             encoded_sentences=[]
+            encoded_sentences_lengths=[]
             log.info("Encoding sentences for test %s with model %s...", test, model_name)
-                   
+            sent2vec = [{} for x in range(len(array_of_sentences))]       
+            #print(sent2vec)
             for i in range(0,len(array_of_sentences)):
                 sentences = array_of_sentences[i]
-                sentences = encode_sentences(sentences, word_to_idx,MAX_SENTENCE_LENGTH)
+                sentences, sentences_lengths,sent2vec[i] = encode_sentences(sentences, word_to_idx,MAX_SENTENCE_LENGTH)
                 encoded_sentences.append(sentences)
-        
+                encoded_sentences_lengths.append(sentences_lengths)
             input = Variable(torch.tensor(encoded_sentences)).type(torch.LongTensor) 
             model = skipthoughts.BiSkip(args.dir_st, vocab)
-        
             model.eval()
-            #print(input[0])
-            #wordvecs = model(input[0])
-        
-            encsA = model(input[0])
-            encsB = model(input[1])
-            encsX = model(input[2])
-            encsY = model(input[3])
+            assert len(input) == 4
+            
+            assert len(input[0]) >= 0
+            assert len(input[1]) >= 0
+            assert len(input[2]) >= 0
+            assert len(input[3]) >= 0
+            encsA = get_embedding_dictionary(model(input[0],encoded_sentences_lengths[0]), sent2vec[0])#.data.numpy())
+            encsB = get_embedding_dictionary(model(input[1],encoded_sentences_lengths[1]),sent2vec[1])#.data.numpy())
+            encsX = get_embedding_dictionary(model(input[2],encoded_sentences_lengths[2]),sent2vec[2])#.data.numpy())
+            encsY = get_embedding_dictionary(model(input[3],encoded_sentences_lengths[3]),sent2vec[3])#.data.numpy())
             
             
             all_encs = [encsA, encsB, encsX, encsY]
+            #print(type(all_encs), all)
             log.info("\tDone!")
 
                     # Save everything
@@ -155,7 +163,7 @@ def main(arguments):
             encsA, encsB, encsX, encsY = encs
         
         log.info("Running test %s on %s", test, model_name)
-            
+        
         weat.run_test(encsA, encsB, encsX, encsY)
             
        

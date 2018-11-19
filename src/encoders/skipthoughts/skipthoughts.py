@@ -367,6 +367,7 @@ class BiSkip(AbstractBiSkip):
         return sorted(range(len(seq)), key=seq.__getitem__)
 
     def forward(self, input, lengths=None):
+        
         batch_size = input.size(0)
         if lengths is None:
             lengths = self._process_lengths(input)

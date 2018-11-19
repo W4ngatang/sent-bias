@@ -13,9 +13,13 @@ import weat
 import encoders.infersent as infersent
 import encoders.gensen as gensen
 import encoders.bow as bow
+import tensorflow as tf
+import tensorflow_hub as hub
+
+
 
 TESTS = ["weat1", "weat2", "weat3", "weat4"]
-MODELS = ["glove", "infersent", "elmo","gensen","bow"]
+MODELS = ["glove", "infersent", "elmo","gensen","bow","guse"]
 
 def handle_arguments(arguments):
     ''' Helper function for handling argument parsing '''
@@ -104,6 +108,18 @@ def encode_sentences_gensen(model, sents):
         sent2vec[sents[j]]=reps_h_t[j]
     return sent2vec
 
+
+def return_glove(words,glove_path):
+    wordvecs =load_glove_file(glove_path)
+    glove_vecs ={}
+    for word in words:
+        glove_vecs[word]= wordvecs[word]
+            
+    return glove_vecs
+
+
+
+
 def main(arguments):
     ''' Main logic: parse args for tests to run and which models to evaluate '''
     args = handle_arguments(arguments)
@@ -177,6 +193,7 @@ def main(arguments):
                     
                     
                     all_encs = [encsA, encsB, encsX, encsY]
+                    print(all_encs)
                     log.info("\tDone!")
 
                     # Save everything
@@ -195,7 +212,44 @@ def main(arguments):
 
                     # Save everything
                     save_encodings(all_encs, enc_file)
-                    log.info("Saved encodings for model %s to %s", model_name, enc_file)     
+                    log.info("Saved encodings for model %s to %s", model_name, enc_file)  
+                
+                elif model_name =='guse':
+                    enc=[[]*512 for x in range(4)]
+                    embed = hub.Module("https://tfhub.dev/google/universal-sentence-encoder/2")
+                    os.environ["CUDA_VISIBLE_DEVICES"] = '0' #use GPU with ID=0
+                    config = tf.ConfigProto()
+                    config.gpu_options.per_process_gpu_memory_fraction = 0.5 # maximun alloc gpu50% of MEM
+                    config.gpu_options.allow_growth = True #allocate dynamically
+                    enc=[]
+                    for i in range(len(sents)):
+                        embeddings = embed(sents[i])
+                        with tf.Session(config=config) as session:
+                              session.run([tf.global_variables_initializer(), tf.tables_initializer()])
+                              enc[i] = session.run(embeddings)
+                              if i==0:
+                                    for j, embedding in enumerate(np.array(enc[i]).tolist()):
+                                          encsA[sents[0][j]] = embedding
+                              
+                              elif i==1:
+                                    for j, embedding in enumerate(np.array(enc[i]).tolist()):
+                                          encsB[sents[0][j]] = embedding
+                              elif i==2:
+                                    for j, embedding in enumerate(np.array(enc[i]).tolist()):
+                                          encsB[sents[0][j]] = embedding
+                                            
+                              elif i==3:
+                                    for j, embedding in enumerate(np.array(enc[i]).tolist()):
+                                          encsB[sents[0][j]] = embedding
+                    
+                    all_encs = [encsA, encsB, encsX, encsY]
+                    log.info("\tDone!")
+
+                    # Save everything
+                    save_encodings(all_encs, enc_file)
+                    log.info("Saved encodings for model %s to %s", model_name, enc_file)  
+                                       
+                        
                 
                 else:
                     raise ValueError("Model %s not found!" % model_name)
@@ -205,7 +259,6 @@ def main(arguments):
 
             # run the test on the encodings
             log.info("Running test %s on %s", test, model_name)
-            
             weat.run_test(encsA, encsB, encsX, encsY)
 
 

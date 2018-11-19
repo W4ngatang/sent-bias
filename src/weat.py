@@ -6,7 +6,7 @@ import itertools as it
 import numpy as np
 
 import glove
-import elmo
+#import elmo
 
 # X and Y are two sets of target words of equal size.
 # A and B are two sets of attribute words.
@@ -17,6 +17,7 @@ import elmo
 #B = [2*np.random.rand(10)-1 for _ in range(7)]
 
 def cossim(x, y):
+    #print(type(x), type(y))
     return np.dot(x, y) / math.sqrt(np.dot(x, x)*np.dot(y, y))
 
 def construct_cossim_lookup(XY, AB):
@@ -175,6 +176,7 @@ def run_test(A, B, X, Y):
     XY.update(Y)
     AB = A.copy()
     AB.update(B)
+    
     COSSIMS = construct_cossim_lookup(XY, AB)
     log.info("computing pval...")
     pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), COSSIMS=COSSIMS)

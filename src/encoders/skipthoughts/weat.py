@@ -17,7 +17,11 @@ import glove
 #B = [2*np.random.rand(10)-1 for _ in range(7)]
 
 def cossim(x, y):
-    return np.dot(x, y) / math.sqrt(np.dot(x, x)*np.dot(y, y))
+    assert type(x)==type(y)
+    #print(x.shape, y.shape)
+    a =x.dot(y)
+    b = x.dot(x) * y.dot(y)
+    return  a/math.sqrt(b)
 
 def construct_cossim_lookup(XY, AB):
     """
