@@ -186,6 +186,7 @@ def run_test(A, B, X, Y):
     log.info("pval: %.9f", pval)
 
     log.info("computing effect size...")
+    
     esize = effect_size(set(X), set(Y), set(A), set(B), COSSIMS=COSSIMS)
     log.info("esize: %.9f", esize)
     return esize, pval
@@ -211,4 +212,5 @@ if __name__ == "__main__":
     log.info("computing effect size...")
     esize = effect_size(set(X), set(Y), set(A), set(B), COSSIMS=COSSIMS)
     log.info("esize: %.9f", esize)
+
 
