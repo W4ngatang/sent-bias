@@ -3,7 +3,11 @@ import os
 import logging as log
 import torch
 
+<<<<<<< HEAD
 PATH_PREFIX = '/home/awang/projects/sent-bias/src/encoders'
+=======
+PATH_PREFIX = '/scratch/sb6416/senteval/infersent/encoder'
+>>>>>>> 133dd79da2dc4e6f9436662205746e4a4e1f27be
 INFERSENT_PATHS = {'all':'infersent.allnli.pickle', 'snli':'infersent.snli.pickle'}
 for k, v in INFERSENT_PATHS.items():
     INFERSENT_PATHS[k] = "%s/%s" % (PATH_PREFIX, v)
