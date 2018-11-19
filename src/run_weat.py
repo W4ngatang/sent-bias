@@ -17,7 +17,7 @@ import tensorflow as tf
 import tensorflow_hub as hub
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
-TESTS = ["weat1", "weat2", "weat3", "weat4"]
+TESTS = ["weat1", "weat2", "weat3", "weat4", "sent_weat1", "sent_weat2", "sent_weat3", "sent_weat4"]
 MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse", "bert"]
 
 def handle_arguments(arguments):
@@ -38,6 +38,7 @@ def handle_arguments(arguments):
 
     parser.add_argument('--infersent_dir', type=str, help="Directory containing model files")
     parser.add_argument('--gensen_dir', type=str, help="Directory containing model files")
+    parser.add_argument('--bert_version', type=str, choices=["base", "large"], help="Version of BERT to use.")
     return parser.parse_args(arguments)
 
 
@@ -214,8 +215,11 @@ def main(arguments):
                                 for j, embedding in enumerate(np.array(enc[i]).tolist()):
                                     encsB[sents[0][j]] = embedding
 
-                elif model_name == 'bert':
-                    model, tokenizer = bert.load_model()
+                elif 'bert' in model_name:
+                    if args.bert_version == "large":
+                        model, tokenizer = bert.load_model('bert-large-uncased')
+                    else:
+                        model, tokenizer = bert.load_model('bert-base-uncased')
                     encsA = bert.encode(model, tokenizer, sents[0])
                     encsB = bert.encode(model, tokenizer, sents[1])
                     encsX = bert.encode(model, tokenizer, sents[2])
