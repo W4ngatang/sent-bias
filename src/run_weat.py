@@ -1,12 +1,15 @@
 ''' Main script for loading models and running WEAT tests '''
 import os
 import sys
+import random
 import argparse
 import logging as log
 import h5py # pylint: disable=import-error
 import nltk
 import torch
 import numpy as np
+from data import load_single_word_sents, load_encodings, save_encodings, \
+                 load_jiant_encodings
 import weat
 import glove
 import encoders.infersent as infersent
@@ -18,11 +21,13 @@ import tensorflow_hub as hub
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
 TESTS = ["weat1", "weat2", "weat3", "weat4", "sent_weat1", "sent_weat2", "sent_weat3", "sent_weat4"]
-MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse", "bert"]
+MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
+          "bert", "cove", "openai"]
 
 def handle_arguments(arguments):
     ''' Helper function for handling argument parsing '''
     parser = argparse.ArgumentParser(description='')
+    parser.add_argument('--seed', '-s', type=int, help="Random seed", default=1111)
     parser.add_argument('--log_file', '-l', type=str, help="File to log to")
     parser.add_argument('--data_dir', '-d', type=str,
                         help="Directory containing examples for each test")
@@ -34,10 +39,12 @@ def handle_arguments(arguments):
                         help="1 if ignore existing encodings and encode from scratch")
 
     parser.add_argument('--tests', '-t', type=str, help="WEAT tests to run")
-    parser.add_argument('--models', '-m', type=str, help="Model to evaluate")
+    parser.add_argument('--n_samples', type=int, help="Number of samples to estimate p-value", default=100000)
 
+    parser.add_argument('--models', '-m', type=str, help="Model to evaluate")
     parser.add_argument('--infersent_dir', type=str, help="Directory containing model files")
     parser.add_argument('--gensen_dir', type=str, help="Directory containing model files")
+    parser.add_argument('--cove_encs', type=str, help="Directory containing precomputed cove encodings")
     parser.add_argument('--bert_version', type=str, choices=["base", "large"], help="Version of BERT to use.")
     return parser.parse_args(arguments)
 
@@ -58,46 +65,12 @@ def maybe_make_dir(dirname):
     os.makedirs(dirname, exist_ok=True)
 
 
-def load_single_word_sents(sent_file):
-    ''' Load sentences from sent_file.
-    Exact format will change a lot. '''
-    data = []
-    with open(sent_file, 'r') as sent_fh:
-        for row in sent_fh:
-            _, examples = row.strip().split(':')
-            data.append(examples.split(','))
-    return data
-
-
-def load_encodings(enc_file):
-    ''' Search to see if we already dumped the vectors for a model somewhere
-    and return it, else return None. '''
-    if not os.path.exists(enc_file):
-        return None
-    encs = []
-    with h5py.File(enc_file, 'r') as enc_fh:
-        for split_name, split in enc_fh.items():
-            split_d = {}
-            for ex, enc in split.items():
-                split_d[ex] = enc[:]
-            encs.append(split_d)
-    return encs
-
-
-def save_encodings(encodings, enc_file):
-    ''' Save encodings to file '''
-    with h5py.File(enc_file, 'w') as enc_fh:
-        for split_name, split_encodings in zip(['A', 'B', 'X', 'Y'], encodings):
-            split = enc_fh.create_group(split_name)
-            for ex, enc in split_encodings.items():
-                split[ex] = enc
-    return
-
 def encode_sentences(model, sents):
     ''' Use model to encode sents '''
     encs = model.encode(sents, bsize=1, tokenize=False)
     sent2enc = {sent: enc for sent, enc in zip(sents, encs)}
     return sent2enc
+
 
 def encode_sentences_gensen(model, sents):
     ''' Use model to encode gensen sents '''
@@ -121,12 +94,13 @@ def return_glove(words, glove_path):
 def main(arguments):
     ''' Main logic: parse args for tests to run and which models to evaluate '''
     args = handle_arguments(arguments)
+    seed = random.randint(1, 100000) if args.seed < 0 else args.seed
+    random.seed(seed)
+    np.random.seed(seed)
     maybe_make_dir(args.exp_dir)
     log.getLogger().addHandler(log.FileHandler(args.log_file))
     log.info("Parsed args: \n%s", args)
 
-    #for wt in weat_tests:
-    #  glove.create_weat_vec_files("../tests/"+wt+".txt")
     tests = split_comma_and_check(args.tests, TESTS, "test")
     models = split_comma_and_check(args.models, MODELS, "model")
     encsA, encsB, encsX, encsY = {},{},{},{}
@@ -155,8 +129,6 @@ def main(arguments):
                 assert len(sents) == 4
 
                 # load the model and do model-specific encoding procedure
-                # TODO(Alex): might want to build models once (knowing what tasks to run) to avoid
-                #             costly model building
                 if model_name == 'elmo': # TODO(Alex): move this
                     encsA, encsB, encsX, encsY = weat.load_elmo_weat_test(test, path='elmo/')
                 elif model_name == 'glove': # TODO(Alex): move this
@@ -215,7 +187,7 @@ def main(arguments):
                                 for j, embedding in enumerate(np.array(enc[i]).tolist()):
                                     encsB[sents[0][j]] = embedding
 
-                elif 'bert' in model_name:
+                elif model_name == "bert":
                     if args.bert_version == "large":
                         model, tokenizer = bert.load_model('bert-large-uncased')
                     else:
@@ -224,6 +196,14 @@ def main(arguments):
                     encsB = bert.encode(model, tokenizer, sents[1])
                     encsX = bert.encode(model, tokenizer, sents[2])
                     encsY = bert.encode(model, tokenizer, sents[3])
+
+                elif model_name == "cove":
+                    enc_file = os.path.join(args.cove_encs, "%s.encs" % test)
+                    encsA, encsB, encsX, encsY = load_jiant_encodings(enc_file, n_header=1)
+
+                elif model_name == "openai":
+                    raise NotImplementedError
+
                 else:
                     raise ValueError("Model %s not found!" % model_name)
 
@@ -236,7 +216,7 @@ def main(arguments):
 
             # run the test on the encodings
             log.info("Running test %s on %s", test, model_name)
-            weat.run_test(encsA, encsB, encsX, encsY)
+            weat.run_test(encsA, encsB, encsX, encsY, args.n_samples)
 
 
 if __name__ == "__main__":
