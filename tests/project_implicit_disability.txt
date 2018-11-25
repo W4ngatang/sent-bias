@@ -1,0 +1,9 @@
+# The Project Implicit IAT only included terms for "Good" and "Bad;"
+# disabled and abled persons were represented by signs.  The terms
+# for disabled and abled persons are my best effort to describe the
+# signs concisely while maintaining some syntactic/semantic coherence
+# within each set.
+Good:spectacular,celebrate,cherish,joyous,terrific,cheer,triumph,fantastic
+Bad:grief,disaster,dirty,negative,humiliate,evil,angry,hate
+DisabledTerms:crutches,wheelchair,service dog,white cane
+AbledTerms:walking,running,crossing,skiing

@@ -1,0 +1,4 @@
+Good:pleasure,happy,delight,cheerful,appealing,celebrate,terrific,adore
+Bad:scorn,evil,failure,ugly,disgust,awful,dirty,abuse
+ArabMuslimNames:Hakim,Sharif,Yousef,Wahib,Akbar,Muhsin,Salim,Karim,Habib,Ashraf
+OtherNames:Ernesto,Matthais,Maarten,Philippe,Guillame,Benoit,Takuya,Kazuki,Chaiyo,Marcelo

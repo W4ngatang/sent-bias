@@ -1,0 +1,7 @@
+# The Project Implicit IAT also included three images of pairs of
+# binary restroom-sign figures (one female-female pair, one male-male,
+# and one male-female).
+Good:appealing,cheer,delight,joyous,glorious,cherish,friendship,excitement
+Bad:hatred,evil,rotten,gross,disgust,failure,awful,poison
+GayTerms:gay people,homosexual,gay
+StraightTerms:straight,straight people,heterosexual
