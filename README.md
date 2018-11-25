@@ -25,6 +25,10 @@ cd scripts
 
 Download the model checkpoints from the [original repo](https://github.com/facebookresearch/InferSent) and put them in `src/encoders`.
 
+### GenSen
+
+Download the model checkpoints.
+Note, you need to process your GloVe word vectors into an HDF5 format. Use `glove2h5.py` in a directory containing the GloVe vectors..
 
 
 ## Running Stuff
@@ -44,6 +48,7 @@ An example script to run things is in `scripts/weat.sh`. To change the test, cha
 
 ## TODO
 
-- [Shikha] add programmatic way of loading GloVe embeddings
-- [Shikha] add support for other SentEval-included models: BoW, SkipThought, GenSen, Google USE (GUSE?)
-- [Alex] add support for jiant-included models: CoVe, OpenAI GPT
+- track down NaNs in GenSen [Shikha]: looks like the denominator (stddev) of the effect size is 0 because a lot of the vectors are the same...possibly a problem with OOV, but all these words should be in GloVe (base word representations used). Can you make sure the vocab expansion method they implemented is being used?
+- add options for concatenation of GenSen models [Shikha]
+- implement SkipThought [Shikha]
+- make sure BoW and GloVe results are the same for single-word WEAT tests [Shikha]

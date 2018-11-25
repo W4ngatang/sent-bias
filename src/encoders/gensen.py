@@ -12,6 +12,14 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
 
+def encode(model, sents):
+    ''' Use model to encode gensen sents '''
+    sent2vec = {}
+    reps_h, reps_h_t = model.get_representation(sents, pool='last', return_numpy=True, tokenize=True)
+    for j in range(0,len(sents)):
+        sent2vec[sents[j]] = reps_h_t[j]
+    return sent2vec
+
 
 class Encoder(nn.Module):
     """GenSen Encoder."""
@@ -142,16 +150,16 @@ class GenSenSingle(nn.Module):
     def _load_params(self):
         """Load pretrained params."""
         # Read vocab pickle files
-        
+
         path = os.path.join(self.model_folder,'%s_vocab.pkl' % (self.filename_prefix))
-        
+
         print(path)
         model_vocab = pickle.load(open(path,'rb'),encoding='latin')
        # with open(path,'rb') as file:
             #print(file.type)
         #    model_vocab = pickle.load(file,encoding='bytes')
          #   print("here")
-     
+
 
         # Word to index mappings
         self.word2id = model_vocab['word2id']

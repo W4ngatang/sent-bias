@@ -3,7 +3,15 @@ import os
 import logging as log
 import torch
 
+
+PATH_PREFIX = '/scratch/sb6416/senteval/infersent/encoder'
 INFERSENT_PATHS = {'all':'infersent.allnli.pickle', 'snli':'infersent.snli.pickle'}
+
+def encode(model, sents):
+    ''' Use model to encode sents '''
+    encs = model.encode(sents, bsize=1, tokenize=False)
+    sent2enc = {sent: enc for sent, enc in zip(sents, encs)}
+    return sent2enc
 
 def prepare(params, samples):
     params.infersent.build_vocab([' '.join(s) for s in samples], tokenize=False)
