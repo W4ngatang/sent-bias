@@ -174,7 +174,7 @@ def main(arguments):
                     encs_targ1, encs_targ2, encs_attr1, encs_attr2 = load_jiant_encodings(load_encs_from, n_header=1)
 
                 elif model_name == 'elmo':
-                    encs_attr11, encs_attr21, encs_targ11, encs_targ21 = weat.load_elmo_weat_test(test, path='encodings/elmo/')
+                    #encs_attr11, encs_attr21, encs_targ11, encs_targ21 = weat.load_elmo_weat_test(test, path='encodings/elmo/')
                     encs_targ1 = elmo.encode(sents[0], args.combine_method, args.elmo_combine)
                     encs_targ2 = elmo.encode(sents[1], args.combine_method, args.elmo_combine)
                     encs_attr1 = elmo.encode(sents[2], args.combine_method, args.elmo_combine)
