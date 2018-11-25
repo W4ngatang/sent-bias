@@ -3,6 +3,8 @@ import os
 import logging as log
 import torch
 
+
+PATH_PREFIX = '/scratch/sb6416/senteval/infersent/encoder'
 INFERSENT_PATHS = {'all':'infersent.allnli.pickle', 'snli':'infersent.snli.pickle'}
 
 def encode(model, sents):

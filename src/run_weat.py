@@ -22,6 +22,7 @@ TESTS = ["weat1", "weat2", "weat3", "weat4", "sent_weat1", "sent_weat2", "sent_w
 MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
 
+
 def handle_arguments(arguments):
     ''' Helper function for handling argument parsing '''
     parser = argparse.ArgumentParser(description='')
@@ -86,7 +87,7 @@ def main(arguments):
             - load the test data
             - encode the vectors
             - dump the files into some storage
-        - else load the saved vectors '''
+         - else load the saved vectors '''
 
         model = None
 
@@ -118,6 +119,13 @@ def main(arguments):
                     encsB = infersent.encode(model, sents[1])
                     encsX = infersent.encode(model, sents[2])
                     encsY = infersent.encode(model, sents[3])
+
+                    all_encs = [encsA, encsB, encsX, encsY]
+                    log.info("\tDone!")
+                    #print(all_encs)
+                    # Save everything
+                    save_encodings(all_encs, enc_file)
+                    log.info("Saved encodings for model %s to %s", model_name, enc_file)
 
                 elif model_name =='gensen':
                     if model is None:
@@ -158,7 +166,11 @@ def main(arguments):
                                 for j, embedding in enumerate(np.array(enc[i]).tolist()):
                                     encsY[sent[j]] = embedding
 
-                elif model_name == 'elmo': # TODO(Alex): move this
+                elif model_name == "cove":
+                    enc_file = os.path.join(args.cove_encs, "%s.encs" % test)
+                    encsA, encsB, encsX, encsY = load_jiant_encodings(enc_file, n_header=1)
+
+                elif model_name == 'elmo':
                     encsA, encsB, encsX, encsY = weat.load_elmo_weat_test(test, path='elmo/')
 
                 elif model_name == "bert":
@@ -171,9 +183,6 @@ def main(arguments):
                     encsX = bert.encode(model, tokenizer, sents[2])
                     encsY = bert.encode(model, tokenizer, sents[3])
 
-                elif model_name == "cove":
-                    enc_file = os.path.join(args.cove_encs, "%s.encs" % test)
-                    encsA, encsB, encsX, encsY = load_jiant_encodings(enc_file, n_header=1)
 
                 elif model_name == "openai":
                     enc_file = os.path.join(args.openai_encs, "%s.encs" % test)
