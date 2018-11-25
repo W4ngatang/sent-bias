@@ -11,101 +11,57 @@ import glove
 # X and Y are two sets of target words of equal size.
 # A and B are two sets of attribute words.
 
-#X = [2*np.random.rand(10)-1 for _ in range(5)]
-#Y = [2*np.random.rand(10)-1 for _ in range(5)]
-#A = [2*np.random.rand(10)-1 for _ in range(4)]
-#B = [2*np.random.rand(10)-1 for _ in range(7)]
-
-def cossim(x, y):
-    #print(type(x), type(y))
-    #print(len(x), len(y))
-    assert len(x)==len(y)
-    x = np.asarray(x)
-    y = np.asarray(y)
-    a= np.dot(x,y)
-    #a =x.dot(y)
-    b = np.dot(x,x) * np.dot(y,y)
-    return  np.dot(x,y)/math.sqrt(b)
 
 
 def construct_cossim_lookup(XY, AB):
     """
     XY: mapping from target string to target vector (either in X or Y)
     AB: mapping from attribute string to attribute vectore (either in A or B)
-    targ_att: mapping from (target_str, attr_str) to cosine similarity
+    cossims: mapping from (target_str, attr_str) to cosine similarity
     """
-    COSSIMS = {}
+    def cossim(x, y):
+        return np.dot(x, y) / math.sqrt(np.dot(x, x)*np.dot(y, y))
+
+    cossims = {}
     for xy in XY:
         for ab in AB:
-            COSSIMS[(xy, ab)] = cossim(XY[xy], AB[ab])
-    return COSSIMS
+            cossims[(xy, ab)] = cossim(XY[xy], AB[ab])
+    return cossims
 
-def mean_w_A(w, A, COSSIMS=None):
-    """
-    Mean cosine similarity of word w across all words
-    in set A.
-    """
-    if COSSIMS:
-        total = sum(COSSIMS[(w, a)] for a in A)
-        return total / len(A)
-    else:
-        total = sum(cossim(w, a) for a in A)
-        return total / len(A)
-
-def s_wAB(w, A, B, COSSIMS=None):
+def s_wAB(w, A, B, cossims=None):
     """
     "...measures the association of [word] w with the attribute"
     """
-    if COSSIMS:
-        return mean_w_A(w, A, COSSIMS=COSSIMS) - mean_w_A(w, B, COSSIMS=COSSIMS)
-    else:
-        return mean_w_A(w, A) - mean_w_A(w, B)
+    def mean_w_A(w, A, cossims=None):
+        """
+        Mean cosine similarity of word w across all words in set A.
+        """
+        total = sum(cossims[(w, a)] for a in A)
+        return total / len(A)
 
-def mean_s_wAB(X, A, B, COSSIMS=None):
-    if COSSIMS:
-        return sum(s_wAB(x, A, B, COSSIMS=COSSIMS) for x in X) / len(X)
-    else:
-        raise NotImplementedError
+    return mean_w_A(w, A, cossims=cossims) - mean_w_A(w, B, cossims=cossims)
 
-def stdev_s_wAB(X, A, B, COSSIMS=None):
-    if COSSIMS:
-        return np.std([s_wAB(x, A, B, COSSIMS=COSSIMS) for x in X]) #ddof=0 or 1?
-    else:
-        raise NotImplementedError
-
-def effect_size(X, Y, A, B, COSSIMS=None):
+def s_XYAB(X, Y, A, B, cossims=None):
     """
-    X, Y, A, B : sets of target (X, Y) and attribute (A, B) strings
-    """
-    if COSSIMS:
-        XY = X.union(Y)
-        numerator = mean_s_wAB(X, A, B, COSSIMS=COSSIMS) - mean_s_wAB(Y, A, B, COSSIMS=COSSIMS)
-        denominator = stdev_s_wAB(XY, A, B, COSSIMS=COSSIMS)
-        return numerator/denominator
-    else:
-        raise NotImplementedError
-
-def s_XYAB(X, Y, A, B, COSSIMS=None):
-    """
-    "...measures the differential association of the two sets of
+    Caliskan: "...measures the differential association of the two sets of
     target words with the attribute."
+    Formally, \sum_{x in X} s(x, A, B) - \sum_{y in Y} s(y, A, B)
+        where s(x, A, B) = mean_{a in A} cos(x, a) - mean_{b in B} cos(x, b)
     """
-    if COSSIMS:
-        sum_s_xAB = sum(s_wAB(x, A, B, COSSIMS=COSSIMS) for x in X)
-        sum_s_yAB = sum(s_wAB(y, A, B, COSSIMS=COSSIMS) for y in Y)
-        return sum_s_xAB - sum_s_yAB
-    else:
-        sum_s_xAB = sum(s_wAB(x, A, B) for x in X)
-        sum_s_yAB = sum(s_wAB(y, A, B) for y in Y)
-        return sum_s_xAB - sum_s_yAB
+    sum_s_xAB = sum(s_wAB(x, A, B, cossims=cossims) for x in X)
+    sum_s_yAB = sum(s_wAB(y, A, B, cossims=cossims) for y in Y)
+    return sum_s_xAB - sum_s_yAB
 
-def p_val_permutation_test(X, Y, A, B, COSSIMS=None):
+def p_val_permutation_test(X, Y, A, B, n_samples, cossims=None):
+    ''' Compute the p-val for the permutation test, which is defined as
+        the probability that a random even partition X_i, Y_i of X u Y
+        satisfies P[s(X_i, Y_i, A, B) > s(X, Y, A, B)]
+    '''
 
-    if COSSIMS:
-        # X, Y, A, B are sets of strings/hashable keys
-        print(len(X), len(Y))
+    if cossims: # X, Y, A, B are sets of strings/hashable keys
         assert len(X) == len(Y)
-        assoc = s_XYAB(X, Y, A, B, COSSIMS=COSSIMS)
+        size = len(X)
+        assoc = s_XYAB(X, Y, A, B, cossims=cossims)
         XY = X.union(Y)
         total_true = 1.0
         total = 1.0
@@ -115,24 +71,21 @@ def p_val_permutation_test(X, Y, A, B, COSSIMS=None):
         #for Xi in it.combinations(XY, len(X)):
         #  Yi = XY.difference(Xi)
         #  assert len(Xi) == len(Yi)
-        #  if s_XYAB(Xi, Yi, A, B, COSSIMS=COSSIMS) > assoc:
+        #  if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
         #    total_true += 1
         #  total += 1
 
         # instead sample 100K subsets
         XY_list = list(XY)
-        while total < 100000:
+        while total < n_samples:
             random.shuffle(XY_list)
-            Xi = XY_list[:len(X)]
-            Yi = XY_list[len(X):]
-            #print(len(Xi),len(Yi))
+            Xi = XY_list[:size]
+            Yi = XY_list[size:]
             assert len(Xi) == len(Yi)
-            if s_XYAB(Xi, Yi, A, B, COSSIMS=COSSIMS) > assoc:
+            if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
                 total_true += 1
             total += 1
-        return total_true / total
-
-    else:
+    else: # TODO(Rachel): when is this branch hit?
         assert len(X) == len(Y)
         assoc = s_XYAB(X, Y, A, B)
         XY = X+Y
@@ -142,11 +95,6 @@ def p_val_permutation_test(X, Y, A, B, COSSIMS=None):
             Xi, Yi = [], []
             for x_or_y in XY:
                 if x_or_y in subset:
-                    #---> 49       if x_or_y in subset:
-                    #     50         Xi.append(x_or_y)
-                    #     51       else:
-                    #
-                    #ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
                     Xi.append(x_or_y)
                 else:
                     Yi.append(x_or_y)
@@ -154,7 +102,26 @@ def p_val_permutation_test(X, Y, A, B, COSSIMS=None):
             if s_XYAB(Xi, Yi, A, B) > assoc:
                 total_true += 1
             total += 1
-        return total_true / total
+    return total_true / total
+
+def effect_size(X, Y, A, B, cossims=None):
+    """
+    Compute the effect size, which is defined as
+        [mean_{x in X} s(x, A, B) - mean_{y in Y} s(y, A, B)] /
+            [ stddev_{w in X u Y} s(w, A, B) ]
+    args:
+        - X, Y, A, B : sets of target (X, Y) and attribute (A, B) strings
+    """
+    def mean_s_wAB(X, A, B, cossims):
+        return sum(s_wAB(x, A, B, cossims=cossims) for x in X) / len(X)
+
+    def stdev_s_wAB(X, A, B, cossims=None):
+        return np.std([s_wAB(x, A, B, cossims=cossims) for x in X]) #ddof=0 or 1?
+
+    XY = X.union(Y)
+    numerator = mean_s_wAB(X, A, B, cossims=cossims) - mean_s_wAB(Y, A, B, cossims=cossims)
+    denominator = stdev_s_wAB(XY, A, B, cossims=cossims)
+    return numerator / denominator
 
 def load_weat_test(weatname, path=None):
     ''' Load pre-extracted GloVe vectors '''
@@ -181,21 +148,24 @@ def load_elmo_weat_test(weatname, path=None):
     Y = elmo.load_elmo_hdf5(path+weatname+".Y.elmo.hdf5")
     return (A, B, X, Y)
 
-def run_test(A, B, X, Y):
+def run_test(A, B, X, Y, n_samples):
+    ''' Run a WEAT.
+    args:
+        - A, B, X, Y (Dict[str: np.array]): dictionaries mapping words
+            to their encodings
+    '''
     XY = X.copy()
     XY.update(Y)
     AB = A.copy()
     AB.update(B)
-    print("type")
-    print([type(X[a]) for a in X])
 
-    COSSIMS = construct_cossim_lookup(XY, AB)
-    log.info("computing pval...")
-    pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), COSSIMS=COSSIMS)
+    cossims = construct_cossim_lookup(XY, AB)
+    log.info("Computing pval...")
+    pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), n_samples, cossims)
     log.info("pval: %.9f", pval)
 
     log.info("computing effect size...")
-    esize = effect_size(set(X), set(Y), set(A), set(B), COSSIMS=COSSIMS)
+    esize = effect_size(set(X), set(Y), set(A), set(B), cossims=cossims)
     log.info("esize: %.9f", esize)
     return esize, pval
 
@@ -212,12 +182,12 @@ if __name__ == "__main__":
     AB = A.copy()
     AB.update(B)
 
-    COSSIMS = construct_cossim_lookup(XY, AB)
+    cossims = construct_cossim_lookup(XY, AB)
     log.info("computing pval...")
-    pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), COSSIMS=COSSIMS)
+    pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), cossims=cossims)
     log.info("pval: %.9f", pval)
 
     log.info("computing effect size...")
-    esize = effect_size(set(X), set(Y), set(A), set(B), COSSIMS=COSSIMS)
+    esize = effect_size(set(X), set(Y), set(A), set(B), cossims=cossims)
     log.info("esize: %.9f", esize)
 

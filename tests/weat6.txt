@@ -1,0 +1,4 @@
+MaleNames:John,Paul,Mike,Kevin,Steve,Greg,Jeff,Bill
+FemaleNames:Amy,Joan,Lisa,Sarah,Diana,Kate,Ann,Donna
+Career:executive,management,professional,corporation,salary,office,business,career
+Family:home,parents,children,family,cousins,marriage,wedding,relatives

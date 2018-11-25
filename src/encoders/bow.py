@@ -1,8 +1,7 @@
-import ipdb
-import numpy as np
-import time
+''' BoW encoder '''
 import io
-
+import time
+import numpy as np
 
 
 def get_word_dict(sentences, tokenize=True):
@@ -25,18 +24,18 @@ def get_vecs(sentences, word_vec, glove_path):
     for sent in sentences:
         key = ''
         vec = np.zeros(int(glove_path[-8:-5]))
-        
+
         for word in sent:
             key = key+word+' '
             single_wordvec = np.array(word_vec[word])
             vec+=single_wordvec
         bow_vec[key[:-1]]  = vec/len(sent)
-        
-    return bow_vec    
-    
+
+    return bow_vec
+
 
 def get_glove(word_dict, glove_path):
-    
+
     word_vec = {}
     with io.open(glove_path) as f:
         for line in f:
