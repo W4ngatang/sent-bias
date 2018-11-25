@@ -12,7 +12,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
 
-def encode_sentences_gensen(model, sents):
+def encode(model, sents):
     ''' Use model to encode gensen sents '''
     sent2vec = {}
     reps_h, reps_h_t = model.get_representation(sents, pool='last', return_numpy=True, tokenize=True)

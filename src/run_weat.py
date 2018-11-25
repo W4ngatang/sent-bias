@@ -104,7 +104,11 @@ def main(arguments):
                 assert len(sents) == 4
 
                 # load the model and do model-specific encoding procedure
-                if model_name == 'bow':
+                if model_name == 'glove':
+                    log.warn("GloVe is deprecating; use 'bow' instead!")
+                    encsA, encsB, encsX, encsY = weat.load_weat_test(test, path=args.data_dir)
+
+                elif model_name == 'bow':
                     encsA = bow.encode(sents[0], args.glove_path)
                     encsB = bow.encode(sents[1], args.glove_path)
                     encsX = bow.encode(sents[2], args.glove_path)
@@ -131,7 +135,7 @@ def main(arguments):
                     if model is None:
                         model = gensen.GenSenSingle(model_folder=os.path.join(args.gensen_dir, 'models'),
                                                     filename_prefix=args.gensen_version,
-                                                    pretrained_emb=os.path.join(args.glove_path))
+                                                    pretrained_emb=os.path.join(args.glove_path, 'glove.840B.300d.h5'))
 
                     encsA = gensen.encode(model, sents[0])
                     encsB = gensen.encode(model, sents[1])

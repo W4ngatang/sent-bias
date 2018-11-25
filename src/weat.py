@@ -161,12 +161,13 @@ def run_test(A, B, X, Y, n_samples):
 
     cossims = construct_cossim_lookup(XY, AB)
     log.info("Computing pval...")
-    pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), n_samples, cossims)
-    log.info("pval: %.9f", pval)
+    #pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), n_samples, cossims)
+    #log.info("pval: %.9f", pval)
 
     log.info("computing effect size...")
     esize = effect_size(set(X), set(Y), set(A), set(B), cossims=cossims)
     log.info("esize: %.9f", esize)
+    import ipdb; ipdb.set_trace()
     return esize, pval
 
 if __name__ == "__main__":

@@ -4,10 +4,9 @@ source user_config.sh
 
 # debug
 #python -m ipdb src/run_weat.py --log_file ${SAVE_DIR}/log.log -t weat1 -m weat1 --exp_dir ${SAVE_DIR} --data_dir tests/ -s 1094 --n_samples 100 -m guse
+python src/run_weat.py --log_file ${SAVE_DIR}/log.log -t weat4 --exp_dir ${SAVE_DIR} --data_dir tests/ -m gensen --gensen_dir ${GENSEN_DIR} --glove_path ${GLOVE_PATH}
 
-# GloVe
-
-# BoW
+# BoW (consumes GloVe method)
 #python src/run_weat.py --log_file ${SAVE_DIR}/log.log -t weat1,weat2,weat3,weat4 --exp_dir ${SAVE_DIR} --data_dir tests/ -m bow --glove_path ${GLOVE_PATH}
 
 # SkipThoughts
@@ -16,7 +15,7 @@ source user_config.sh
 #python src/run_weat.py --log_file ${SAVE_DIR}/log.log -t weat1,weat2,weat3,weat4 --exp_dir ${SAVE_DIR} --data_dir tests/ -m infersent --infersent_dir src/encoders --glove_path ${GLOVE_PATH}
 
 # GenSen
-python src/run_weat.py --log_file ${SAVE_DIR}/log.log -t weat1,weat2,weat3,weat4 --exp_dir ${SAVE_DIR} --data_dir tests/ -m gensen --gensen_dir ${GENSEN_DIR} --glove_path ${GLOVE_PATH}
+#python src/run_weat.py --log_file ${SAVE_DIR}/log.log -t weat1,weat2,weat3,weat4 --exp_dir ${SAVE_DIR} --data_dir tests/ -m gensen --gensen_dir ${GENSEN_DIR} --glove_path ${GLOVE_PATH}
 
 # GUSE
 #python src/run_weat.py --log_file ${SAVE_DIR}/log.log -t weat1,weat2,weat3,weat4 --exp_dir ${SAVE_DIR} --data_dir tests/ -m guse 
