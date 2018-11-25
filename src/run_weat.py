@@ -44,7 +44,8 @@ def handle_arguments(arguments):
     parser.add_argument('--models', '-m', type=str, help="Model to evaluate")
     parser.add_argument('--infersent_dir', type=str, help="Directory containing model files")
     parser.add_argument('--gensen_dir', type=str, help="Directory containing model files")
-    parser.add_argument('--cove_encs', type=str, help="Directory containing precomputed cove encodings")
+    parser.add_argument('--cove_encs', type=str, help="Directory containing precomputed CoVe encodings")
+    parser.add_argument('--openai_encs', type=str, help="Directory containing precomputed OpenAI encodings")
     parser.add_argument('--bert_version', type=str, choices=["base", "large"], help="Version of BERT to use.")
     return parser.parse_args(arguments)
 
@@ -202,7 +203,8 @@ def main(arguments):
                     encsA, encsB, encsX, encsY = load_jiant_encodings(enc_file, n_header=1)
 
                 elif model_name == "openai":
-                    raise NotImplementedError
+                    enc_file = os.path.join(args.openai_encs, "%s.encs" % test)
+                    encsA, encsB, encsX, encsY = load_jiant_encodings(enc_file, n_header=1)
 
                 else:
                     raise ValueError("Model %s not found!" % model_name)
