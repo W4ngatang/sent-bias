@@ -3,15 +3,14 @@ import os
 from collections import defaultdict
 import numpy as np
 
-def load_single_word_sents(sent_file):
+def load_sents(sent_file):
     ''' Load sentences from sent_file.
     Exact format will change a lot. '''
     data = [] #defaultdict(list)
     with open(sent_file, 'r') as sent_fh:
         for row in sent_fh:
             category, examples = row.strip().split(':')
-            #data[category].append(examples.split(','))
-            data.append([[e] for e in examples.split(',')])
+            data.append([e.split() for e in examples.split(',')])
     return data
 
 
