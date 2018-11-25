@@ -6,7 +6,7 @@ import itertools as it
 import numpy as np
 
 import encoders.glove as glove
-#import elmo
+import encoders.elmo as elmo
 
 # X and Y are two sets of target words of equal size.
 # A and B are two sets of attribute words.
@@ -139,7 +139,7 @@ def load_weat_test(weatname, path=None):
 def load_elmo_weat_test(weatname, path=None):
     ''' Load pre-computed ELMo vectors '''
     if path is None:
-        path = "../elmo/"
+        path = "../encodings/elmo/"
     else:
         path = path.rstrip('/')+'/'
     A = elmo.load_elmo_hdf5(path+weatname+".A.elmo.hdf5")
@@ -161,13 +161,12 @@ def run_test(A, B, X, Y, n_samples):
 
     cossims = construct_cossim_lookup(XY, AB)
     log.info("Computing pval...")
-    #pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), n_samples, cossims)
-    #log.info("pval: %.9f", pval)
+    pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), n_samples, cossims)
+    log.info("pval: %.9f", pval)
 
     log.info("computing effect size...")
     esize = effect_size(set(X), set(Y), set(A), set(B), cossims=cossims)
     log.info("esize: %.9f", esize)
-    import ipdb; ipdb.set_trace()
     return esize, pval
 
 if __name__ == "__main__":
@@ -185,7 +184,7 @@ if __name__ == "__main__":
 
     cossims = construct_cossim_lookup(XY, AB)
     log.info("computing pval...")
-    pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), cossims=cossims)
+    pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), cossims=cossims, n_samples=10000)
     log.info("pval: %.9f", pval)
 
     log.info("computing effect size...")

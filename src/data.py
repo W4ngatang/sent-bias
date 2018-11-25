@@ -11,7 +11,7 @@ def load_single_word_sents(sent_file):
         for row in sent_fh:
             category, examples = row.strip().split(':')
             #data[category].append(examples.split(','))
-            data.append(examples.split(','))
+            data.append([[e] for e in examples.split(',')])
     return data
 
 
@@ -40,8 +40,9 @@ def save_encodings(encodings, enc_file):
     return
 
 
-def load_jiant_encodings(enc_file, n_header=1):
-    ''' Load a dumb tsv format of jiant encodings '''
+def load_jiant_encodings(enc_file, n_header=1, is_openai=False):
+    ''' Load a dumb tsv format of jiant encodings.
+    This is really brittle and makes a lot of assumptions about ordering. '''
     encs = []
     last_cat = None
     with open(enc_file, 'r') as enc_fh:
@@ -49,6 +50,8 @@ def load_jiant_encodings(enc_file, n_header=1):
             enc_fh.readline() # header
         for row in enc_fh:
             idx, category, string, enc = row.strip().split('\t')
+            if is_openai:
+                string = " ".join([w.rstrip("</w>") for w in string])
             enc = [float(n) for n in enc[1:-1].split(',')]
             #encs[category][string] = np.array(enc)
             if last_cat is None or last_cat != category:
