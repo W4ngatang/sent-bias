@@ -44,6 +44,7 @@ An example script to run things is in `scripts/weat.sh`. To change the test, cha
 
 ## TODO
 
-- [Shikha] add programmatic way of loading GloVe embeddings
-- [Shikha] add support for other SentEval-included models: BoW, SkipThought, GenSen, Google USE (GUSE?)
-- [Alex] add support for jiant-included models: CoVe, OpenAI GPT
+- track down NaNs in GenSen [Shikha]
+- add options for concatenation of GenSen models [Shikha]
+- implement SkipThought [Shikha]
+- make sure BoW and GloVe results are the same for single-word WEAT tests [Shikha]
