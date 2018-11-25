@@ -13,7 +13,7 @@ from utils import *
 import weat
 
 
-TESTS = ["weat1", "weat2", "weat3", "weat4"]
+TESTS = ["weat1", "weat2", "weat3", "weat4", "sent_weat1", "sent_weat2", "sent_weat3", "sent_weat4"]
 MODELS = ["skipthoughts"]
 def handle_arguments(arguments):
     ''' Helper function for handling argument parsing '''
@@ -136,6 +136,8 @@ def main(arguments):
                 sentences, sentences_lengths,sent2vec[i] = encode_sentences(sentences, word_to_idx,MAX_SENTENCE_LENGTH)
                 encoded_sentences.append(sentences)
                 encoded_sentences_lengths.append(sentences_lengths)
+            print(len(encoded_sentences))    
+                
             input = Variable(torch.tensor(encoded_sentences)).type(torch.LongTensor) 
             model = skipthoughts.BiSkip(args.dir_st, vocab)
             model.eval()

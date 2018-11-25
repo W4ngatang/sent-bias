@@ -18,8 +18,9 @@ import tensorflow_hub as hub
 
 
 
-TESTS = ["weat1", "weat2", "weat3", "weat4"]
-MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse"]
+
+TESTS = ["weat1", "weat2", "weat3", "weat4", "sent_weat1", "sent_weat2", "sent_weat3", "sent_weat4"]
+MODELS = ["glove", "infersent", "elmo","gensen","bow","guse"]
 
 def handle_arguments(arguments):
     ''' Helper function for handling argument parsing '''
@@ -56,6 +57,7 @@ def maybe_make_dir(dirname):
 
 
 
+    
 def load_single_word_sents(sent_file):
     ''' Load sentences from sent_file.
     Exact format will change a lot. '''
@@ -63,7 +65,9 @@ def load_single_word_sents(sent_file):
     with open(sent_file, 'r') as sent_fh:
         for row in sent_fh:
             _, examples = row.strip().split(':')
+            
             data.append(examples.split(','))
+            
     return data
 
 
@@ -107,12 +111,13 @@ def encode_sentences_gensen(model, sents):
 
 
 def return_glove(words,glove_path):
-    wordvecs = load_glove_file(glove_path)
+    wordvecs =load_glove_file(glove_path)
     glove_vecs ={}
     for word in words:
         glove_vecs[word]= wordvecs[word]
-
+            
     return glove_vecs
+
 
 
 
@@ -127,7 +132,8 @@ def main(arguments):
     #  glove.create_weat_vec_files("../tests/"+wt+".txt")
     tests = split_comma_and_check(args.tests, TESTS, "test")
     models = split_comma_and_check(args.models, MODELS, "model")
-    encsA, encsB, encsX, encsY = {},{},{},{}
+    print(tests)
+    encsA, encsB, encsX, encsY ={},{},{},{}
     for model_name in models:
         ''' Different models have different interfaces for things, but generally want to:
          - if saved vectors aren't there:
@@ -149,7 +155,7 @@ def main(arguments):
 
                 # load the test data
                 sents = load_single_word_sents(os.path.join(args.data_dir, "%s.txt" % test))
-
+                
                 assert len(sents) == 4
 
                 # load the model and do model-specific encoding procedure
@@ -165,21 +171,25 @@ def main(arguments):
                     model.build_vocab([s for s in sents[0] + sents[1] + sents[2] + sents[3]], tokenize=False)
                     log.info("Encoding sentences for test %s with model %s...", test, model_name)
                     encsA = encode_sentences(model, sents[0])
+                   
+                   
                     encsB = encode_sentences(model, sents[1])
                     encsX = encode_sentences(model, sents[2])
                     encsY = encode_sentences(model, sents[3])
                     all_encs = [encsA, encsB, encsX, encsY]
                     log.info("\tDone!")
-
+                    #print(all_encs)
                     # Save everything
                     save_encodings(all_encs, enc_file)
                     log.info("Saved encodings for model %s to %s", model_name, enc_file)
-
+                    
                 elif model_name =='gensen':
                     sent={}
+                    prefixes = ['nli_large_bothskip', 'nli_large_bothskip_parse', 'nli_large']
+                    prefix = prefixes[2]
+                    print(prefix)
                     model = gensen.GenSenSingle(model_folder='/scratch/sb6416/senteval/gensen/data/models',
-                                         filename_prefix='nli_large_bothskip',
-                                         pretrained_emb='/scratch/sb6416/senteval/gensen/data/embedding/glove.840B.300d.h5')
+                                         filename_prefix= prefix,                                                pretrained_emb='/scratch/sb6416/senteval/gensen/data/embedding/glove.840B.300d.h5')
 
                     encsA = encode_sentences_gensen(model, sents[0])
                     encsB = encode_sentences_gensen(model, sents[1])
@@ -188,27 +198,27 @@ def main(arguments):
 
 
                     all_encs = [encsA, encsB, encsX, encsY]
-                    print(all_encs)
+
                     log.info("\tDone!")
 
-                    # Save everything
-                    save_encodings(all_encs, enc_file)
-                    log.info("Saved encodings for model %s to %s", model_name, enc_file)
-
-                elif model_name =='bow':
-
+                # Save everything
+                    #save_encodings(all_encs, enc_file)
+                    log.info("Saved encodings for model %s  %s to %s", model_name, prefix, enc_file)  
+                    
+                elif model_name =='bow':  
+                    
                     encsA = bow.get_bow_vecs(sents[0],args.glove_path)
                     encsB = bow.get_bow_vecs(sents[1],args.glove_path)
                     encsX = bow.get_bow_vecs(sents[2],args.glove_path)
                     encsY = bow.get_bow_vecs(sents[3],args.glove_path)
-
+                                                                                  
                     all_encs = [encsA, encsB, encsX, encsY]
                     log.info("\tDone!")
-
+                    
                     # Save everything
                     save_encodings(all_encs, enc_file)
-                    log.info("Saved encodings for model %s to %s", model_name, enc_file)
-
+                    log.info("Saved encodings for model %s to %s", model_name, enc_file)  
+                
                 elif model_name =='guse':
                     enc=[[]*512 for x in range(4)]
                     embed = hub.Module("https://tfhub.dev/google/universal-sentence-encoder/2")
@@ -216,43 +226,55 @@ def main(arguments):
                     config = tf.ConfigProto()
                     config.gpu_options.per_process_gpu_memory_fraction = 0.5 # maximun alloc gpu50% of MEM
                     config.gpu_options.allow_growth = True #allocate dynamically
-                    enc=[]
+                    
+                    
                     for i in range(len(sents)):
                         embeddings = embed(sents[i])
+                        
                         with tf.Session(config=config) as session:
                               session.run([tf.global_variables_initializer(), tf.tables_initializer()])
                               enc[i] = session.run(embeddings)
                               if i==0:
+                                    print(len(enc[i]))
                                     for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                                          encsA[sents[0][j]] = embedding
-
+                                          encsA[sents[i][j]] = embedding
+                              
                               elif i==1:
+                                    print(len(enc[i]))
                                     for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                                          encsB[sents[0][j]] = embedding
+                                          encsB[sents[i][j]] = embedding
                               elif i==2:
+                                    print(len(enc[i]))
                                     for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                                          encsB[sents[0][j]] = embedding
-
+                                          encsX[sents[i][j]] = embedding
+                                            
                               elif i==3:
+                                    print(len(enc[i]))
                                     for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                                          encsB[sents[0][j]] = embedding
-
+                                          encsY[sents[i][j]] = embedding
+                    
                     all_encs = [encsA, encsB, encsX, encsY]
                     log.info("\tDone!")
-
+                    
+        
                     # Save everything
                     save_encodings(all_encs, enc_file)
-                    log.info("Saved encodings for model %s to %s", model_name, enc_file)
-
+                    log.info("Saved encodings for model %s  to %s", model_name,  enc_file)  
+                    #weat.run_test(encsA, encsB, encsX, encsY)
+                    
+                                       
+                        
+                
                 else:
                     raise ValueError("Model %s not found!" % model_name)
-
+                        
             else:
                 encsA, encsB, encsX, encsY = encs
 
             # run the test on the encodings
             log.info("Running test %s on %s", test, model_name)
             weat.run_test(encsA, encsB, encsX, encsY)
+            
 
 
 if __name__ == "__main__":

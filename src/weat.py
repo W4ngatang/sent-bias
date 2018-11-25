@@ -17,7 +17,16 @@ import glove
 #B = [2*np.random.rand(10)-1 for _ in range(7)]
 
 def cossim(x, y):
-    return np.dot(x, y) / math.sqrt(np.dot(x, x)*np.dot(y, y))
+    #print(type(x), type(y))
+    #print(len(x), len(y))
+    assert len(x)==len(y)
+    x = np.asarray(x)
+    y = np.asarray(y)
+    a= np.dot(x,y)
+    #a =x.dot(y)
+    b = np.dot(x,x) * np.dot(y,y)
+    return  np.dot(x,y)/math.sqrt(b)
+
 
 def construct_cossim_lookup(XY, AB):
     """
@@ -94,6 +103,7 @@ def p_val_permutation_test(X, Y, A, B, COSSIMS=None):
 
     if COSSIMS:
         # X, Y, A, B are sets of strings/hashable keys
+        print(len(X), len(Y))
         assert len(X) == len(Y)
         assoc = s_XYAB(X, Y, A, B, COSSIMS=COSSIMS)
         XY = X.union(Y)
@@ -115,6 +125,7 @@ def p_val_permutation_test(X, Y, A, B, COSSIMS=None):
             random.shuffle(XY_list)
             Xi = XY_list[:len(X)]
             Yi = XY_list[len(X):]
+            #print(len(Xi),len(Yi))
             assert len(Xi) == len(Yi)
             if s_XYAB(Xi, Yi, A, B, COSSIMS=COSSIMS) > assoc:
                 total_true += 1
@@ -175,6 +186,8 @@ def run_test(A, B, X, Y):
     XY.update(Y)
     AB = A.copy()
     AB.update(B)
+    print("type")
+    print([type(X[a]) for a in X])
 
     COSSIMS = construct_cossim_lookup(XY, AB)
     log.info("computing pval...")

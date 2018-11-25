@@ -179,6 +179,9 @@ def run_test(A, B, X, Y):
     XY.update(Y)
     AB = A.copy()
     AB.update(B)
+    print("type")
+    print([type(X[a]) for a in X])
+
     
     COSSIMS = construct_cossim_lookup(XY, AB)
     log.info("computing pval...")
@@ -212,5 +215,4 @@ if __name__ == "__main__":
     log.info("computing effect size...")
     esize = effect_size(set(X), set(Y), set(A), set(B), COSSIMS=COSSIMS)
     log.info("esize: %.9f", esize)
-
 
