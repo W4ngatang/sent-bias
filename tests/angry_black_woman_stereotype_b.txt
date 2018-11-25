@@ -5,5 +5,5 @@
 # corpora contain human-like biases (see supplement).
 AngryBlackWomanStereotype:shrill,loud,argumentative,irrational,angry,abusive,obnoxious,controlling,nagging,brash,hostile,emasculating,mean,harsh,sassy,aggressive,opinionated,domineering
 NearAntonyms:soft,quiet,compromising,rational,calm,kind,agreeable,servile,pleasant,cautious,friendly,supportive,nice,mild,demure,passive,indifferent,submissive
-BlackFemaleTerms:black female,black woman,black girl
-WhiteFemaleTerms:white female,white woman,white girl
+BlackFemaleTerms:black female,black woman,black girl,woman of color
+WhiteFemaleTerms:white female,white woman,white girl,fair-skinned woman

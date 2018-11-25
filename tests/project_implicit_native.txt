@@ -5,4 +5,4 @@
 Foreign:Antarctica,Mount Everest,Sahara,Mount Merapi,Great Barrier Reef
 American:Old Faithful,Niagara Falls,Grand Canyon,Devils Tower,redwood forest
 NativeAmericanTerms:Native American,indigenous American
-WhiteAmericanTerms:European American,Caucasian American
+WhiteAmericanTerms:European American,American colonist

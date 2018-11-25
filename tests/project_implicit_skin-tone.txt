@@ -5,5 +5,5 @@
 # fashion.
 Good:spectacular,excitement,glorious,enjoy,friend,beautiful,smiling,friendship
 Bad:bothersome,rotten,selfish,disgust,ugly,horrible,evil,poison
-LightTerms:light-skinned,light skin,white person,pale,fair
+LightTerms:light-skinned,light skin,white person,pale,fair-skinned
 DarkTerms:dark-skinned,dark skin,brown person,black person,person of color
