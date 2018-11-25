@@ -5,7 +5,7 @@ import random
 import itertools as it
 import numpy as np
 
-import glove
+import encoders.glove as glove
 #import elmo
 
 # X and Y are two sets of target words of equal size.

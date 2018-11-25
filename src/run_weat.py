@@ -42,6 +42,9 @@ def handle_arguments(arguments):
     parser.add_argument('--models', '-m', type=str, help="Model to evaluate")
     parser.add_argument('--infersent_dir', type=str, help="Directory containing model files")
     parser.add_argument('--gensen_dir', type=str, help="Directory containing model files")
+    parser.add_argument('--gensen_version', type=str,
+                        choices=["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer"],
+                        default="nli_large_bothskip_parse", help="Version of gensen to use.")
     parser.add_argument('--cove_encs', type=str, help="Directory containing precomputed CoVe encodings")
     parser.add_argument('--openai_encs', type=str, help="Directory containing precomputed OpenAI encodings")
     parser.add_argument('--bert_version', type=str, choices=["base", "large"], help="Version of BERT to use.")
@@ -62,32 +65,6 @@ def split_comma_and_check(arg_str, allowed_set, item_type):
 def maybe_make_dir(dirname):
     ''' Maybe make directory '''
     os.makedirs(dirname, exist_ok=True)
-
-
-def encode_sentences(model, sents):
-    ''' Use model to encode sents '''
-    encs = model.encode(sents, bsize=1, tokenize=False)
-    sent2enc = {sent: enc for sent, enc in zip(sents, encs)}
-    return sent2enc
-
-
-def encode_sentences_gensen(model, sents):
-    ''' Use model to encode gensen sents '''
-    sent2vec = {}
-    reps_h, reps_h_t = model.get_representation(sents, pool='last', return_numpy=True,tokenize =True)
-    for j in range(0,len(sents)):
-        sent2vec[sents[j]] = reps_h_t[j]
-    return sent2vec
-
-
-def return_glove(words, glove_path):
-    wordvecs = glove.load_glove_file(glove_path)
-    glove_vecs = {}
-    for word in words:
-        glove_vecs[word]= wordvecs[word]
-
-    return glove_vecs
-
 
 
 def main(arguments):
@@ -123,43 +100,35 @@ def main(arguments):
 
                 # load the test data
                 sents = load_single_word_sents(os.path.join(args.data_dir, "%s.txt" % test))
-
                 assert len(sents) == 4
 
                 # load the model and do model-specific encoding procedure
-                if model_name == 'elmo': # TODO(Alex): move this
-                    encsA, encsB, encsX, encsY = weat.load_elmo_weat_test(test, path='elmo/')
-
-                elif model_name == 'glove': # TODO(Alex): delete/merge this with BoW
-                    encsA, encsB, encsX, encsY = weat.load_weat_test(test, path=args.data_dir)
+                if model_name == 'bow':
+                    encsA = bow.encode(sents[0], args.glove_path)
+                    encsB = bow.encode(sents[1], args.glove_path)
+                    encsX = bow.encode(sents[2], args.glove_path)
+                    encsY = bow.encode(sents[3], args.glove_path)
 
                 elif model_name == 'infersent':
                     if model is None:
                         model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
                     model.build_vocab([s for s in sents[0] + sents[1] + sents[2] + sents[3]], tokenize=False)
                     log.info("Encoding sentences for test %s with model %s...", test, model_name)
-                    encsA = encode_sentences(model, sents[0])
-                    encsB = encode_sentences(model, sents[1])
-                    encsX = encode_sentences(model, sents[2])
-                    encsY = encode_sentences(model, sents[3])
+                    encsA = infersent.encode(model, sents[0])
+                    encsB = infersent.encode(model, sents[1])
+                    encsX = infersent.encode(model, sents[2])
+                    encsY = infersent.encode(model, sents[3])
 
                 elif model_name =='gensen':
                     if model is None:
                         model = gensen.GenSenSingle(model_folder=os.path.join(args.gensen_dir, 'models'),
-                                                    filename_prefix='nli_large_bothskip',
+                                                    filename_prefix=args.gensen_version,
                                                     pretrained_emb=os.path.join(args.glove_path))
 
-                    encsA = encode_sentences_gensen(model, sents[0])
-                    encsB = encode_sentences_gensen(model, sents[1])
-                    encsX = encode_sentences_gensen(model, sents[2])
-                    encsY = encode_sentences_gensen(model, sents[3])
-
-                elif model_name == 'bow':
-
-                    encsA = bow.get_bow_vecs(sents[0],args.glove_path)
-                    encsB = bow.get_bow_vecs(sents[1],args.glove_path)
-                    encsX = bow.get_bow_vecs(sents[2],args.glove_path)
-                    encsY = bow.get_bow_vecs(sents[3],args.glove_path)
+                    encsA = gensen.encode(model, sents[0])
+                    encsB = gensen.encode(model, sents[1])
+                    encsX = gensen.encode(model, sents[2])
+                    encsY = gensen.encode(model, sents[3])
 
                 elif model_name =='guse':
                     enc = [[] * 512 for _ in range(4)]
@@ -188,6 +157,9 @@ def main(arguments):
                             elif i == 3:
                                 for j, embedding in enumerate(np.array(enc[i]).tolist()):
                                     encsY[sent[j]] = embedding
+
+                elif model_name == 'elmo': # TODO(Alex): move this
+                    encsA, encsB, encsX, encsY = weat.load_elmo_weat_test(test, path='elmo/')
 
                 elif model_name == "bert":
                     if args.bert_version == "large":

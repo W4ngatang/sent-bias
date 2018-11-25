@@ -1,55 +1,64 @@
 ''' BoW encoder '''
 import io
-import time
+import logging as log
 import numpy as np
+import encoders.glove as glove
+import ipdb
 
-
-def get_word_dict(sentences, tokenize=True):
-    # create vocab of words
+def get_word_dict(sentences, tokenize):
+    ''' From sentences create vocab of words '''
     word_dict = {}
     if tokenize:
         from nltk.tokenize import word_tokenize
-    sentences = [s.split() if not tokenize else word_tokenize(s)
-                 for s in sentences]
-    for sent in sentences:
+    tokenized_sents = [s.split() if not tokenize else word_tokenize(s) for s in sentences]
+    for sent in tokenized_sents:
         for word in sent:
             if word not in word_dict:
                 word_dict[word] = ''
-    word_dict['<s>'] = ''
-    word_dict['</s>'] = ''
-    return sentences,word_dict
+    #word_dict['<s>'] = ''
+    #word_dict['</s>'] = ''
+    return tokenized_sents, word_dict
 
-def get_vecs(sentences, word_vec, glove_path):
-    bow_vec={}
+def get_vecs(sentences, word_vec, dim):
+    ''' Create BoW representations for sentences using word_vecs '''
+    bow_vec = {}
     for sent in sentences:
-        key = ''
-        vec = np.zeros(int(glove_path[-8:-5]))
+        key = []
+        vec = np.zeros(dim) # initialize w/ zeros
 
         for word in sent:
-            key = key+word+' '
+            key.append(word)
             single_wordvec = np.array(word_vec[word])
-            vec+=single_wordvec
-        bow_vec[key[:-1]]  = vec/len(sent)
+            vec += single_wordvec
+        bow_vec[' '.join(key)] = vec / len(sent)
 
     return bow_vec
 
 
-def get_glove(word_dict, glove_path):
-
-    word_vec = {}
+def get_glove(vocab, glove_path):
+    ''' Load vectors for words in word_dict from glove_path '''
+    word_vecs = {}
+    dim = None
     with io.open(glove_path) as f:
         for line in f:
             word, vec = line.split(' ', 1)
-            if word in word_dict:
-                word_vec[word] = np.fromstring(vec, sep=' ')
-    print('Found {0}(/{1}) words with glove vectors'
-          .format(len(word_vec), len(word_dict)))
-    return word_vec
+            if word in vocab:
+                word_vecs[word] = np.fromstring(vec, sep=' ')
+                if dim is None:
+                    dim = len(word_vecs[word])
+                else:
+                    assert len(word_vecs[word]) == dim
+    log.info('Found %d/%d words with glove vectors', len(word_vecs), len(vocab))
+    return word_vecs, dim
 
-def get_bow_vecs(sentences, glove_path, tokenize=True):
-    sents, word_dict = get_word_dict(sentences, tokenize)
-    word_vec = get_glove(word_dict,glove_path)
-    BoW_word_vecs = get_vecs(sents,word_vec, glove_path)
-    print('Vocab size : {0}'.format(len(word_vec)))
-    print('No of Sentences : {0}'.format(len(BoW_word_vecs)))
-    return BoW_word_vecs
+def encode(sentences, glove_path, tokenize=False):
+    ''' Encode sentences into BoW representation '''
+    sents, vocab = get_word_dict(sentences, tokenize)
+
+    word_vecs, dim = get_glove(vocab, glove_path)
+
+    bow_word_vecs = get_vecs(sents, word_vecs, dim)
+
+    #log.info('Vocab size : %d', len(word_vecs))
+    #log.info('No of Sentences : %d', len(bow_word_vecs))
+    return bow_word_vecs
