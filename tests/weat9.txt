@@ -1,0 +1,4 @@
+MentalDisease:sad,hopeless,gloomy,tearful,miserable,depressed
+PhysicalDisease:sick,illness,influenza,disease,virus,cancer
+Temporary:impermanent,unstable,variable,fleeting,short-term,brief,occasional
+Permanent:stable,always,constant,persistent,chronic,prolonged,forever
