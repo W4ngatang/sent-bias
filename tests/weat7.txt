@@ -1,0 +1,4 @@
+Math:math,algebra,geometry,calculus,equations,computation,numbers,addition
+Arts:poetry,art,dance,literature,novel,symphony,drama,sculpture
+MaleTerms:male,man,boy,brother,he,him,his,son
+FemaleTerms:female,woman,girl,sister,she,her,hers,daughter
