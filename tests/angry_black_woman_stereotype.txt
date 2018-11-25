@@ -1,0 +1,7 @@
+# Stereotype terms from Harris-Perry, 2011: Sister Citizen, pp. 87-90;
+# antonyms from thesaurus.com and web searches.  Names from Sweeney,
+# 2013: Discrimination in Online Ad Delivery, Table 1.
+AngryBlackWomanStereotype:shrill,loud,argumentative,irrational,angry,abusive,obnoxious,controlling,nagging,brash,hostile,emasculating,mean,harsh,sassy,aggressive,opinionated,domineering
+NearAntonyms:soft,quiet,compromising,rational,calm,kind,agreeable,servile,pleasant,cautious,friendly,supportive,nice,mild,demure,passive,indifferent,submissive
+BlackFemaleNames:Aisha,Ebony,Keisha,Kenya,Latonya,Lakisha,Latoya,Tamika,Imani,Shanice,Aaliyah,Precious,Nia,Deja,Diamond,Latanya,Latisha
+WhiteFemaleNames:Allison,Anne,Carrie,Emily,Jill,Laurie,Kristen,Meredith,Molly,Amy,Claire,Katie,Madeline,Katelyn,Emma

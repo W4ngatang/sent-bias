@@ -1,0 +1,4 @@
+Science:science,technology,physics,chemistry,Einstein,NASA,experiment,astronomy
+Arts:poetry,art,Shakespeare,dance,literature,novel,symphony,drama
+MaleNames:John,Paul,Mike,Kevin,Steve,Greg,Jeff,Bill
+FemaleNames:Amy,Joan,Lisa,Sarah,Diana,Kate,Ann,Donna
