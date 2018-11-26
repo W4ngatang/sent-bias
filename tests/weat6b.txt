@@ -1,3 +1,6 @@
+# Male, female terms copied from the WEAT 7 test in Caliskan et al.,
+# 2017: Semantics derived automatically from language corpora contain
+# human-like biases (see supplement).
 MaleTerms:male,man,boy,brother,he,him,his,son
 FemaleTerms:female,woman,girl,sister,she,her,hers,daughter
 Career:executive,management,professional,corporation,salary,office,business,career
