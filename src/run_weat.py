@@ -6,7 +6,7 @@ import argparse
 import logging as log
 import h5py # pylint: disable=import-error
 import numpy as np
-from data import load_single_word_sents, load_encodings, save_encodings, \
+from data import load_sents, load_encodings, save_encodings, \
                  load_jiant_encodings
 import weat
 import encoders.glove as glove
@@ -19,7 +19,8 @@ import tensorflow as tf
 import tensorflow_hub as hub
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
-TESTS = ["weat1", "weat2", "weat3", "weat4", "sent_weat1", "sent_weat2", "sent_weat3", "sent_weat4"]
+TESTS = ["weat1", "weat2", "weat3", "weat4",
+         "sent-weat1", "sent-weat2", "sent-weat3", "sent-weat4"]
 MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
 
@@ -105,7 +106,7 @@ def main(arguments):
                          "Generating new encodings.", model_name, test)
 
                 # load the test data
-                sents = load_single_word_sents(os.path.join(args.data_dir, "%s.txt" % test))
+                sents = load_sents(os.path.join(args.data_dir, "%s.txt" % test))
                 assert len(sents) == 4
                 assert isinstance(sents[0], list)
 
@@ -174,7 +175,7 @@ def main(arguments):
                     encs_targ1, encs_targ2, encs_attr1, encs_attr2 = load_jiant_encodings(load_encs_from, n_header=1)
 
                 elif model_name == 'elmo':
-                    encs_attr11, encs_attr21, encs_targ11, encs_targ21 = weat.load_elmo_weat_test(test, path='encodings/elmo/')
+                    #encs_attr11, encs_attr21, encs_targ11, encs_targ21 = weat.load_elmo_weat_test(test, path='encodings/elmo/')
                     encs_targ1 = elmo.encode(sents[0], args.combine_method, args.elmo_combine)
                     encs_targ2 = elmo.encode(sents[1], args.combine_method, args.elmo_combine)
                     encs_attr1 = elmo.encode(sents[2], args.combine_method, args.elmo_combine)
@@ -185,10 +186,10 @@ def main(arguments):
                         model, tokenizer = bert.load_model('bert-large-uncased')
                     else:
                         model, tokenizer = bert.load_model('bert-base-uncased')
-                    encs_targ1 = bert.encode(model, tokenizer, sents[0])
-                    encs_targ2 = bert.encode(model, tokenizer, sents[1])
-                    encs_attr1 = bert.encode(model, tokenizer, sents[2])
-                    encs_attr2 = bert.encode(model, tokenizer, sents[3])
+                    encs_targ1 = bert.encode(model, tokenizer, sents[0], args.combine_method)
+                    encs_targ2 = bert.encode(model, tokenizer, sents[1], args.combine_method)
+                    encs_attr1 = bert.encode(model, tokenizer, sents[2], args.combine_method)
+                    encs_attr2 = bert.encode(model, tokenizer, sents[3], args.combine_method)
 
 
                 elif model_name == "openai":
