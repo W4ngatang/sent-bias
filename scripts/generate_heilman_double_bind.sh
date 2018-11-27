@@ -27,8 +27,11 @@ print_contexts() {
 
     for name in $names
     do
-        echo -en "\t"
-        echo -n "$success_text" | sed "s/NAME/$name/g;s/CAP_POSS_PRON/$cap_poss_pron/g;s/POSS_PRON/$poss_pron/g;s/CAP_PRON/$cap_pron/g;s/PRON/$pron/g"
+        echo -en "\t$success_text" | \
+            sed "s/NAME/$name/g" | \
+            sed "s/CAP_POSS_PRON/$cap_poss_pron/g" | \
+            sed "s/POSS_PRON/$poss_pron/g" | \
+            sed "s/CAP_PRON/$cap_pron/g;s/PRON/$pron/g"
     done
     echo
 }
@@ -49,40 +52,36 @@ print_header() {
     echo '# Reactions to Women Who Succeed at Male Gender-Typed Tasks'
 }
 
-f=../tests/heilman_double_bind_ambiguous.txt
-print_header \
-    > $f
-echo -n 'Female' \
-    >> $f
-print_contexts "$ambig_success_text" "$female_names" Her her She she \
-    >> $f
-echo -n 'Male' \
-    >> $f
-print_contexts "$ambig_success_text" "$male_names" His his He he \
-    >> $f
-echo -n 'CompetentAchievementOriented' \
-    >> $f
-print_evaluations "$competent" \
-    >> $f
-echo -n 'IncompetentNotAchievementOriented' \
-    >> $f
-print_evaluations "$incompetent" \
-    >> $f
+print_tests() {
+    success_text="$1"
+    shift
+    target_1_name="$1"
+    shift
+    target_1="$1"
+    shift
+    target_2_name="$1"
+    shift
+    target_2="$1"
+    shift
 
-f=../tests/heilman_double_bind_clear.txt
-print_header \
-    > $f
-print_contexts "$clear_success_text" "$female_names" Her her She she \
-    >> $f
-echo -n 'Male' \
-    >> $f
-print_contexts "$clear_success_text" "$male_names" His his He he \
-    >> $f
-echo -n 'LikableNotHostile' \
-    >> $f
-print_evaluations "$likable" \
-    >> $f
-echo -n 'UnlikableHostile' \
-    >> $f
-print_evaluations "$unlikable" \
-    >> $f
+    print_header
+    echo -n Female
+    print_contexts "$success_text" "$female_names" Her her She she
+    echo -n Male
+    print_contexts "$success_text" "$male_names" His his He he
+    echo -n "$target_1_name"
+    print_evaluations "$target_1"
+    echo -n "$target_2_name"
+    print_evaluations "$target_2"
+}
+
+print_tests \
+    "$ambig_success_text" \
+    CompetentAchievementOriented "$competent" \
+    IncompetentNotAchievementOriented "$incompetent" \
+    > ../tests/heilman_double_bind_ambiguous.txt
+print_tests \
+    "$clear_success_text" \
+    LikableNotHostile "$likable" \
+    UnlikableHostile "$unlikable" \
+    > ../tests/heilman_double_bind_clear.txt
