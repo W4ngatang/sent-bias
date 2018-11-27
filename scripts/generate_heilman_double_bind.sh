@@ -24,14 +24,23 @@ print_contexts() {
     shift
     local pron="$1"
     shift
+    local sentences_to_keep="$1"
+    shift
 
+    local name=
     for name in $names
     do
-        echo -en "\t$success_text" | \
+        s=`echo -en "\t$success_text" | \
             sed "s/NAME/$name/g" | \
             sed "s/CAP_POSS_PRON/$cap_poss_pron/g" | \
             sed "s/POSS_PRON/$poss_pron/g" | \
-            sed "s/CAP_PRON/$cap_pron/g;s/PRON/$pron/g"
+            sed "s/CAP_PRON/$cap_pron/g;s/PRON/$pron/g"`
+        if [ $sentences_to_keep -gt 0 ]
+        then
+            s=`echo -n "$s" | cut -d . -f 1-$sentences_to_keep`
+            s="$s."
+        fi
+        echo -n "$s"
     done
     echo
 }
@@ -40,6 +49,7 @@ print_evaluations() {
     local adjectives="$1"
     shift
 
+    local adjective=
     for adjective in $adjectives
     do
         echo -en "\tThe assistant vice president is $adjective."
@@ -53,35 +63,48 @@ print_header() {
 }
 
 print_tests() {
-    success_text="$1"
+    local success_text="$1"
     shift
-    target_1_name="$1"
+    local target_1_name="$1"
     shift
-    target_1="$1"
+    local target_1="$1"
     shift
-    target_2_name="$1"
+    local target_2_name="$1"
     shift
-    target_2="$1"
+    local target_2="$1"
+    shift
+    local sentences_to_keep="$1"
     shift
 
     print_header
     echo -n Female
-    print_contexts "$success_text" "$female_names" Her her She she
+    print_contexts "$success_text" "$female_names" Her her She she "$sentences_to_keep"
     echo -n Male
-    print_contexts "$success_text" "$male_names" His his He he
+    print_contexts "$success_text" "$male_names" His his He he "$sentences_to_keep"
     echo -n "$target_1_name"
     print_evaluations "$target_1"
     echo -n "$target_2_name"
     print_evaluations "$target_2"
 }
 
-print_tests \
-    "$ambig_success_text" \
-    CompetentAchievementOriented "$competent" \
-    IncompetentNotAchievementOriented "$incompetent" \
-    > ../tests/heilman_double_bind_ambiguous.txt
-print_tests \
-    "$clear_success_text" \
-    LikableNotHostile "$likable" \
-    UnlikableHostile "$unlikable" \
-    > ../tests/heilman_double_bind_clear.txt
+for sentences_to_keep in 0 1
+do
+    if [ $sentences_to_keep -gt 0 ]
+    then
+        suffix="_$sentences_to_keep"
+    else
+        suffix=""
+    fi
+    print_tests \
+        "$ambig_success_text" \
+        CompetentAchievementOriented "$competent" \
+        IncompetentNotAchievementOriented "$incompetent" \
+        $sentences_to_keep \
+        > ../tests/heilman_double_bind_ambiguous$suffix.txt
+    print_tests \
+        "$clear_success_text" \
+        LikableNotHostile "$likable" \
+        UnlikableHostile "$unlikable" \
+        $sentences_to_keep \
+        > ../tests/heilman_double_bind_clear$suffix.txt
+done
