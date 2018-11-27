@@ -3,7 +3,7 @@
 ## Setup 
 
 `environment.yml` has all dependencies for Conda environment. Everything should be installable with pip.
-Create the environment with `conda environment -f environment.yml`.
+Create the environment with `conda env create -f environment.yml`.
 Activate the environment with `source activate sentbias`.
 
 ### GloVe 
