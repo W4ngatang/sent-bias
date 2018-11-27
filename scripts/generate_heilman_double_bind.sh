@@ -30,17 +30,17 @@ print_contexts() {
     local name=
     for name in $names
     do
-        s=`echo -en "\t$success_text" | \
+        field=`echo -en "\t$success_text" | \
             sed "s/NAME/$name/g" | \
             sed "s/CAP_POSS_PRON/$cap_poss_pron/g" | \
             sed "s/POSS_PRON/$poss_pron/g" | \
-            sed "s/CAP_PRON/$cap_pron/g;s/PRON/$pron/g"`
-        if [ $sentences_to_keep -gt 0 ]
+            sed "s/CAP_PRON/$cap_pron/g;s/PRON/$pron/g" | \
+            cut -d . -f "$sentences_to_keep"`
+        if [ "${field: -1}" != . ]
         then
-            s=`echo -n "$s" | cut -d . -f 1-$sentences_to_keep`
-            s="$s."
+            field="$field."
         fi
-        echo -n "$s"
+        echo -n "$field"
     done
     echo
 }
@@ -87,24 +87,18 @@ print_tests() {
     print_evaluations "$target_2"
 }
 
-for sentences_to_keep in 0 1
+for sentences_to_keep in 1 1- 1,3-
 do
-    if [ $sentences_to_keep -gt 0 ]
-    then
-        suffix="_$sentences_to_keep"
-    else
-        suffix=""
-    fi
     print_tests \
         "$ambig_success_text" \
         CompetentAchievementOriented "$competent" \
         IncompetentNotAchievementOriented "$incompetent" \
         $sentences_to_keep \
-        > ../tests/heilman_double_bind_ambiguous$suffix.txt
+        > ../tests/heilman_double_bind_ambiguous_$sentences_to_keep.txt
     print_tests \
         "$clear_success_text" \
         LikableNotHostile "$likable" \
         UnlikableHostile "$unlikable" \
         $sentences_to_keep \
-        > ../tests/heilman_double_bind_clear$suffix.txt
+        > ../tests/heilman_double_bind_clear_$sentences_to_keep.txt
 done
