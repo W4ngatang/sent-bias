@@ -10,7 +10,7 @@ def load_sents(sent_file):
     with open(sent_file, 'r') as sent_fh:
         for row in sent_fh:
             category, examples = row.strip().split(':')
-            data.append([e.split() for e in examples.split(',')])
+            data.append(examples.split(','))
     return data
 
 
