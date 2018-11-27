@@ -199,10 +199,10 @@ def main(arguments):
                 else:
                     raise ValueError("Model %s not found!" % model_name)
 
+                log.info("\tDone!")
                 #all_encs = [encs_targ1, encs_targ2, encs_attr1, encs_attr2]
                 #save_encodings(all_encs, enc_file)
-                log.info("\tDone!")
-                log.info("Saved encodings for model %s to %s", model_name, enc_file)
+                #log.info("Saved encodings for model %s to %s", model_name, enc_file)
             else:
                 encs_targ1, encs_targ2, encs_attr1, encs_attr2 = encs
 
