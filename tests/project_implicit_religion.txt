@@ -1,6 +1,6 @@
 # The "star and crescent" and "cross" were represented by images of the
 # respective symbols in the Project Implicit IAT.
-IslamTerms:star and crescent,mosque,Koran,Muslim,Islam
-ChristianityTerms:cross,church,Bible,Christian,Christianity
-Good:cherish,fantastic,attractive,joyful,adore,glad,happy,celebrate
-Bad:abuse,humiliate,negative,horrific,bothersome,disgust,hurtful,scorn
+targ1	ChristianityTerms	cross	church	Bible	Christian	Christianity
+targ2	IslamTerms	star and crescent	mosque	Koran	Muslim	Islam
+attr1	Good	cherish	fantastic	attractive	joyful	adore	glad	happy	celebrate
+attr2	Bad	abuse	humiliate	negative	horrific	bothersome	disgust	hurtful	scorn

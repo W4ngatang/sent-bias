@@ -1,4 +1,4 @@
-targ1:Math:math,algebra,geometry,calculus,equations,computation,numbers,addition
-targ2:Arts:poetry,art,dance,literature,novel,symphony,drama,sculpture
-attr1:MaleTerms:male,man,boy,brother,he,him,his,son
-attr2:FemaleTerms:female,woman,girl,sister,she,her,hers,daughter
+targ1	Math	math	algebra	geometry	calculus	equations	computation	numbers	addition
+targ2	Arts	poetry	art	dance	literature	novel	symphony	drama	sculpture
+attr1	MaleTerms	male	man	boy	brother	he	him	his	son
+attr2	FemaleTerms	female	woman	girl	sister	she	her	hers	daughter

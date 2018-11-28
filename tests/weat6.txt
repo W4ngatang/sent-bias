@@ -1,4 +1,4 @@
-targ1:MaleNames:John,Paul,Mike,Kevin,Steve,Greg,Jeff,Bill
-targ2:FemaleNames:Amy,Joan,Lisa,Sarah,Diana,Kate,Ann,Donna
-attr1:Career:executive,management,professional,corporation,salary,office,business,career
-attr2:Family:home,parents,children,family,cousins,marriage,wedding,relatives
+targ1	MaleNames	John	Paul	Mike	Kevin	Steve	Greg	Jeff	Bill
+targ2	FemaleNames	Amy	Joan	Lisa	Sarah	Diana	Kate	Ann	Donna
+attr1	Career	executive	management	professional	corporation	salary	office	business	career
+attr2	Family	home	parents	children	family	cousins	marriage	wedding	relatives
