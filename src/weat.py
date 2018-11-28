@@ -94,7 +94,7 @@ def mean_s_wAB(X, A, B, cossims):
     return sum(s_wAB(x, A, B, cossims=cossims) for x in X) / len(X)
 
 def stdev_s_wAB(X, A, B, cossims):
-    return np.std([s_wAB(x, A, B, cossims=cossims) for x in X]) #ddof=0 or 1?
+    return np.std([s_wAB(x, A, B, cossims=cossims) for x in X], ddof=1)
 
 def effect_size(X, Y, A, B, cossims):
     """
