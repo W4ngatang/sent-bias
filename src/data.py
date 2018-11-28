@@ -4,17 +4,34 @@ from collections import defaultdict
 import numpy as np
 import h5py
 
+WEAT_SETS = ["targ1", "targ2", "attr1", "attr2"]
+
 def load_sents(sent_file, split_sentence_into_list=True):
-    ''' Load sentences from sent_file.
-    Exact format will change a lot. '''
-    data = [] #defaultdict(list)
+    ''' Load sentences from sent_file.  Exact format will change a lot.
+
+    args:
+        - sent_file
+        - split_sentence_into_list (Bool): if True, split sentence into List(str).
+            Otherwise, leave a sentence as one long string, as
+            some models internally do their own tokenization
+
+    returns:
+        - data (Dict[List[str]]): dictionary containing four word sets'''
+
+    data = defaultdict(list)
     with open(sent_file, 'r') as sent_fh:
         for row in sent_fh:
-            category, examples = row.strip().split(':')
+            if row[0] == "#":
+                continue
+            role, _ , examples = row.strip().split(':')
+            assert role in WEAT_SETS
             if split_sentence_into_list:
-                data.append([e.split() for e in examples.split(',')])
+                data[role] += [e.split() for e in examples.split(',')]
             else:
-                data.append(examples.split(','))
+                data[role] += examples.split(',')
+
+    for weat_set in WEAT_SETS: # check that all the needed word sets are there
+        assert weat_set in data
     return data
 
 

@@ -1,4 +1,4 @@
-Science:science,technology,physics,chemistry,Einstein,NASA,experiment,astronomy
-Arts:poetry,art,Shakespeare,dance,literature,novel,symphony,drama
-MaleTerms:brother,father,uncle,grandfather,son,he,his,him
-FemaleTerms:sister,mother,aunt,grandmother,daughter,she,hers,her
+targ1:Science:science,technology,physics,chemistry,Einstein,NASA,experiment,astronomy
+targ2:Arts:poetry,art,Shakespeare,dance,literature,novel,symphony,drama
+attr1:MaleTerms:brother,father,uncle,grandfather,son,he,his,him
+attr2:FemaleTerms:sister,mother,aunt,grandmother,daughter,she,hers,her

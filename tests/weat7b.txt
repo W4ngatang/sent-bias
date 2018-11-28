@@ -1,7 +1,7 @@
 # Male, female names copied from the WEAT 6 test in Caliskan et al.,
 # 2017: Semantics derived automatically from language corpora contain
 # human-like biases (see supplement).
-Math:math,algebra,geometry,calculus,equations,computation,numbers,addition
-Arts:poetry,art,dance,literature,novel,symphony,drama,sculpture
-MaleNames:John,Paul,Mike,Kevin,Steve,Greg,Jeff,Bill
-FemaleNames:Amy,Joan,Lisa,Sarah,Diana,Kate,Ann,Donna
+targ1:Math:math,algebra,geometry,calculus,equations,computation,numbers,addition
+targ2:Arts:poetry,art,dance,literature,novel,symphony,drama,sculpture
+attr1:MaleNames:John,Paul,Mike,Kevin,Steve,Greg,Jeff,Bill
+attr2:FemaleNames:Amy,Joan,Lisa,Sarah,Diana,Kate,Ann,Donna

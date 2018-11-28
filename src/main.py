@@ -20,7 +20,10 @@ import tensorflow_hub as hub
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
 TESTS = ["weat1", "weat2", "weat3", "weat4",
-         "sent-weat1", "sent-weat2", "sent-weat3", "sent-weat4"]
+         "weat5", "weat5b", "weat6", "weat6b", "weat7", "weat7b", "weat8", "weat8b",
+         "weat9", "weat10",
+         "sent-weat1", "sent-weat2", "sent-weat3", "sent-weat4",
+         ]
 MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
 
@@ -107,8 +110,6 @@ def main(arguments):
 
                 # load the test data
                 sents = load_sents(os.path.join(args.data_dir, "%s.txt" % test), split_sentence_into_list=bool(model=="bert"))
-                assert len(sents) == 4
-                assert isinstance(sents[0], list)
 
                 # load the model and do model-specific encoding procedure
                 if model_name == 'glove':
@@ -116,20 +117,20 @@ def main(arguments):
                     encs_targ1, encs_targ2, encs_attr1, encs_attr2 = weat.load_weat_test(test, path=args.data_dir)
 
                 elif model_name == 'bow':
-                    encs_targ1 = bow.encode(sents[0], args.glove_path)
-                    encs_targ2 = bow.encode(sents[1], args.glove_path)
-                    encs_attr1 = bow.encode(sents[2], args.glove_path)
-                    encs_attr2 = bow.encode(sents[3], args.glove_path)
+                    encs_targ1 = bow.encode(sents["targ1"], args.glove_path)
+                    encs_targ2 = bow.encode(sents["targ2"], args.glove_path)
+                    encs_attr1 = bow.encode(sents["attr1"], args.glove_path)
+                    encs_attr2 = bow.encode(sents["attr2"], args.glove_path)
 
                 elif model_name == 'infersent':
                     if model is None:
                         model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
-                    model.build_vocab([s for s in sents[0] + sents[1] + sents[2] + sents[3]], tokenize=False)
+                    model.build_vocab([s for s in sents["targ1"] + sents["targ2"] + sents["attr1"] + sents["attr2"]], tokenize=False)
                     log.info("Encoding sentences for test %s with model %s...", test, model_name)
-                    encs_targ1 = infersent.encode(model, sents[0])
-                    encs_targ2 = infersent.encode(model, sents[1])
-                    encs_attr1 = infersent.encode(model, sents[2])
-                    encs_attr2 = infersent.encode(model, sents[3])
+                    encs_targ1 = infersent.encode(model, sents["targ1"])
+                    encs_targ2 = infersent.encode(model, sents["targ2"])
+                    encs_attr1 = infersent.encode(model, sents["attr1"])
+                    encs_attr2 = infersent.encode(model, sents["attr2"])
 
                 elif model_name =='gensen':
                     if model is None:
@@ -137,10 +138,10 @@ def main(arguments):
                                                     filename_prefix=args.gensen_version,
                                                     pretrained_emb=os.path.join(args.glove_path, 'glove.840B.300d.h5'))
 
-                    encs_targ1 = gensen.encode(model, sents[0])
-                    encs_targ2 = gensen.encode(model, sents[1])
-                    encs_attr1 = gensen.encode(model, sents[2])
-                    encs_attr2 = gensen.encode(model, sents[3])
+                    encs_targ1 = gensen.encode(model, sents["targ1"])
+                    encs_targ2 = gensen.encode(model, sents["targ2"])
+                    encs_attr1 = gensen.encode(model, sents["attr1"])
+                    encs_attr2 = gensen.encode(model, sents["attr2"])
 
                 elif model_name =='guse':
                     enc = [[] * 512 for _ in range(4)]
@@ -176,20 +177,20 @@ def main(arguments):
 
                 elif model_name == 'elmo':
                     #encs_attr11, encs_attr21, encs_targ11, encs_targ21 = weat.load_elmo_weat_test(test, path='encodings/elmo/')
-                    encs_targ1 = elmo.encode(sents[0], args.combine_method, args.elmo_combine)
-                    encs_targ2 = elmo.encode(sents[1], args.combine_method, args.elmo_combine)
-                    encs_attr1 = elmo.encode(sents[2], args.combine_method, args.elmo_combine)
-                    encs_attr2 = elmo.encode(sents[3], args.combine_method, args.elmo_combine)
+                    encs_targ1 = elmo.encode(sents["targ1"], args.combine_method, args.elmo_combine)
+                    encs_targ2 = elmo.encode(sents["targ2"], args.combine_method, args.elmo_combine)
+                    encs_attr1 = elmo.encode(sents["attr1"], args.combine_method, args.elmo_combine)
+                    encs_attr2 = elmo.encode(sents["attr2"], args.combine_method, args.elmo_combine)
 
                 elif model_name == "bert":
                     if args.bert_version == "large":
                         model, tokenizer = bert.load_model('bert-large-uncased')
                     else:
                         model, tokenizer = bert.load_model('bert-base-uncased')
-                    encs_targ1 = bert.encode(model, tokenizer, sents[0], args.combine_method)
-                    encs_targ2 = bert.encode(model, tokenizer, sents[1], args.combine_method)
-                    encs_attr1 = bert.encode(model, tokenizer, sents[2], args.combine_method)
-                    encs_attr2 = bert.encode(model, tokenizer, sents[3], args.combine_method)
+                    encs_targ1 = bert.encode(model, tokenizer, sents["targ1"], args.combine_method)
+                    encs_targ2 = bert.encode(model, tokenizer, sents["targ2"], args.combine_method)
+                    encs_attr1 = bert.encode(model, tokenizer, sents["attr1"], args.combine_method)
+                    encs_attr2 = bert.encode(model, tokenizer, sents["attr2"], args.combine_method)
 
 
                 elif model_name == "openai":

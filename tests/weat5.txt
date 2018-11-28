@@ -1,4 +1,4 @@
-EuropeanAmericanNames:Brad,Brendan,Geoffrey,Greg,Brett,Jay,Matthew,Neil,Todd,Allison,Anne,Carrie,Emily,Jill,Laurie,Kristen,Meredith,Sarah
-AfricanAmericanNames:Darnell,Hakim,Jermaine,Kareem,Jamal,Leroy,Rasheed,Tremayne,Tyrone,Aisha,Ebony,Keisha,Kenya,Latonya,Lakisha,Latoya,Tamika,Tanisha
-Pleasant:joy,love,peace,wonderful,pleasure,friend,laughter,happy
-Unpleasant:agony,terrible,horrible,nasty,evil,war,awful,failure
+targ1:EuropeanAmericanNames:Brad,Brendan,Geoffrey,Greg,Brett,Jay,Matthew,Neil,Todd,Allison,Anne,Carrie,Emily,Jill,Laurie,Kristen,Meredith,Sarah
+targ2:AfricanAmericanNames:Darnell,Hakim,Jermaine,Kareem,Jamal,Leroy,Rasheed,Tremayne,Tyrone,Aisha,Ebony,Keisha,Kenya,Latonya,Lakisha,Latoya,Tamika,Tanisha
+attr1:Pleasant:joy,love,peace,wonderful,pleasure,friend,laughter,happy
+attr2:Unpleasant:agony,terrible,horrible,nasty,evil,war,awful,failure

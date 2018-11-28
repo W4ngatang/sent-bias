@@ -79,6 +79,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
         log.info('Using exact test')
         XY_set = set(XY)
         for Xi in it.combinations(XY, len(X)):
+            Xi = list(Xi)
             Yi = list(XY_set.difference(Xi))
             assert len(Xi) == len(Yi)
             if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:

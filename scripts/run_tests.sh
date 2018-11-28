@@ -6,6 +6,7 @@ source user_config.sh
 #python -m ipdb src/main.py --log_file ${SAVE_DIR}/log.log -t weat1 -m weat1 --exp_dir ${SAVE_DIR} --data_dir tests/ -s 1094 --n_samples 100 -m guse
 #python src/main.py --log_file ${SAVE_DIR}/log.log -t weat4 --exp_dir ${SAVE_DIR} --data_dir tests/ -m gensen --gensen_dir ${GENSEN_DIR} --glove_path ${GLOVE_PATH}
 #python src/main.py --log_file ${SAVE_DIR}/log.log -t weat1 --exp_dir ${SAVE_DIR} --data_dir tests/ -m elmo --elmo_combine concat
+python -m ipdb src/main.py --log_file ${SAVE_DIR}/log.log -t weat5,weat5b,weat6,weat7,weat8 -m bert --bert_version large --exp_dir ${SAVE_DIR} --data_dir tests/ --glove_path ${GLOVE_PATH} --combine_method max
 
 # BoW (consumes GloVe method)
 #python src/main.py --log_file ${SAVE_DIR}/log.log -t weat1,weat2,weat3,weat4 --exp_dir ${SAVE_DIR} --data_dir tests/ -m bow --glove_path ${GLOVE_PATH}
@@ -36,5 +37,5 @@ source user_config.sh
 # BERT
 #python src/main.py --log_file ${SAVE_DIR}/log.log -t weat1,weat2,weat3,weat4 -m bert --bert_version base --exp_dir ${SAVE_DIR} --data_dir tests/ --glove_path ${GLOVE_PATH} --combine_method max
 #python src/main.py --log_file ${SAVE_DIR}/log.log -t sent-weat1,sent-weat2,sent-weat3,sent-weat4 -m bert --bert_version base --exp_dir ${SAVE_DIR} --data_dir tests/ --glove_path ${GLOVE_PATH} --combine_method max
-python src/main.py --log_file ${SAVE_DIR}/log.log -t weat1,weat2,weat3,weat4 -m bert --bert_version large --exp_dir ${SAVE_DIR} --data_dir tests/ --glove_path ${GLOVE_PATH} --combine_method max
-python src/main.py --log_file ${SAVE_DIR}/log.log -t sent-weat1,sent-weat2,sent-weat3,sent-weat4 -m bert --bert_version large --exp_dir ${SAVE_DIR} --data_dir tests/ --glove_path ${GLOVE_PATH} --combine_method max
+#python src/main.py --log_file ${SAVE_DIR}/log.log -t weat1,weat2,weat3,weat4 -m bert --bert_version large --exp_dir ${SAVE_DIR} --data_dir tests/ --glove_path ${GLOVE_PATH} --combine_method max
+#python src/main.py --log_file ${SAVE_DIR}/log.log -t sent-weat1,sent-weat2,sent-weat3,sent-weat4 -m bert --bert_version large --exp_dir ${SAVE_DIR} --data_dir tests/ --glove_path ${GLOVE_PATH} --combine_method max
