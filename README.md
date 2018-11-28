@@ -3,8 +3,12 @@
 ## Setup 
 
 `environment.yml` has all dependencies for Conda environment. Everything should be installable with pip.
-Create the environment with `conda environment -f environment.yml`.
+Create the environment with `conda env create -f environment.yml`.
 Activate the environment with `source activate sentbias`.
+
+You will also need to download pretrained model weights for each model
+you want to test.  Instructions for each supported model are as
+follows.
 
 ### GloVe 
 
@@ -28,10 +32,10 @@ Download the model checkpoints from the [original repo](https://github.com/faceb
 ### GenSen
 
 Download the model checkpoints.
-Note, you need to process your GloVe word vectors into an HDF5 format. Use `glove2h5.py` in a directory containing the GloVe vectors..
+Note, you need to process your GloVe word vectors into an HDF5 format. Run `src/glove2h5.py` in a directory containing the GloVe vectors.
 
 
-## Running Stuff
+## Running Bias Tests
 
 Create user-specific paths `${EXP_DIR}` and `${GLOVE_PATH}` in `user_config.sh`, e.g.: 
 

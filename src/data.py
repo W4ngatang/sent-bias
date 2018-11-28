@@ -2,6 +2,7 @@
 import os
 from collections import defaultdict
 import numpy as np
+import h5py
 
 def load_sents(sent_file, split_sentence_into_list=True):
     ''' Load sentences from sent_file.

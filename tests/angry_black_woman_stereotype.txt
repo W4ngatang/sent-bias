@@ -3,5 +3,5 @@
 # 2013: Discrimination in Online Ad Delivery, Table 1.
 AngryBlackWomanStereotype:shrill,loud,argumentative,irrational,angry,abusive,obnoxious,controlling,nagging,brash,hostile,emasculating,mean,harsh,sassy,aggressive,opinionated,domineering
 NearAntonyms:soft,quiet,compromising,rational,calm,kind,agreeable,servile,pleasant,cautious,friendly,supportive,nice,mild,demure,passive,indifferent,submissive
-BlackFemaleNames:Aisha,Ebony,Keisha,Kenya,Latonya,Lakisha,Latoya,Tamika,Imani,Shanice,Aaliyah,Precious,Nia,Deja,Diamond,Latanya,Latisha
+BlackFemaleNames:Aisha,Ebony,Keisha,Latonya,Lakisha,Latoya,Tamika,Imani,Shanice,Aaliyah,Precious,Nia,Deja,Latanya,Latisha
 WhiteFemaleNames:Allison,Anne,Carrie,Emily,Jill,Laurie,Kristen,Meredith,Molly,Amy,Claire,Katie,Madeline,Katelyn,Emma

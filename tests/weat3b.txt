@@ -1,3 +1,10 @@
+# European, African American terms are drawn from the 2016 American
+# Community Survey, Place of Birth for the Foreign-Born Population in
+# the United States:
+# https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pid=ACS_16_1YR_B05006&prodType=table
+# The selected terms are immigrant ethnicities corresponding to the
+# fourteen largest place-of-birth countries in the table on a given
+# continent.
 EuropeanAmericanTerms:European American,British American,German American,Polish American,Russian American,Ukrainian American,Italian American,Portuguese American,French American,Romanian American,Greek American,Irish American,Spanish American,Bosnian American,Albanian American
 AfricanAmericanTerms:African American,Nigerian American,Ethiopian American,Egyptian American,Ghanaian American,Kenyan American,South African American,Somali American,Liberian American,Moroccan American,Cameroonian American,Cape Verdean American,Eritrean American,Sudanese American,Sierra Leonean American
 Pleasant:caress,freedom,health,love,peace,cheer,friend,heaven,loyal,pleasure,diamond,gentle,honest,lucky,rainbow,diploma,gift,honor,miracle,sunrise,family,happy,laughter,paradise,vacation
