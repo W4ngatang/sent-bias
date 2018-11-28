@@ -61,6 +61,11 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
     total = 0
 
     if scipy.special.binom(2 * len(X), len(X)) > n_samples:
+        # We only have as much precision as the number of samples drawn;
+        # bias the p-value (hallucinate a positive observation) to
+        # reflect that.
+        total_true += 1
+        total += 1
         log.info('Drawing {} samples'.format(n_samples))
         while total < n_samples:
             random.shuffle(XY)
@@ -70,10 +75,6 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
             if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
                 total_true += 1
             total += 1
-        # We only have as much precision as the number of samples drawn;
-        # bias the p-value to reflect that.
-        if total_true < total:
-            total_true += 1
     else:
         log.info('Using exact test')
         XY_set = set(XY)
