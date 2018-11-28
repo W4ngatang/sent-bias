@@ -3,14 +3,17 @@ import os
 from collections import defaultdict
 import numpy as np
 
-def load_sents(sent_file):
+def load_sents(sent_file, split_sentence_into_list=True):
     ''' Load sentences from sent_file.
     Exact format will change a lot. '''
     data = [] #defaultdict(list)
     with open(sent_file, 'r') as sent_fh:
         for row in sent_fh:
             category, examples = row.strip().split(':')
-            data.append([e.split() for e in examples.split(',')])
+            if split_sentence_into_list:
+                data.append([e.split() for e in examples.split(',')])
+            else:
+                data.append(examples.split(','))
     return data
 
 

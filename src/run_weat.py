@@ -106,7 +106,7 @@ def main(arguments):
                          "Generating new encodings.", model_name, test)
 
                 # load the test data
-                sents = load_sents(os.path.join(args.data_dir, "%s.txt" % test))
+                sents = load_sents(os.path.join(args.data_dir, "%s.txt" % test), split_sentence_into_list=bool(model=="bert"))
                 assert len(sents) == 4
                 assert isinstance(sents[0], list)
 
