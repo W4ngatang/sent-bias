@@ -3,7 +3,7 @@
 # for fat and thin people are an ad-hoc set of adjectives produced by
 # starting with "fat" and using thesaurus.com to generate synonyms and
 # antonyms.
-Good:fabulous,love,enjoy,adore,excitement,delight,friend,smiling
-Bad:awful,gross,horrific,poison,yucky,detest,hate,sadness
 FatTerms:fat,overweight,heavy,thick,plump,obese,chubby,large,wide,hefty
 ThinTerms:thin,underweight,light,skinny,bony,gaunt,slender,scrawny,lanky,lean
+Good:fabulous,love,enjoy,adore,excitement,delight,friend,smiling
+Bad:awful,gross,horrific,poison,yucky,detest,hate,sadness
