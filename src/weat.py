@@ -64,8 +64,8 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims=None):
         size = len(X)
         assoc = s_XYAB(X, Y, A, B, cossims=cossims)
         XY = X.union(Y)
-        total_true = 1.0
-        total = 1.0
+        total_true = 0
+        total = 0
 
         # this way computes all subsets, which is prohibitive for large
         # set sizes
@@ -78,6 +78,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims=None):
 
         # instead sample 100K subsets
         if scipy.special.binom(2 * len(X), len(X)) > n_samples:
+            log.info('Drawing {} samples'.format(n_samples))
             XY_list = list(XY)
             while total < n_samples:
                 random.shuffle(XY_list)
@@ -88,6 +89,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims=None):
                     total_true += 1
                 total += 1
         else:
+            log.info('Using exact test')
             for Xi in it.combinations(XY, len(X)):
                 Yi = XY.difference(Xi)
                 assert len(Xi) == len(Yi)
@@ -112,6 +114,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims=None):
             if s_XYAB(Xi, Yi, A, B) > assoc:
                 total_true += 1
             total += 1
+
     return total_true / total
 
 def effect_size(X, Y, A, B, cossims=None):
