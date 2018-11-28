@@ -29,11 +29,11 @@ def construct_cossim_lookup(XY, AB):
             cossims[(xy, ab)] = cossim(XY[xy], AB[ab])
     return cossims
 
-def s_wAB(w, A, B, cossims=None):
+def s_wAB(w, A, B, cossims):
     """
     "...measures the association of [word] w with the attribute"
     """
-    def mean_w_A(w, A, cossims=None):
+    def mean_w_A(w, A, cossims):
         """
         Mean cosine similarity of word w across all words in set A.
         """
@@ -42,7 +42,7 @@ def s_wAB(w, A, B, cossims=None):
 
     return mean_w_A(w, A, cossims=cossims) - mean_w_A(w, B, cossims=cossims)
 
-def s_XYAB(X, Y, A, B, cossims=None):
+def s_XYAB(X, Y, A, B, cossims):
     """
     Caliskan: "...measures the differential association of the two sets of
     target words with the attribute."
@@ -53,71 +53,42 @@ def s_XYAB(X, Y, A, B, cossims=None):
     sum_s_yAB = sum(s_wAB(y, A, B, cossims=cossims) for y in Y)
     return sum_s_xAB - sum_s_yAB
 
-def p_val_permutation_test(X, Y, A, B, n_samples, cossims=None):
+def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
     ''' Compute the p-val for the permutation test, which is defined as
         the probability that a random even partition X_i, Y_i of X u Y
         satisfies P[s(X_i, Y_i, A, B) > s(X, Y, A, B)]
     '''
 
-    if cossims: # X, Y, A, B are sets of strings/hashable keys
-        assert len(X) == len(Y)
-        size = len(X)
-        assoc = s_XYAB(X, Y, A, B, cossims=cossims)
-        XY = X.union(Y)
-        total_true = 0
-        total = 0
+    assert len(X) == len(Y)
+    size = len(X)
+    assoc = s_XYAB(X, Y, A, B, cossims=cossims)
+    XY = X.union(Y)
+    total_true = 0
+    total = 0
 
-        # this way computes all subsets, which is prohibitive for large
-        # set sizes
-        #for Xi in it.combinations(XY, len(X)):
-        #  Yi = XY.difference(Xi)
-        #  assert len(Xi) == len(Yi)
-        #  if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
-        #    total_true += 1
-        #  total += 1
-
-        # instead sample 100K subsets
-        if scipy.special.binom(2 * len(X), len(X)) > n_samples:
-            log.info('Drawing {} samples'.format(n_samples))
-            XY_list = list(XY)
-            while total < n_samples:
-                random.shuffle(XY_list)
-                Xi = XY_list[:size]
-                Yi = XY_list[size:]
-                assert len(Xi) == len(Yi)
-                if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
-                    total_true += 1
-                total += 1
-        else:
-            log.info('Using exact test')
-            for Xi in it.combinations(XY, len(X)):
-                Yi = XY.difference(Xi)
-                assert len(Xi) == len(Yi)
-                if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
-                    total_true += 1
-                total += 1
-
-    else: # TODO(Rachel): when is this branch hit?
-        assert len(X) == len(Y)
-        assoc = s_XYAB(X, Y, A, B)
-        XY = X+Y
-        total_true = 1.0
-        total = 0.0
-        for subset in it.combinations(XY, len(X)):
-            Xi, Yi = [], []
-            for x_or_y in XY:
-                if x_or_y in subset:
-                    Xi.append(x_or_y)
-                else:
-                    Yi.append(x_or_y)
-            assert len(Xi) == len(Yi) == len(X)
-            if s_XYAB(Xi, Yi, A, B) > assoc:
+    if scipy.special.binom(2 * len(X), len(X)) > n_samples:
+        log.info('Drawing {} samples'.format(n_samples))
+        XY_list = list(XY)
+        while total < n_samples:
+            random.shuffle(XY_list)
+            Xi = XY_list[:size]
+            Yi = XY_list[size:]
+            assert len(Xi) == len(Yi)
+            if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
+                total_true += 1
+            total += 1
+    else:
+        log.info('Using exact test')
+        for Xi in it.combinations(XY, len(X)):
+            Yi = XY.difference(Xi)
+            assert len(Xi) == len(Yi)
+            if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
                 total_true += 1
             total += 1
 
     return total_true / total
 
-def effect_size(X, Y, A, B, cossims=None):
+def effect_size(X, Y, A, B, cossims):
     """
     Compute the effect size, which is defined as
         [mean_{x in X} s(x, A, B) - mean_{y in Y} s(y, A, B)] /
@@ -128,7 +99,7 @@ def effect_size(X, Y, A, B, cossims=None):
     def mean_s_wAB(X, A, B, cossims):
         return sum(s_wAB(x, A, B, cossims=cossims) for x in X) / len(X)
 
-    def stdev_s_wAB(X, A, B, cossims=None):
+    def stdev_s_wAB(X, A, B, cossims):
         return np.std([s_wAB(x, A, B, cossims=cossims) for x in X]) #ddof=0 or 1?
 
     XY = X.union(Y)
@@ -174,7 +145,7 @@ def run_test(A, B, X, Y, n_samples):
 
     cossims = construct_cossim_lookup(XY, AB)
     log.info("Computing pval...")
-    pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), n_samples, cossims)
+    pval = p_val_permutation_test(set(X), set(Y), set(A), set(B), n_samples, cossims=cossims)
     log.info("pval: %.9f", pval)
 
     log.info("computing effect size...")
