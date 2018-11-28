@@ -4,6 +4,7 @@ import math
 import random
 import itertools as it
 import numpy as np
+import scipy.special
 
 import encoders.glove as glove
 import encoders.elmo as elmo
@@ -76,15 +77,24 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims=None):
         #  total += 1
 
         # instead sample 100K subsets
-        XY_list = list(XY)
-        while total < n_samples:
-            random.shuffle(XY_list)
-            Xi = XY_list[:size]
-            Yi = XY_list[size:]
-            assert len(Xi) == len(Yi)
-            if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
-                total_true += 1
-            total += 1
+        if scipy.special.binom(2 * len(X), len(X)) > n_samples:
+            XY_list = list(XY)
+            while total < n_samples:
+                random.shuffle(XY_list)
+                Xi = XY_list[:size]
+                Yi = XY_list[size:]
+                assert len(Xi) == len(Yi)
+                if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
+                    total_true += 1
+                total += 1
+        else:
+            for Xi in it.combinations(XY, len(X)):
+                Yi = XY.difference(Xi)
+                assert len(Xi) == len(Yi)
+                if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
+                    total_true += 1
+                total += 1
+
     else: # TODO(Rachel): when is this branch hit?
         assert len(X) == len(Y)
         assoc = s_XYAB(X, Y, A, B)
