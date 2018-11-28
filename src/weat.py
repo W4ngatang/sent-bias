@@ -14,14 +14,15 @@ import encoders.elmo as elmo
 
 
 
+def cossim(x, y):
+    return np.dot(x, y) / math.sqrt(np.dot(x, x)*np.dot(y, y))
+
 def construct_cossim_lookup(XY, AB):
     """
     XY: mapping from target string to target vector (either in X or Y)
     AB: mapping from attribute string to attribute vectore (either in A or B)
     cossims: mapping from (target_str, attr_str) to cosine similarity
     """
-    def cossim(x, y):
-        return np.dot(x, y) / math.sqrt(np.dot(x, x)*np.dot(y, y))
 
     cossims = {}
     for xy in XY:
@@ -29,16 +30,17 @@ def construct_cossim_lookup(XY, AB):
             cossims[(xy, ab)] = cossim(XY[xy], AB[ab])
     return cossims
 
+def mean_w_A(w, A, cossims):
+    """
+    Mean cosine similarity of word w across all words in set A.
+    """
+    total = sum(cossims[(w, a)] for a in A)
+    return total / len(A)
+
 def s_wAB(w, A, B, cossims):
     """
     "...measures the association of [word] w with the attribute"
     """
-    def mean_w_A(w, A, cossims):
-        """
-        Mean cosine similarity of word w across all words in set A.
-        """
-        total = sum(cossims[(w, a)] for a in A)
-        return total / len(A)
 
     return mean_w_A(w, A, cossims=cossims) - mean_w_A(w, B, cossims=cossims)
 
@@ -88,6 +90,12 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
 
     return total_true / total
 
+def mean_s_wAB(X, A, B, cossims):
+    return sum(s_wAB(x, A, B, cossims=cossims) for x in X) / len(X)
+
+def stdev_s_wAB(X, A, B, cossims):
+    return np.std([s_wAB(x, A, B, cossims=cossims) for x in X]) #ddof=0 or 1?
+
 def effect_size(X, Y, A, B, cossims):
     """
     Compute the effect size, which is defined as
@@ -96,11 +104,6 @@ def effect_size(X, Y, A, B, cossims):
     args:
         - X, Y, A, B : sets of target (X, Y) and attribute (A, B) strings
     """
-    def mean_s_wAB(X, A, B, cossims):
-        return sum(s_wAB(x, A, B, cossims=cossims) for x in X) / len(X)
-
-    def stdev_s_wAB(X, A, B, cossims):
-        return np.std([s_wAB(x, A, B, cossims=cossims) for x in X]) #ddof=0 or 1?
 
     XY = X.union(Y)
     numerator = mean_s_wAB(X, A, B, cossims=cossims) - mean_s_wAB(Y, A, B, cossims=cossims)
