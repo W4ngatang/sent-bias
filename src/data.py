@@ -23,12 +23,12 @@ def load_sents(sent_file, split_sentence_into_list=True):
         for row in sent_fh:
             if row[0] == "#":
                 continue
-            role, _ , examples = row.strip().split(':')
+            role, _, *examples = row.strip().split(':')
             assert role in WEAT_SETS
             if split_sentence_into_list:
-                data[role] += [e.split() for e in examples.split(',')]
+                data[role] += [e.split() for e in examples]
             else:
-                data[role] += examples.split(',')
+                data[role] += examples
 
     for weat_set in WEAT_SETS: # check that all the needed word sets are there
         assert weat_set in data
