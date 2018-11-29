@@ -1,0 +1,44 @@
+{
+  "targ1": {
+    "category": "StraightTerms",
+    "examples": [
+      "straight",
+      "straight people",
+      "heterosexual"
+    ]
+  },
+  "targ2": {
+    "category": "GayTerms",
+    "examples": [
+      "gay people",
+      "homosexual",
+      "gay"
+    ]
+  },
+  "attr1": {
+    "category": "Good",
+    "examples": [
+      "appealing",
+      "cheer",
+      "delight",
+      "joyous",
+      "glorious",
+      "cherish",
+      "friendship",
+      "excitement"
+    ]
+  },
+  "attr2": {
+    "category": "Bad",
+    "examples": [
+      "hatred",
+      "evil",
+      "rotten",
+      "gross",
+      "disgust",
+      "failure",
+      "awful",
+      "poison"
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "targ1": {
+    "category": "LightTerms",
+    "examples": [
+      "light-skinned",
+      "light skin",
+      "white person",
+      "pale",
+      "fair-skinned"
+    ]
+  },
+  "targ2": {
+    "category": "DarkTerms",
+    "examples": [
+      "dark-skinned",
+      "dark skin",
+      "brown person",
+      "black person",
+      "person of color"
+    ]
+  },
+  "attr1": {
+    "category": "Good",
+    "examples": [
+      "spectacular",
+      "excitement",
+      "glorious",
+      "enjoy",
+      "friend",
+      "beautiful",
+      "smiling",
+      "friendship"
+    ]
+  },
+  "attr2": {
+    "category": "Bad",
+    "examples": [
+      "bothersome",
+      "rotten",
+      "selfish",
+      "disgust",
+      "ugly",
+      "horrible",
+      "evil",
+      "poison"
+    ]
+  }
+}

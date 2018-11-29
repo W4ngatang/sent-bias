@@ -6,8 +6,8 @@ import argparse
 import logging as log
 import h5py # pylint: disable=import-error
 import numpy as np
-from data import load_sents, load_encodings, save_encodings, \
-                 load_jiant_encodings
+from data import load_sents, load_json, \
+                 load_encodings, save_encodings, load_jiant_encodings
 import weat
 import encoders.glove as glove
 import encoders.bow as bow
@@ -19,28 +19,19 @@ import tensorflow as tf
 import tensorflow_hub as hub
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
-TESTS = [
-	'angry_black_woman_stereotype_b', 'angry_black_woman_stereotype',
-	'heilman_double_bind_ambiguous_1,3-',
-	'heilman_double_bind_ambiguous_1-',
-	'heilman_double_bind_ambiguous_1',
-	'heilman_double_bind_clear_1,3-',
-	'heilman_double_bind_clear_1-',
-	'heilman_double_bind_clear_1',
-	'project_implicit_arab-muslim',
-	'project_implicit_disability',
-	'project_implicit_native',
-	'project_implicit_religion',
-	'project_implicit_sexuality',
-	'project_implicit_skin-tone',
-	'project_implicit_weapons',
-	'project_implicit_weight',
-	'sent-weat1', 'sent-weat2', 'sent-weat3', 'sent-weat4',
-	'weat1', 'weat2', 'weat3b', 'weat3', 'weat4',
-	'weat5b', 'weat5', 'weat6b', 'weat6',
-	'weat7b', 'weat7', 'weat8b', 'weat8',
-	'weat9', 'weat10'
-]
+TESTS = ['angry_black_woman_stereotype_b', 'angry_black_woman_stereotype',
+         'heilman_double_bind_ambiguous_1,3-', 'heilman_double_bind_ambiguous_1-',
+         'heilman_double_bind_ambiguous_1', 'heilman_double_bind_clear_1,3-',
+         'heilman_double_bind_clear_1-', 'heilman_double_bind_clear_1',
+         'project_implicit_arab-muslim', 'project_implicit_disability',
+         'project_implicit_native', 'project_implicit_religion',
+         'project_implicit_sexuality', 'project_implicit_skin-tone',
+         'project_implicit_weapons', 'project_implicit_weight',
+         'sent-weat1', 'sent-weat2', 'sent-weat3', 'sent-weat4',
+         'weat1', 'weat2', 'weat3b', 'weat3', 'weat4',
+         'weat5b', 'weat5', 'weat6b', 'weat6',
+         'weat7b', 'weat7', 'weat8b', 'weat8',
+         'weat9', 'weat10']
 MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
 
@@ -127,13 +118,8 @@ def main(arguments):
                          "Generating new encodings.", model_name, test)
 
                 # load the test data
-                if "heilman" in test:
-                    sents = load_sents(os.path.join(args.data_dir, "%s.txt" % test),
-                                       split_sentence_into_list=bool(model == "bert"),
-                                       category_sep='\t', ex_sep='\t')
-                else:
-                    sents = load_sents(os.path.join(args.data_dir, "%s.txt" % test),
-                                       split_sentence_into_list=bool(model == "bert"))
+                sents = load_json(os.path.join(args.data_dir, "%s.jsonl" % test),
+                                  split_sentence_into_list=bool(model == "bert"))
 
                 # load the model and do model-specific encoding procedure
                 if model_name == 'glove':

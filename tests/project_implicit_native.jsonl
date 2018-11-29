@@ -1,0 +1,36 @@
+{
+  "targ1": {
+    "category": "WhiteAmericanTerms",
+    "examples": [
+      "European American",
+      "American colonist"
+    ]
+  },
+  "targ2": {
+    "category": "NativeAmericanTerms",
+    "examples": [
+      "Native American",
+      "indigenous American"
+    ]
+  },
+  "attr1": {
+    "category": "American",
+    "examples": [
+      "Old Faithful",
+      "Niagara Falls",
+      "Grand Canyon",
+      "Devils Tower",
+      "redwood forest"
+    ]
+  },
+  "attr2": {
+    "category": "Foreign",
+    "examples": [
+      "Antarctica",
+      "Mount Everest",
+      "Sahara",
+      "Mount Merapi",
+      "Great Barrier Reef"
+    ]
+  }
+}

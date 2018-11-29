@@ -1,5 +1,6 @@
 ''' Helper functions related to loading and saving data '''
 import os
+import json
 from collections import defaultdict
 import numpy as np
 import h5py
@@ -34,6 +35,20 @@ def load_sents(sent_file, split_sentence_into_list=True,
     for weat_set in WEAT_SETS: # check that all the needed word sets are there
         assert weat_set in data
     return data
+
+def load_json(sent_file, split_sentence_into_list=True):
+    ''' Load from json. We expect a certain format later, so do some post processing '''
+    print("Loading %s..." % sent_file)
+    all_data = json.load(open(sent_file, 'r'))
+    data = {}
+    for k, v in all_data.items():
+        if split_sentence_into_list:
+            examples = [e.split() for e in v["examples"]]
+        else:
+            examples = v["examples"]
+        data[k] = examples
+    return data
+
 
 
 def load_encodings(enc_file):

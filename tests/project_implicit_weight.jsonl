@@ -1,0 +1,58 @@
+{
+  "targ1": {
+    "category": "ThinTerms",
+    "examples": [
+      "thin",
+      "underweight",
+      "light",
+      "skinny",
+      "bony",
+      "gaunt",
+      "slender",
+      "scrawny",
+      "lanky",
+      "lean"
+    ]
+  },
+  "targ2": {
+    "category": "FatTerms",
+    "examples": [
+      "fat",
+      "overweight",
+      "heavy",
+      "thick",
+      "plump",
+      "obese",
+      "chubby",
+      "large",
+      "wide",
+      "hefty"
+    ]
+  },
+  "attr1": {
+    "category": "Good",
+    "examples": [
+      "fabulous",
+      "love",
+      "enjoy",
+      "adore",
+      "excitement",
+      "delight",
+      "friend",
+      "smiling"
+    ]
+  },
+  "attr2": {
+    "category": "Bad",
+    "examples": [
+      "awful",
+      "gross",
+      "horrific",
+      "poison",
+      "yucky",
+      "detest",
+      "hate",
+      "sadness"
+    ]
+  }
+}

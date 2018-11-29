@@ -1,0 +1,58 @@
+{
+  "targ1": {
+    "category": "OtherNames",
+    "examples": [
+      "Ernesto",
+      "Matthais",
+      "Maarten",
+      "Philippe",
+      "Guillame",
+      "Benoit",
+      "Takuya",
+      "Kazuki",
+      "Chaiyo",
+      "Marcelo"
+    ]
+  },
+  "targ2": {
+    "category": "ArabMuslimNames",
+    "examples": [
+      "Hakim",
+      "Sharif",
+      "Yousef",
+      "Wahib",
+      "Akbar",
+      "Muhsin",
+      "Salim",
+      "Karim",
+      "Habib",
+      "Ashraf"
+    ]
+  },
+  "attr1": {
+    "category": "Good",
+    "examples": [
+      "pleasure",
+      "happy",
+      "delight",
+      "cheerful",
+      "appealing",
+      "celebrate",
+      "terrific",
+      "adore"
+    ]
+  },
+  "attr2": {
+    "category": "Bad",
+    "examples": [
+      "scorn",
+      "evil",
+      "failure",
+      "ugly",
+      "disgust",
+      "awful",
+      "dirty",
+      "abuse"
+    ]
+  }
+}

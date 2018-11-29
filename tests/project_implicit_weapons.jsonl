@@ -1,0 +1,46 @@
+{
+  "targ1": {
+    "category": "WhiteAmericanTerms",
+    "examples": [
+      "light-skinned",
+      "light skin",
+      "white person",
+      "pale",
+      "fair"
+    ]
+  },
+  "targ2": {
+    "category": "BlackAmericanTerms",
+    "examples": [
+      "dark-skinned",
+      "dark skin",
+      "brown person",
+      "black person",
+      "person of color"
+    ]
+  },
+  "attr1": {
+    "category": "HarmlessObjects",
+    "examples": [
+      "water bottle",
+      "camera",
+      "soda can",
+      "ice cream cone",
+      "cell phone",
+      "tape player",
+      "wallet"
+    ]
+  },
+  "attr2": {
+    "category": "Weapons",
+    "examples": [
+      "axe",
+      "canon",
+      "grenade",
+      "mace",
+      "pistol",
+      "rifle",
+      "sword"
+    ]
+  }
+}

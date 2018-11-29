@@ -48,6 +48,7 @@ Put that config file in the top level directory.
 
 An example script to run things is in `scripts/weat.sh`. To change the test, change the `-t` flag. To change the model, change the `-m` flag (currently accepted: InferSent, GloVe, ELMo)..
 
+## Tests
 
 
 ## TODO
