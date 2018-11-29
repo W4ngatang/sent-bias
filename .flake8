@@ -1,0 +1,20 @@
+[flake8]
+ignore =
+    E221,
+    E225,
+    E226,
+    E231,
+    E261,
+    E265,
+    E302,
+    E303,
+    E305,
+    E501,
+    W291,
+    W292,
+    W293,
+    W391
+exclude =
+    .git,
+    tests,
+    tests-meta
