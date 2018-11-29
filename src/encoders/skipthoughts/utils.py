@@ -7,6 +7,7 @@ import sys
 import argparse
 import logging as log
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
+import json
 import h5py # pylint: disable=import-error
 import nltk
 import ipdb
@@ -49,21 +50,6 @@ def maybe_make_dir(dirname):
     os.makedirs(dirname, exist_ok=True)
 
 
-
-    
-def load_single_word_sents(sent_file):
-    ''' Load sentences from sent_file.
-    Exact format will change a lot. '''
-    data = []
-    with open(sent_file, 'r') as sent_fh:
-        for row in sent_fh:
-            _, examples = row.strip().split(':')
-            
-            data.append(examples.split(','))
-            
-    return data
-
-
 def load_encodings(enc_file):
     ''' Search to see if we already dumped the vectors for a model somewhere
     and return it, else return None. '''
@@ -88,18 +74,32 @@ def save_encodings(encodings, enc_file):
                 split['%s' % ex] = enc
     return
 
+
+def load_json(sent_file, split_sentence_into_list=True):
+    ''' Load from json. We expect a certain format later, so do some post processing '''
+    print("Loading %s..." % sent_file)
+    all_data = json.load(open(sent_file, 'r'))
+    data = {}
+    for k, v in all_data.items():
+        if split_sentence_into_list:
+            examples = [e.split() for e in v["examples"]]
+        else:
+            examples = v["examples"]
+        data[k] = examples
+    return data
+
+
 def preprocess_file(filepath, output_path):
     with open(filepath, 'r') as f:
         text = f.read()
-    array_of_sentences = load_single_word_sents(filepath)
-    assert len(array_of_sentences) == 4 
+    dict_of_sentences = load_json(filepath, False)
+    assert len(dict_of_sentences) == 4
     tmp_output_path = output_path[:-3] + 'tmp'
     tokens = set()
     sentence_tokens = []
     MAX_SENTENCE_LENGTH = 0
     
-    for i in range(0,len(array_of_sentences)):
-        sentences = array_of_sentences[i]
+    for sentences in dict_of_sentences.values():
         for j in range(len(sentences)):
             sents = sentences[j]
             
@@ -120,16 +120,6 @@ def preprocess_file(filepath, output_path):
         tokens.update(set(sent))
     os.remove(tmp_output_path)    
     return tokens,MAX_SENTENCE_LENGTH
-        
-def load_single_word_sents(sent_file):
-    ''' Load sentences from sent_file.
-    Exact format will change a lot. '''
-    data = []
-    with open(sent_file, 'r') as sent_fh:
-        for row in sent_fh:
-            _, examples = row.strip().split(':')
-            data.append(examples.split(','))
-    return data 
 
 
 def read_vocab(vocab_path):

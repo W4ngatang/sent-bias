@@ -1,7 +1,6 @@
 ''' Main script for loading models and running WEAT tests '''
 import os
 import sys
-import json
 import argparse
 import logging as log
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
@@ -48,20 +47,6 @@ def split_comma_and_check(arg_str, allowed_set, item_type):
 def maybe_make_dir(dirname):
     ''' Maybe make directory '''
     os.makedirs(dirname, exist_ok=True)
-
-
-def load_json(sent_file, split_sentence_into_list=True):
-    ''' Load from json. We expect a certain format later, so do some post processing '''
-    print("Loading %s..." % sent_file)
-    all_data = json.load(open(sent_file, 'r'))
-    data = {}
-    for k, v in all_data.items():
-        if split_sentence_into_list:
-            examples = [e.split() for e in v["examples"]]
-        else:
-            examples = v["examples"]
-        data[k] = examples
-    return data
 
 
 def load_encodings(enc_file):
