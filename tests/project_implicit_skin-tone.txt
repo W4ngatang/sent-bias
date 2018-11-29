@@ -1,8 +1,3 @@
-# The Project Implicit IAT only included terms for "Good" and "Bad;"
-# light- and dark-skinned people were represented by images of faces.
-# The terms for light- and dark-skinned people could be used to
-# describe the depicted people; they were generated in an ad-hoc
-# fashion.
 targ1	LightTerms	light-skinned	light skin	white person	pale	fair-skinned
 targ2	DarkTerms	dark-skinned	dark skin	brown person	black person	person of color
 attr1	Good	spectacular	excitement	glorious	enjoy	friend	beautiful	smiling	friendship

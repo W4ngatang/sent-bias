@@ -1,0 +1,6 @@
+The Project Implicit IAT consisted of pictures of items and pictures
+faces; the terms here are descriptions of those items and ad-hoc
+terms from the skin tone IAT.  Note that the category names for this
+IAT are different (Black, White American versus Dark, Light); we use
+the same set of terms for simplicity, considering the similarity
+between the two sets.

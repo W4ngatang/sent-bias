@@ -1,5 +1,3 @@
-# The "star and crescent" and "cross" were represented by images of the
-# respective symbols in the Project Implicit IAT.
 targ1	ChristianityTerms	cross	church	Bible	Christian	Christianity
 targ2	IslamTerms	star and crescent	mosque	Koran	Muslim	Islam
 attr1	Good	cherish	fantastic	attractive	joyful	adore	glad	happy	celebrate

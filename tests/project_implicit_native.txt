@@ -1,7 +1,3 @@
-# The Project Implicit IAT consisted of captioned pictures of landmarks
-# and pictures of faces; the terms here are those captions (after
-# minimal editing) and ad-hoc terms that might describe the depicted
-# people.
 targ1	WhiteAmericanTerms	European American	American colonist
 targ2	NativeAmericanTerms	Native American	indigenous American
 attr1	American	Old Faithful	Niagara Falls	Grand Canyon	Devils Tower	redwood forest

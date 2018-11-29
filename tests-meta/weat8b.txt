@@ -1,0 +1,3 @@
+Male, female names copied from the WEAT 6 test in Caliskan et al.,
+2017: Semantics derived automatically from language corpora contain
+human-like biases (see supplement).

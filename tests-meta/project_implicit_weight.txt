@@ -1,0 +1,5 @@
+The Project Implicit IAT only included terms for "Good" and "Bad;"
+fat and thin people were represented by images of figures.  The terms
+for fat and thin people are an ad-hoc set of adjectives produced by
+starting with "fat" and using thesaurus.com to generate synonyms and
+antonyms.

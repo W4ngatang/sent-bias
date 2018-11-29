@@ -1,0 +1,7 @@
+European, African American terms are drawn from the 2016 American
+Community Survey, Place of Birth for the Foreign-Born Population in
+the United States:
+https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pid=ACS_16_1YR_B05006&prodType=table
+The selected terms are immigrant ethnicities corresponding to the
+fourteen largest place-of-birth countries in the table on a given
+continent.
