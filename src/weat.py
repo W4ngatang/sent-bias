@@ -33,7 +33,7 @@ def construct_cossim_lookup(XY, AB):
 
 
 def s_XYAB(X, Y, A, B, cossims):
-    """
+    r"""
     Caliskan: "...measures the differential association of the two sets of
     target words with the attribute."
     Formally, \sum_{x in X} s(x, A, B) - \sum_{y in Y} s(y, A, B)
