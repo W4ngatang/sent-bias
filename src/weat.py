@@ -82,7 +82,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
             Xi = list(Xi)
             Yi = list(XY_set.difference(Xi))
             assert len(Xi) == len(Yi)
-            if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
+            if s_XYAB(Xi, Yi, A, B, cossims=cossims) >= assoc:
                 total_true += 1
             total += 1
 

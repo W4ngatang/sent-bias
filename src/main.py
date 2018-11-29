@@ -25,7 +25,7 @@ TESTS = ["weat1", "weat2", "weat3", "weat4",
          "sent-weat1", "sent-weat2", "sent-weat3", "sent-weat4",
          "angry_black_woman_stereotype", "angry_black_woman_stereotype_b",
          "heilman_double_bind_ambiguous_1", "heilman_double_bind_clear_1",
-         "heilman_double_bind_ambiguous_1,3-", "heilman_double_bind_clear_1,3-",
+         "heilman_double_bind_ambiguous_1+3", "heilman_double_bind_clear_1+3",
          ]
 MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
