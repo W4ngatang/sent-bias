@@ -23,6 +23,9 @@ TESTS = ["weat1", "weat2", "weat3", "weat4",
          "weat5", "weat5b", "weat6", "weat6b", "weat7", "weat7b", "weat8", "weat8b",
          "weat9", "weat10",
          "sent-weat1", "sent-weat2", "sent-weat3", "sent-weat4",
+         "angry_black_woman_stereotype", "angry_black_woman_stereotype_b",
+         "heilman_double_bind_ambiguous_1", "heilman_double_bind_clear_1",
+         "heilman_double_bind_ambiguous_1,3-", "heilman_double_bind_clear_1,3-",
          ]
 MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
@@ -89,6 +92,7 @@ def main(arguments):
 
     tests = split_comma_and_check(args.tests, TESTS, "test")
     models = split_comma_and_check(args.models, MODELS, "model")
+    results = []
     for model_name in models:
         ''' Different models have different interfaces for things, but generally want to:
          - if saved vectors aren't there:
@@ -109,7 +113,13 @@ def main(arguments):
                          "Generating new encodings.", model_name, test)
 
                 # load the test data
-                sents = load_sents(os.path.join(args.data_dir, "%s.txt" % test), split_sentence_into_list=bool(model=="bert"))
+                if "heilman" in test:
+                    sents = load_sents(os.path.join(args.data_dir, "%s.txt" % test),
+                                       split_sentence_into_list=bool(model == "bert"),
+                                       category_sep='\t', ex_sep='\t')
+                else:
+                    sents = load_sents(os.path.join(args.data_dir, "%s.txt" % test),
+                                       split_sentence_into_list=bool(model == "bert"))
 
                 # load the model and do model-specific encoding procedure
                 if model_name == 'glove':
@@ -117,10 +127,10 @@ def main(arguments):
                     encs_targ1, encs_targ2, encs_attr1, encs_attr2 = weat.load_weat_test(test, path=args.data_dir)
 
                 elif model_name == 'bow':
-                    encs_targ1 = bow.encode(sents["targ1"], args.glove_path)
-                    encs_targ2 = bow.encode(sents["targ2"], args.glove_path)
-                    encs_attr1 = bow.encode(sents["attr1"], args.glove_path)
-                    encs_attr2 = bow.encode(sents["attr2"], args.glove_path)
+                    encs_targ1 = bow.encode(sents["targ1"], args.glove_path, tokenize=True)
+                    encs_targ2 = bow.encode(sents["targ2"], args.glove_path, tokenize=True)
+                    encs_attr1 = bow.encode(sents["attr1"], args.glove_path, tokenize=True)
+                    encs_attr2 = bow.encode(sents["attr2"], args.glove_path, tokenize=True)
 
                 elif model_name == 'infersent':
                     if model is None:
@@ -213,7 +223,11 @@ def main(arguments):
             # run the test on the encodings
             log.info("Running test %s on %s", test, model_name)
             log.info("Representation dimension: %d", d_rep)
-            weat.run_test(encs_targ1, encs_targ2, encs_attr1, encs_attr2, args.n_samples)
+            esize, pval = weat.run_test(encs_targ1, encs_targ2, encs_attr1, encs_attr2, args.n_samples)
+            results.append((test, pval, esize))
+        log.info("Model: %s", model_name)
+        for test, pval, esize in results:
+            log.info("\tTest %s:\tp-val: %.5f\tesize: %.5f", test, pval, esize)
 
 
 if __name__ == "__main__":
