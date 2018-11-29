@@ -1,4 +1,4 @@
-ArabMuslimNames:Hakim,Sharif,Yousef,Wahib,Akbar,Muhsin,Salim,Karim,Habib,Ashraf
-OtherNames:Ernesto,Matthais,Maarten,Philippe,Guillame,Benoit,Takuya,Kazuki,Chaiyo,Marcelo
-Good:pleasure,happy,delight,cheerful,appealing,celebrate,terrific,adore
-Bad:scorn,evil,failure,ugly,disgust,awful,dirty,abuse
+targ1	OtherNames	Ernesto	Matthais	Maarten	Philippe	Guillame	Benoit	Takuya	Kazuki	Chaiyo	Marcelo
+targ2	ArabMuslimNames	Hakim	Sharif	Yousef	Wahib	Akbar	Muhsin	Salim	Karim	Habib	Ashraf
+attr1	Good	pleasure	happy	delight	cheerful	appealing	celebrate	terrific	adore
+attr2	Bad	scorn	evil	failure	ugly	disgust	awful	dirty	abuse

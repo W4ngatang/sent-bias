@@ -2,7 +2,7 @@
 # and pictures of faces; the terms here are those captions (after
 # minimal editing) and ad-hoc terms that might describe the depicted
 # people.
-NativeAmericanTerms:Native American,indigenous American
-WhiteAmericanTerms:European American,American colonist
-Foreign:Antarctica,Mount Everest,Sahara,Mount Merapi,Great Barrier Reef
-American:Old Faithful,Niagara Falls,Grand Canyon,Devils Tower,redwood forest
+targ1	WhiteAmericanTerms	European American	American colonist
+targ2	NativeAmericanTerms	Native American	indigenous American
+attr1	American	Old Faithful	Niagara Falls	Grand Canyon	Devils Tower	redwood forest
+attr2	Foreign	Antarctica	Mount Everest	Sahara	Mount Merapi	Great Barrier Reef

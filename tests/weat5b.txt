@@ -5,7 +5,7 @@
 # The selected terms are immigrant ethnicities corresponding to the
 # fourteen largest place-of-birth countries in the table on a given
 # continent.
-targ1:EuropeanAmericanTerms:European American,British American,German American,Polish American,Russian American,Ukrainian American,Italian American,Portuguese American,French American,Romanian American,Greek American,Irish American,Spanish American,Bosnian American,Albanian American
-targ2:AfricanAmericanTerms:African American,Nigerian American,Ethiopian American,Egyptian American,Ghanaian American,Kenyan American,South African American,Somali American,Liberian American,Moroccan American,Cameroonian American,Cape Verdean American,Eritrean American,Sudanese American,Sierra Leonean American
-attr1:Pleasant:joy,love,peace,wonderful,pleasure,friend,laughter,happy
-attr2:Unpleasant:agony,terrible,horrible,nasty,evil,war,awful,failure
+targ1	EuropeanAmericanTerms	European American	British American	German American	Polish American	Russian American	Ukrainian American	Italian American	Portuguese American	French American	Romanian American	Greek American	Irish American	Spanish American	Bosnian American	Albanian American
+targ2	AfricanAmericanTerms	African American	Nigerian American	Ethiopian American	Egyptian American	Ghanaian American	Kenyan American	South African American	Somali American	Liberian American	Moroccan American	Cameroonian American	Cape Verdean American	Eritrean American	Sudanese American	Sierra Leonean American
+attr1	Pleasant	joy	love	peace	wonderful	pleasure	friend	laughter	happy
+attr2	Unpleasant	agony	terrible	horrible	nasty	evil	war	awful	failure

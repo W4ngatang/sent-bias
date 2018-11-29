@@ -19,14 +19,28 @@ import tensorflow as tf
 import tensorflow_hub as hub
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
-TESTS = ["weat1", "weat2", "weat3", "weat4",
-         "weat5", "weat5b", "weat6", "weat6b", "weat7", "weat7b", "weat8", "weat8b",
-         "weat9", "weat10",
-         "sent-weat1", "sent-weat2", "sent-weat3", "sent-weat4",
-         "angry_black_woman_stereotype", "angry_black_woman_stereotype_b",
-         "heilman_double_bind_ambiguous_1", "heilman_double_bind_clear_1",
-         "heilman_double_bind_ambiguous_1+3", "heilman_double_bind_clear_1+3",
-         ]
+TESTS = [
+	'angry_black_woman_stereotype_b', 'angry_black_woman_stereotype',
+	'heilman_double_bind_ambiguous_1,3-',
+	'heilman_double_bind_ambiguous_1-',
+	'heilman_double_bind_ambiguous_1',
+	'heilman_double_bind_clear_1,3-',
+	'heilman_double_bind_clear_1-',
+	'heilman_double_bind_clear_1',
+	'project_implicit_arab-muslim',
+	'project_implicit_disability',
+	'project_implicit_native',
+	'project_implicit_religion',
+	'project_implicit_sexuality',
+	'project_implicit_skin-tone',
+	'project_implicit_weapons',
+	'project_implicit_weight',
+	'sent-weat1', 'sent-weat2', 'sent-weat3', 'sent-weat4',
+	'weat1', 'weat2', 'weat3b', 'weat3', 'weat4',
+	'weat5b', 'weat5', 'weat6b', 'weat6',
+	'weat7b', 'weat7', 'weat8b', 'weat8',
+	'weat9', 'weat10'
+]
 MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
 

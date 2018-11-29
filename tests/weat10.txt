@@ -1,4 +1,4 @@
-targ1:YoungPeoplesNames:Tiffany,Michelle,Cindy,Kristy,Brad,Eric,Joey,Billy
-targ2:OldPeoplesNames:Ethel,Bernice,Gertrude,Agnes,Cecil,Wilbert,Mortimer,Edgar
-attr1:Pleasant:joy,love,peace,wonderful,pleasure,friend,laughter,happy
-attr2:Unpleasant:agony,terrible,horrible,nasty,evil,war,awful,failure
+targ1	YoungPeoplesNames	Tiffany	Michelle	Cindy	Kristy	Brad	Eric	Joey	Billy
+targ2	OldPeoplesNames	Ethel	Bernice	Gertrude	Agnes	Cecil	Wilbert	Mortimer	Edgar
+attr1	Pleasant	joy	love	peace	wonderful	pleasure	friend	laughter	happy
+attr2	Unpleasant	agony	terrible	horrible	nasty	evil	war	awful	failure

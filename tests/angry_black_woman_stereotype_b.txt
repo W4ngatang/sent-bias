@@ -3,7 +3,7 @@
 # terms are ad-hoc, based on those used in various tests from
 # Caliskan et al., 2017: Semantics derived automatically from language
 # corpora contain human-like biases (see supplement).
-targ1:BlackFemaleTerms:black female,black woman,black girl,woman of color
-targ2:WhiteFemaleTerms:white female,white woman,white girl,fair-skinned woman
-attr1:AngryBlackWomanStereotype:shrill,loud,argumentative,irrational,angry,abusive,obnoxious,controlling,nagging,brash,hostile,emasculating,mean,harsh,sassy,aggressive,opinionated,domineering
-attr2:NearAntonyms:soft,quiet,compromising,rational,calm,kind,agreeable,servile,pleasant,cautious,friendly,supportive,nice,mild,demure,passive,indifferent,submissive
+targ1	WhiteFemaleTerms	white female	white woman	white girl	fair-skinned woman
+targ2	BlackFemaleTerms	black female	black woman	black girl	woman of color
+attr1	NearAntonyms	soft	quiet	compromising	rational	calm	kind	agreeable	servile	pleasant	cautious	friendly	supportive	nice	mild	demure	passive	indifferent	submissive
+attr2	AngryBlackWomanStereotype	shrill	loud	argumentative	irrational	angry	abusive	obnoxious	controlling	nagging	brash	hostile	emasculating	mean	harsh	sassy	aggressive	opinionated	domineering

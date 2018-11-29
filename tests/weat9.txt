@@ -1,4 +1,4 @@
-targ1:MentalDisease:sad,hopeless,gloomy,tearful,miserable,depressed
-targ2:PhysicalDisease:sick,illness,influenza,disease,virus,cancer
-attr1:Temporary:impermanent,unstable,variable,fleeting,short-term,brief,occasional
-attr2:Permanent:stable,always,constant,persistent,chronic,prolonged,forever
+targ1	MentalDisease	sad	hopeless	gloomy	tearful	miserable	depressed
+targ2	PhysicalDisease	sick	illness	influenza	disease	virus	cancer
+attr1	Temporary	impermanent	unstable	variable	fleeting	short-term	brief	occasional
+attr2	Permanent	stable	always	constant	persistent	chronic	prolonged	forever

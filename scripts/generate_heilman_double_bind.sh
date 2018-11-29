@@ -11,7 +11,7 @@ female_names="Amy Joan Lisa Sarah Diana Kate Ann Donna"
 ambig_success_text='NAME is the assistant vice president of sales at an aircraft company, and is in charge of training and supervising junior executives, breaking into new markets, keeping abreast of industry trends, and generating new clients.  The products PRON is responsible for include engine assemblies, fuel tanks, and other aircraft equipment and parts.  CAP_PRON is about to undergo POSS_PRON annual performance review; POSS_PRON evaluation will be based on sales volume, number of new client accounts, and actual dollars earned.'
 clear_success_text='NAME is the assistant vice president of sales at an aircraft company, and is in charge of training and supervising junior executives, breaking into new markets, keeping abreast of industry trends, and generating new clients.  The products PRON is responsible for include engine assemblies, fuel tanks, and other aircraft equipment and parts.  CAP_PRON has recently undergone the company-wide annual performance review and PRON received consistently high evaluations.  CAP_PRON has been designated as a "stellar performer" based on sales volume, number of new client accounts, and actual dollars earned.  CAP_POSS_PRON performance is in the top 5% of all employees at POSS_PRON level.'
 
-print_contexts() {
+print_targets() {
     local success_text="$1"
     shift
     local names="$1"
@@ -45,7 +45,7 @@ print_contexts() {
     echo
 }
 
-print_evaluations() {
+print_attributes() {
     local adjectives="$1"
     shift
 
@@ -65,26 +65,26 @@ print_header() {
 print_tests() {
     local success_text="$1"
     shift
-    local target_1_name="$1"
+    local attribute_1_name="$1"
     shift
-    local target_1="$1"
+    local attribute_1="$1"
     shift
-    local target_2_name="$1"
+    local attribute_2_name="$1"
     shift
-    local target_2="$1"
+    local attribute_2="$1"
     shift
     local sentences_to_keep="$1"
     shift
 
     print_header
-    echo -n Female
-    print_contexts "$success_text" "$female_names" Her her She she "$sentences_to_keep"
-    echo -n Male
-    print_contexts "$success_text" "$male_names" His his He he "$sentences_to_keep"
-    echo -n "$target_1_name"
-    print_evaluations "$target_1"
-    echo -n "$target_2_name"
-    print_evaluations "$target_2"
+    echo -en "targ1\tMale"
+    print_targets "$success_text" "$male_names" His his He he "$sentences_to_keep"
+    echo -en "targ2\tFemale"
+    print_targets "$success_text" "$female_names" Her her She she "$sentences_to_keep"
+    echo -en "attr1\t$attribute_1_name"
+    print_attributes "$attribute_1"
+    echo -en "attr2\t$attribute_2_name"
+    print_attributes "$attribute_2"
 }
 
 for sentences_to_keep in 1 1- 1,3-
