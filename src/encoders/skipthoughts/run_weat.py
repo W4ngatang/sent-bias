@@ -1,6 +1,7 @@
 ''' Main script for loading models and running WEAT tests '''
 import os
 import sys
+import json
 import argparse
 import logging as log
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
@@ -49,18 +50,17 @@ def maybe_make_dir(dirname):
     os.makedirs(dirname, exist_ok=True)
 
 
-
-    
-def load_single_word_sents(sent_file):
-    ''' Load sentences from sent_file.
-    Exact format will change a lot. '''
-    data = []
-    with open(sent_file, 'r') as sent_fh:
-        for row in sent_fh:
-            _, examples = row.strip().split(':')
-            
-            data.append(examples.split(','))
-            
+def load_json(sent_file, split_sentence_into_list=True):
+    ''' Load from json. We expect a certain format later, so do some post processing '''
+    print("Loading %s..." % sent_file)
+    all_data = json.load(open(sent_file, 'r'))
+    data = {}
+    for k, v in all_data.items():
+        if split_sentence_into_list:
+            examples = [e.split() for e in v["examples"]]
+        else:
+            examples = v["examples"]
+        data[k] = examples
     return data
 
 
@@ -124,15 +124,15 @@ def main(arguments):
                 f.write('\n'.join(vocab))
             word_to_idx = {w: idx for (idx, w) in enumerate(read_vocab(vocab_path))}     
 
-            array_of_sentences = load_single_word_sents(filepath)
-            #print(array_of_sentences)
+            dict_of_sentences = load_json(filepath, False)
+            #print(dict_of_sentences)
             encoded_sentences=[]
             encoded_sentences_lengths=[]
             log.info("Encoding sentences for test %s with model %s...", test, model_name)
-            sent2vec = [{} for x in range(len(array_of_sentences))]       
+            sent2vec = [{} for x in range(len(dict_of_sentences))]
             #print(sent2vec)
-            for i in range(0,len(array_of_sentences)):
-                sentences = array_of_sentences[i]
+            for (i, k) in enumerate(('attr1', 'attr2', 'targ1', 'targ2')):
+                sentences = dict_of_sentences[k]
                 sentences, sentences_lengths,sent2vec[i] = encode_sentences(sentences, word_to_idx,MAX_SENTENCE_LENGTH)
                 encoded_sentences.append(sentences)
                 encoded_sentences_lengths.append(sentences_lengths)

@@ -7,34 +7,6 @@ import h5py
 
 WEAT_SETS = ["targ1", "targ2", "attr1", "attr2"]
 
-def load_sents(sent_file, split_sentence_into_list=True,
-               category_sep=':', ex_sep=','):
-    ''' Load sentences from sent_file.  Exact format will change a lot.
-
-    args:
-        - sent_file
-        - split_sentence_into_list (Bool): if True, split sentence into List(str).
-            Otherwise, leave a sentence as one long string, as
-            some models internally do their own tokenization
-
-    returns:
-        - data (Dict[List[str]]): dictionary containing four word sets'''
-
-    data = defaultdict(list)
-    with open(sent_file, 'r') as sent_fh:
-        for row in sent_fh:
-            if row[0] == "#":
-                continue
-            role, _, *examples = row.strip().split('\t')
-            assert role in WEAT_SETS
-            if split_sentence_into_list:
-                data[role] += [e.split() for e in examples]
-            else:
-                data[role] += examples
-
-    for weat_set in WEAT_SETS: # check that all the needed word sets are there
-        assert weat_set in data
-    return data
 
 def load_json(sent_file, split_sentence_into_list=True):
     ''' Load from json. We expect a certain format later, so do some post processing '''

@@ -6,7 +6,7 @@ import argparse
 import logging as log
 import h5py # pylint: disable=import-error
 import numpy as np
-from data import load_sents, load_json, \
+from data import load_json, \
                  load_encodings, save_encodings, load_jiant_encodings
 import weat
 import encoders.glove as glove
