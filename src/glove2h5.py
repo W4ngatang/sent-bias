@@ -2,18 +2,27 @@
 import h5py
 import numpy as np
 
-glove_vectors = [
-    line.strip().split()
-    for line in open('glove.840B.300d.txt', 'r')
-]
+embeddings_index ={}
+import numpy as np
 
-vocab = [line[0] for line in glove_vectors]
-vectors = np.array(
-    [[float(val) for val in line[1:]] for line in glove_vectors]
-).astype(np.float32)
-vocab = '\n'.join(vocab)
+f = open('/scratch/sb6416/senteval/gensen/data/embedding/glove.840B.300d.txt')#, encoding='utf8')
+for line in f:
+    values = line.split()
+    word = ''.join(values[:-300])
+    coefs = np.asarray(values[-300:], dtype='float32')
+    embeddings_index[word] = coefs#.decode()
+f.close()
+vocab, vector= [],[]
+for emb in embeddings_index:
+    #print(emb)
+    vocab.append(emb)
+    vector.append(embeddings_index[emb])
+vector=np.asarray(vector) 
 
-f = h5py.File('glove.840B.300d.h5', 'w')
-f.create_dataset(data=vectors, name='embedding')
-f.create_dataset(data=vocab, name='words_flatten')
+f = h5py.File('/scratch/sb6416/senteval/gensen/data/embedding/glove.840B.300d.h5', 'w')
+dt = h5py.special_dtype(vlen=str)     # PY3
+f.create_dataset(data=vector, name='embedding')
+
+voc = [v.encode('utf-8') for v in vocab]
+f.create_dataset(data=voc, name='words_flatten',dtype=dt)
 f.close()
