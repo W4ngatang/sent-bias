@@ -2,9 +2,16 @@
 
 ## Setup 
 
-`environment.yml` has all dependencies for Conda environment. Everything should be installable with pip.
-Create the environment with `conda env create -f environment.yml`.
+Use `environment.yml` to create a conda environment with all necessary
+code dependencies: `conda env create -f environment.yml`.
 Activate the environment with `source activate sentbias`.
+
+Then, in the environment, download the NLTK punkt tokenization
+resource:
+
+```
+python -c 'import nltk; nltk.download("punkt")'
+```
 
 You will also need to download pretrained model weights for each model
 you want to test.  Instructions for each supported model are as
@@ -12,7 +19,11 @@ follows.
 
 ### GloVe 
 
-Example glove representations for weat tests are included in `tests/`.
+Download and unzip the [GloVe Common Crawl 840B 300d
+vectors](http://nlp.stanford.edu/data/glove.840B.300d.zip) from the
+[Stanford NLP GloVe web
+page](https://nlp.stanford.edu/projects/glove/).  Make note of the
+path to the resultant text file.
 
 ### ELMo
 
@@ -33,7 +44,6 @@ Download the model checkpoints from the [original repo](https://github.com/faceb
 
 Download the model checkpoints.
 Note, you need to process your GloVe word vectors into an HDF5 format. Run `src/glove2h5.py` in a directory containing the GloVe vectors.
-
 
 ## Running Bias Tests
 
