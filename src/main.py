@@ -38,34 +38,51 @@ MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
 
 def handle_arguments(arguments):
     ''' Helper function for handling argument parsing '''
-    parser = argparse.ArgumentParser(description='')
+    parser = argparse.ArgumentParser(
+        description='Run specified SEAT tests on specified models.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--seed', '-s', type=int, help="Random seed", default=1111)
-    parser.add_argument('--log_file', '-l', type=str, help="File to log to")
-    parser.add_argument('--data_dir', '-d', type=str,
+    parser.add_argument('--log_file', '-l', type=str,
+                        help="File to log to")
+    parser.add_argument('--data_dir', '-d', type=str, required=True,
                         help="Directory containing examples for each test")
-    parser.add_argument('--exp_dir', type=str,
+    parser.add_argument('--exp_dir', type=str, required=True,
                         help="Directory from which to load and save vectors. " +
                         "Files should be stored as h5py files.")
-    parser.add_argument('--glove_path', '-g', type=str, help="File to GloVe vectors")
-    parser.add_argument('--ignore_cached_encs', '-i', type=str,
-                        help="1 if ignore existing encodings and encode from scratch")
+    parser.add_argument('--glove_path', '-g', type=str,
+                        help="File to GloVe vectors. Required if glove model is specified.")
+    parser.add_argument('--ignore_cached_encs', '-i', action='store_true',
+                        help="If set, ignore existing encodings and encode from scratch.")
+    parser.add_argument('--dont_cache_encs', action='store_true',
+                        help="If set, don't cache encodings to disk.")
 
-    parser.add_argument('--tests', '-t', type=str, help="WEAT tests to run")
-    parser.add_argument('--n_samples', type=int, help="Number of samples to estimate p-value", default=100000)
+    parser.add_argument('--tests', '-t', type=str, required=True,
+                        help="WEAT tests to run (a comma-separated list; options: {})".format(','.join(TESTS)))
+    parser.add_argument('--n_samples', type=int,
+                        help="Number of permutation test samples used when estimate p-values (exact test is used if "
+                             "there are fewer than this many permutations)",
+                        default=100000)
 
-    parser.add_argument('--models', '-m', type=str, help="Model to evaluate")
+    parser.add_argument('--models', '-m', type=str,
+                        help="Models to evaluate (a comma-separated list; options: {})".format(','.join(MODELS)))
     parser.add_argument('--combine_method', type=str, choices=["max", "mean", "last", "concat"],
                         default="max", help="How to combine vector sequences")
-    parser.add_argument('--infersent_dir', type=str, help="Directory containing model files")
-    parser.add_argument('--gensen_dir', type=str, help="Directory containing model files")
+    parser.add_argument('--infersent_dir', type=str,
+                        help="Directory containing model files. Required if infersent model is specified.")
+    parser.add_argument('--gensen_dir', type=str,
+                        help="Directory containing model files. Required if gensen model is specified.")
     parser.add_argument('--gensen_version', type=str,
                         choices=["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer"],
                         default="nli_large_bothskip_parse", help="Version of gensen to use.")
-    parser.add_argument('--cove_encs', type=str, help="Directory containing precomputed CoVe encodings")
+    parser.add_argument('--cove_encs', type=str,
+                        help="Directory containing precomputed CoVe encodings. Required if cove model is specified.")
     parser.add_argument('--elmo_combine', type=str, choices=["add", "concat"],
-                        default="add", help="Directory containing precomputed CoVe encodings")
-    parser.add_argument('--openai_encs', type=str, help="Directory containing precomputed OpenAI encodings")
-    parser.add_argument('--bert_version', type=str, choices=["base", "large"], help="Version of BERT to use.")
+                        help="TODO", default="add")
+    parser.add_argument('--openai_encs', type=str,
+                        help="Directory containing precomputed OpenAI encodings. "
+                             "Required if openai model is specified.")
+    parser.add_argument('--bert_version', type=str, choices=["base", "large"],
+                        help="Version of BERT to use.", default="base")
     return parser.parse_args(arguments)
 
 
@@ -92,36 +109,42 @@ def main(arguments):
     random.seed(seed)
     np.random.seed(seed)
     maybe_make_dir(args.exp_dir)
-    log.getLogger().addHandler(log.FileHandler(args.log_file))
+    if args.log_file:
+        log.getLogger().addHandler(log.FileHandler(args.log_file))
     log.info("Parsed args: \n%s", args)
 
     tests = split_comma_and_check(args.tests, TESTS, "test")
     models = split_comma_and_check(args.models, MODELS, "model")
     results = []
     for model_name in models:
-        ''' Different models have different interfaces for things, but generally want to:
-         - if saved vectors aren't there:
-            - load the model
-            - load the test data
-            - encode the vectors
-            - dump the files into some storage
-         - else load the saved vectors '''
+        # Different models have different interfaces for things, but generally want to:
+        # - if saved vectors aren't there:
+        #    - load the model
+        #    - load the test data
+        #    - encode the vectors
+        #    - dump the files into some storage
+        # - else load the saved vectors '''
+        log.info('Running tests for model {}'.format(model_name))
 
         model = None
 
         for test in tests:
+            log.info('Running test {} for model {}'.format(test, model_name))
             enc_file = os.path.join(args.exp_dir, "%s.%s.h5" % (model_name, test))
-            encs = load_encodings(enc_file)
-
-            if encs is None:
-                log.info("Unable to find saved encodings for model %s for test %s. " +
-                         "Generating new encodings.", model_name, test)
-
+            if not args.ignore_cached_encs and os.path.isfile(enc_file):
+                log.info("Loading encodings from %s", enc_file)
+                encs = load_encodings(enc_file)
+                encs_targ1 = encs['targ1']
+                encs_targ2 = encs['targ2']
+                encs_attr1 = encs['attr1']
+                encs_attr2 = encs['attr2']
+            else:
                 # load the test data
                 sents = load_json(os.path.join(args.data_dir, "%s.jsonl" % test),
                                   split_sentence_into_list=bool(model == "bert"))
 
                 # load the model and do model-specific encoding procedure
+                log.info('Computing sentence encodings')
                 if model_name == 'glove':
                     log.warn("GloVe is deprecating; use 'bow' instead!")
                     encs_targ1, encs_targ2, encs_attr1, encs_attr2 = weat.load_weat_test(test, path=args.data_dir)
@@ -211,20 +234,24 @@ def main(arguments):
                     raise ValueError("Model %s not found!" % model_name)
 
                 log.info("\tDone!")
-                #all_encs = [encs_targ1, encs_targ2, encs_attr1, encs_attr2]
-                #save_encodings(all_encs, enc_file)
-                #log.info("Saved encodings for model %s to %s", model_name, enc_file)
-            else:
-                encs_targ1, encs_targ2, encs_attr1, encs_attr2 = encs
+                if not args.dont_cache_encs:
+                    log.info("Saving encodings to %s", enc_file)
+                    all_encs = dict(
+                        targ1=encs_targ1,
+                        targ2=encs_targ2,
+                        attr1=encs_attr1,
+                        attr2=encs_attr2)
+                    save_encodings(all_encs, enc_file)
 
             enc = [e for e in encs_targ1.values()][0]
             d_rep = enc.size if isinstance(enc, np.ndarray) else len(enc)
 
             # run the test on the encodings
-            log.info("Running test %s on %s", test, model_name)
-            log.info("Representation dimension: %d", d_rep)
+            log.info("Running SEAT")
+            log.info("Representation dimension: {}".format(d_rep))
             esize, pval = weat.run_test(encs_targ1, encs_targ2, encs_attr1, encs_attr2, args.n_samples)
             results.append((test, pval, esize))
+
         log.info("Model: %s", model_name)
         for test, pval, esize in results:
             log.info("\tTest %s:\tp-val: %.5f\tesize: %.5f", test, pval, esize)

@@ -10,7 +10,7 @@ WEAT_SETS = ["targ1", "targ2", "attr1", "attr2"]
 
 def load_json(sent_file, split_sentence_into_list=True):
     ''' Load from json. We expect a certain format later, so do some post processing '''
-    print("Loading %s..." % sent_file)
+    log.info("Loading %s..." % sent_file)
     all_data = json.load(open(sent_file, 'r'))
     data = {}
     for k, v in all_data.items():
@@ -24,28 +24,24 @@ def load_json(sent_file, split_sentence_into_list=True):
 
 
 def load_encodings(enc_file):
-    ''' Search to see if we already dumped the vectors for a model somewhere
-    and return it, else return None. '''
-    if not os.path.exists(enc_file):
-        return None
-    encs = []
+    ''' Load cached vectors from a model. '''
+    encs = dict()
     with h5py.File(enc_file, 'r') as enc_fh:
         for split_name, split in enc_fh.items():
             split_d = {}
             for ex, enc in split.items():
                 split_d[ex] = enc[:]
-            encs.append(split_d)
+            encs[split_name] = split_d
     return encs
 
 
 def save_encodings(encodings, enc_file):
     ''' Save encodings to file '''
     with h5py.File(enc_file, 'w') as enc_fh:
-        for split_name, split_encodings in zip(['A', 'B', 'X', 'Y'], encodings):
+        for split_name, split_encodings in encodings.items():
             split = enc_fh.create_group(split_name)
             for ex, enc in split_encodings.items():
                 split[ex] = enc
-    return
 
 
 def load_jiant_encodings(enc_file, n_header=1, is_openai=False):
