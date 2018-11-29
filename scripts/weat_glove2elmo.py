@@ -38,3 +38,7 @@ def main():
         with open(elmo_path, 'w') as f:
             for example in test_data[set_name]['examples']:
                 f.write('{}\n'.format(example))
+
+
+if __name__ == '__main__':
+    main()
