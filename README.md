@@ -18,10 +18,10 @@ Example glove representations for weat tests are included in `tests/`.
 
 ```
 cd scripts
-./weat_glove2elmo.sh $WEATTESTNAME
+./weat_glove2elmo.py $WEATTESTNAME
 ./generate_elmo_embeddings.sh $WEATTESTNAME
 # for example
-./weat_glove2elmo.sh weat1
+./weat_glove2elmo.py weat1
 ./generate_elmo_embeddings.sh weat1
 ```
 
