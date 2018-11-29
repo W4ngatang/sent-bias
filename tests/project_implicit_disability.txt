@@ -1,4 +1,0 @@
-targ1	AbledTerms	walking	running	crossing	skiing
-targ2	DisabledTerms	crutches	wheelchair	service dog	white cane
-attr1	Good	spectacular	celebrate	cherish	joyous	terrific	cheer	triumph	fantastic
-attr2	Bad	grief	disaster	dirty	negative	humiliate	evil	angry	hate

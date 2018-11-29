@@ -1,4 +1,0 @@
-targ1	ThinTerms	thin	underweight	light	skinny	bony	gaunt	slender	scrawny	lanky	lean
-targ2	FatTerms	fat	overweight	heavy	thick	plump	obese	chubby	large	wide	hefty
-attr1	Good	fabulous	love	enjoy	adore	excitement	delight	friend	smiling
-attr2	Bad	awful	gross	horrific	poison	yucky	detest	hate	sadness

@@ -1,4 +1,0 @@
-targ1	Science	science	technology	physics	chemistry	Einstein	NASA	experiment	astronomy
-targ2	Arts	poetry	art	Shakespeare	dance	literature	novel	symphony	drama
-attr1	MaleNames	John	Paul	Mike	Kevin	Steve	Greg	Jeff	Bill
-attr2	FemaleNames	Amy	Joan	Lisa	Sarah	Diana	Kate	Ann	Donna

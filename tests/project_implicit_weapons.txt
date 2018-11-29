@@ -1,4 +1,0 @@
-targ1	WhiteAmericanTerms	light-skinned	light skin	white person	pale	fair
-targ2	BlackAmericanTerms	dark-skinned	dark skin	brown person	black person	person of color
-attr1	HarmlessObjects	water bottle	camera	soda can	ice cream cone	cell phone	tape player	wallet
-attr2	Weapons	axe	canon	grenade	mace	pistol	rifle	sword

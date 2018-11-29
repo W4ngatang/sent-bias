@@ -1,4 +1,0 @@
-targ1	Math	math	algebra	geometry	calculus	equations	computation	numbers	addition
-targ2	Arts	poetry	art	dance	literature	novel	symphony	drama	sculpture
-attr1	MaleNames	John	Paul	Mike	Kevin	Steve	Greg	Jeff	Bill
-attr2	FemaleNames	Amy	Joan	Lisa	Sarah	Diana	Kate	Ann	Donna

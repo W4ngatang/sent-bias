@@ -1,4 +1,0 @@
-targ1	MaleTerms	male	man	boy	brother	he	him	his	son
-targ2	FemaleTerms	female	woman	girl	sister	she	her	hers	daughter
-attr1	Career	executive	management	professional	corporation	salary	office	business	career
-attr2	Family	home	parents	children	family	cousins	marriage	wedding	relatives

@@ -1,4 +1,0 @@
-targ1	StraightTerms	straight	straight people	heterosexual
-targ2	GayTerms	gay people	homosexual	gay
-attr1	Good	appealing	cheer	delight	joyous	glorious	cherish	friendship	excitement
-attr2	Bad	hatred	evil	rotten	gross	disgust	failure	awful	poison
