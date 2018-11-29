@@ -10,7 +10,6 @@ log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', 
 import h5py # pylint: disable=import-error
 import nltk
 import ipdb
-import numpy as np
 import gzip
 import _pickle as pk
 

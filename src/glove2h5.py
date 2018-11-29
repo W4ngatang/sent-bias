@@ -3,7 +3,6 @@ import h5py
 import numpy as np
 
 embeddings_index ={}
-import numpy as np
 
 f = open('/scratch/sb6416/senteval/gensen/data/embedding/glove.840B.300d.txt')#, encoding='utf8')
 for line in f:
