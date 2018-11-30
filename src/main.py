@@ -17,21 +17,9 @@ import encoders.elmo as elmo
 import encoders.bert as bert
 import tensorflow as tf
 import tensorflow_hub as hub
-log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
-TESTS = ['angry_black_woman_stereotype_b', 'angry_black_woman_stereotype',
-         'heilman_double_bind_ambiguous_1,3-', 'heilman_double_bind_ambiguous_1-',
-         'heilman_double_bind_ambiguous_1', 'heilman_double_bind_clear_1,3-',
-         'heilman_double_bind_clear_1-', 'heilman_double_bind_clear_1',
-         'project_implicit_arab-muslim', 'project_implicit_disability',
-         'project_implicit_native', 'project_implicit_religion',
-         'project_implicit_sexuality', 'project_implicit_skin-tone',
-         'project_implicit_weapons', 'project_implicit_weight',
-         'sent-weat1', 'sent-weat2', 'sent-weat3', 'sent-weat4',
-         'weat1', 'weat2', 'weat3b', 'weat3', 'weat4',
-         'weat5b', 'weat5', 'weat6b', 'weat6',
-         'weat7b', 'weat7', 'weat8b', 'weat8',
-         'weat9', 'weat10']
+
+TEST_EXT = '.jsonl'
 MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
 
@@ -41,13 +29,9 @@ def handle_arguments(arguments):
     parser = argparse.ArgumentParser(
         description='Run specified SEAT tests on specified models.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--data_dir', '-d', type=str, required=True,
-                        help="Directory containing examples for each test")
-    parser.add_argument('--exp_dir', type=str, required=True,
-                        help="Directory from which to load and save vectors. " +
-                        "Files should be stored as h5py files.")
     parser.add_argument('--tests', '-t', type=str, required=True,
-                        help="WEAT tests to run (a comma-separated list; options: {})".format(','.join(TESTS)))
+                        help="WEAT tests to run (a comma-separated list; test files should be in `data_dir` and "
+                             "have corresponding names, with extension {})".format(TEST_EXT))
     parser.add_argument('--models', '-m', type=str, required=True,
                         help="Models to evaluate (a comma-separated list; options: {})".format(','.join(MODELS)))
     parser.add_argument('--seed', '-s', type=int, help="Random seed", default=1111)
@@ -60,6 +44,13 @@ def handle_arguments(arguments):
     parser.add_argument('--dont_cache_encs', action='store_true',
                         help="If set, don't cache encodings to disk.")
 
+    parser.add_argument('--data_dir', '-d', type=str,
+                        help="Directory containing examples for each test",
+                        default='tests')
+    parser.add_argument('--exp_dir', type=str,
+                        help="Directory from which to load and save vectors. "
+                             "Files should be stored as h5py files.",
+                        default='output')
     parser.add_argument('--n_samples', type=int,
                         help="Number of permutation test samples used when estimate p-values (exact test is used if "
                              "there are fewer than this many permutations)",
@@ -104,6 +95,8 @@ def maybe_make_dir(dirname):
 
 def main(arguments):
     ''' Main logic: parse args for tests to run and which models to evaluate '''
+    log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
+
     args = handle_arguments(arguments)
     seed = random.randint(1, 100000) if args.seed < 0 else args.seed
     random.seed(seed)
@@ -113,7 +106,14 @@ def main(arguments):
         log.getLogger().addHandler(log.FileHandler(args.log_file))
     log.info("Parsed args: \n%s", args)
 
-    tests = split_comma_and_check(args.tests, TESTS, "test")
+    tests = split_comma_and_check(
+        args.tests,
+        [
+            entry[:-len(TEST_EXT)]
+            for entry in os.listdir(args.data_dir)
+            if not entry.startswith('.') and entry.endswith(TEST_EXT)
+        ],
+        "test")
     models = split_comma_and_check(args.models, MODELS, "model")
     results = []
     for model_name in models:
@@ -140,7 +140,7 @@ def main(arguments):
                 encs_attr2 = encs['attr2']
             else:
                 # load the test data
-                sents = load_json(os.path.join(args.data_dir, "%s.jsonl" % test),
+                sents = load_json(os.path.join(args.data_dir, test + TEST_EXT),
                                   split_sentence_into_list=bool(model == "bert"))
 
                 # load the model and do model-specific encoding procedure
