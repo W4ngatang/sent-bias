@@ -155,8 +155,6 @@ def run_test(encs, n_samples):
     args:
         - encs (Dict[str: Dict]): dictionary mapping targ1, targ2, attr1, attr2
             to dictionaries containing the category and the encodings
-        - A, B, X, Y (Dict[str: np.array]): dictionaries mapping words
-            to their encodings
     '''
     # First convert all keys to ints to facilitate array lookups
     X, Y = encs["targ1"]["encs"], encs["targ2"]["encs"]

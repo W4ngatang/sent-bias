@@ -4,8 +4,11 @@ import sys
 import random
 import argparse
 import logging as log
-import h5py # pylint: disable=import-error
+log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
+
+import h5py
 import numpy as np
+
 from data import load_json, \
                  load_encodings, save_encodings, load_jiant_encodings
 import weat
@@ -17,7 +20,6 @@ import encoders.elmo as elmo
 import encoders.bert as bert
 import tensorflow as tf
 import tensorflow_hub as hub
-log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
 TESTS = ['angry_black_woman_stereotype_b', 'angry_black_woman_stereotype',
          'heilman_double_bind_ambiguous_1+3-', 'heilman_double_bind_ambiguous_1-',
@@ -261,11 +263,11 @@ def main(arguments):
             d_rep = enc.size if isinstance(enc, np.ndarray) else len(enc)
 
             # run the test on the encodings
-            log.info("Running SEAT")
+            log.info("Running SEAT...")
             log.info("Representation dimension: {}".format(d_rep))
             esize, pval = weat.run_test(encs, n_samples=args.n_samples)
-
             results.append((test, pval, esize))
+            log.info("\n")
 
         log.info("Model: %s", model_name)
         for test, pval, esize in results:
