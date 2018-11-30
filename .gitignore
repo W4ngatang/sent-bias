@@ -5,3 +5,4 @@
 *.pyc
 *.sw*
 *~
+/user_config.sh
