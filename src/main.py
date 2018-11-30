@@ -153,7 +153,7 @@ def main(arguments):
                 encs_attr2 = encs['attr2']
             else:
                 # load the test data
-                encs = load_json(os.path.join(args.data_dir, "%s.%s" % (test, TEST_EXT),
+                encs = load_json(os.path.join(args.data_dir, "%s.%s" % (test, TEST_EXT)),
                                   split_sentence_into_list=bool(model == "bert"))
 
                 # load the model and do model-specific encoding procedure
