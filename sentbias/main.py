@@ -111,7 +111,7 @@ def main(arguments):
     tests = split_comma_and_check(
         args.tests,
         [
-            entry[:-(len(TEST_EXT) + 1)]
+            entry[:-len(TEST_EXT)]
             for entry in os.listdir(args.data_dir)
             if not entry.startswith('.') and entry.endswith(TEST_EXT)
         ],
@@ -142,7 +142,7 @@ def main(arguments):
                 encs_attr2 = encs['attr2']
             else:
                 # load the test data
-                encs = load_json(os.path.join(args.data_dir, "%s.%s" % (test, TEST_EXT)),
+                encs = load_json(os.path.join(args.data_dir, "%s%s" % (test, TEST_EXT)),
                                  split_sentence_into_list=bool(model == "bert"))
 
                 # load the model and do model-specific encoding procedure
