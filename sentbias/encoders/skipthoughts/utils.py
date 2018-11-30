@@ -3,11 +3,9 @@ import gzip
 import numpy as np
 import os
 
-from sentbias.data import load_json
-
 
 def preprocess_file(filepath, output_path):
-    dict_of_sentences = load_json(filepath, False)
+    dict_of_sentences = {}  # pass this in as parameter to function, TODO
     assert len(dict_of_sentences) == 4
     tmp_output_path = output_path[:-3] + 'tmp'
     tokens = set()
