@@ -111,7 +111,7 @@ def main(arguments):
     tests = split_comma_and_check(
         args.tests,
         [
-            entry[:-len(TEST_EXT)]
+            entry[:-(len(TEST_EXT) + 1)]
             for entry in os.listdir(args.data_dir)
             if not entry.startswith('.') and entry.endswith(TEST_EXT)
         ],
@@ -142,28 +142,32 @@ def main(arguments):
                 encs_attr2 = encs['attr2']
             else:
                 # load the test data
-                sents = load_json(os.path.join(args.data_dir, test + TEST_EXT),
-                                  split_sentence_into_list=bool(model == "bert"))
+                encs = load_json(os.path.join(args.data_dir, "%s.%s" % (test, TEST_EXT)),
+                                 split_sentence_into_list=bool(model == "bert"))
 
                 # load the model and do model-specific encoding procedure
                 log.info('Computing sentence encodings')
                 if model_name == 'bow':
-                    encs_targ1 = bow.encode(sents["targ1"], args.glove_path, tokenize=True)
-                    encs_targ2 = bow.encode(sents["targ2"], args.glove_path, tokenize=True)
-                    encs_attr1 = bow.encode(sents["attr1"], args.glove_path, tokenize=True)
-                    encs_attr2 = bow.encode(sents["attr2"], args.glove_path, tokenize=True)
+                    encs_targ1 = bow.encode(encs["targ1"]["examples"], args.glove_path, tokenize=True)
+                    encs_targ2 = bow.encode(encs["targ2"]["examples"], args.glove_path, tokenize=True)
+                    encs_attr1 = bow.encode(encs["attr1"]["examples"], args.glove_path, tokenize=True)
+                    encs_attr2 = bow.encode(encs["attr2"]["examples"], args.glove_path, tokenize=True)
 
                 elif model_name == 'infersent':
                     if model is None:
                         model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
                     model.build_vocab(
-                        [s for s in sents["targ1"] + sents["targ2"] + sents["attr1"] + sents["attr2"]],
+                        [
+                            example
+                            for k in ('targ1', 'targ2', 'attr1', 'attr2')
+                            for example in encs[k]['examples']
+                        ],
                         tokenize=False)
                     log.info("Encoding sentences for test %s with model %s...", test, model_name)
-                    encs_targ1 = infersent.encode(model, sents["targ1"])
-                    encs_targ2 = infersent.encode(model, sents["targ2"])
-                    encs_attr1 = infersent.encode(model, sents["attr1"])
-                    encs_attr2 = infersent.encode(model, sents["attr2"])
+                    encs_targ1 = infersent.encode(model, encs["targ1"]["examples"])
+                    encs_targ2 = infersent.encode(model, encs["targ2"]["examples"])
+                    encs_attr1 = infersent.encode(model, encs["attr1"]["examples"])
+                    encs_attr2 = infersent.encode(model, encs["attr2"]["examples"])
 
                 elif model_name == 'gensen':
                     if model is None:
@@ -171,10 +175,10 @@ def main(arguments):
                                                     filename_prefix=args.gensen_version,
                                                     pretrained_emb=os.path.join(args.glove_path, 'glove.840B.300d.h5'))
 
-                    encs_targ1 = gensen.encode(model, sents["targ1"])
-                    encs_targ2 = gensen.encode(model, sents["targ2"])
-                    encs_attr1 = gensen.encode(model, sents["attr1"])
-                    encs_attr2 = gensen.encode(model, sents["attr2"])
+                    encs_targ1 = gensen.encode(model, encs["targ1"]["examples"])
+                    encs_targ2 = gensen.encode(model, encs["targ2"]["examples"])
+                    encs_attr1 = gensen.encode(model, encs["attr1"]["examples"])
+                    encs_attr2 = gensen.encode(model, encs["attr2"]["examples"])
 
                 elif model_name == 'guse':
                     enc = [[] * 512 for _ in range(4)]
@@ -186,7 +190,8 @@ def main(arguments):
                     config.gpu_options.per_process_gpu_memory_fraction = 0.5  # maximum alloc gpu50% of MEM
                     config.gpu_options.allow_growth = True  # allocate dynamically
 
-                    for i, sent in enumerate(sents):  # iterate through the four word sets
+                    # TODO(Alex): I don't think this is compatible with dictionaries
+                    for i, sent in enumerate(encs):  # iterate through the four word sets
                         embeddings = model(sent)  # embed the word set
                         with tf.Session(config=config) as session:
                             session.run([tf.global_variables_initializer(), tf.tables_initializer()])
@@ -206,52 +211,51 @@ def main(arguments):
 
                 elif model_name == "cove":
                     load_encs_from = os.path.join(args.cove_encs, "%s.encs" % test)
-                    encs_targ1, encs_targ2, encs_attr1, encs_attr2 = load_jiant_encodings(load_encs_from, n_header=1)
+                    encs = load_jiant_encodings(load_encs_from, n_header=1)
 
                 elif model_name == 'elmo':
                     # encs_attr11, encs_attr21, encs_targ11, encs_targ21 = weat.load_elmo_weat_test(
                     #     test, path='encodings/elmo/')
-                    encs_targ1 = elmo.encode(sents["targ1"], args.combine_method, args.elmo_combine)
-                    encs_targ2 = elmo.encode(sents["targ2"], args.combine_method, args.elmo_combine)
-                    encs_attr1 = elmo.encode(sents["attr1"], args.combine_method, args.elmo_combine)
-                    encs_attr2 = elmo.encode(sents["attr2"], args.combine_method, args.elmo_combine)
+                    encs_targ1 = elmo.encode(encs["targ1"]["examples"], args.combine_method, args.elmo_combine)
+                    encs_targ2 = elmo.encode(encs["targ2"]["examples"], args.combine_method, args.elmo_combine)
+                    encs_attr1 = elmo.encode(encs["attr1"]["examples"], args.combine_method, args.elmo_combine)
+                    encs_attr2 = elmo.encode(encs["attr2"]["examples"], args.combine_method, args.elmo_combine)
 
                 elif model_name == "bert":
                     if args.bert_version == "large":
                         model, tokenizer = bert.load_model('bert-large-uncased')
                     else:
                         model, tokenizer = bert.load_model('bert-base-uncased')
-                    encs_targ1 = bert.encode(model, tokenizer, sents["targ1"], args.combine_method)
-                    encs_targ2 = bert.encode(model, tokenizer, sents["targ2"], args.combine_method)
-                    encs_attr1 = bert.encode(model, tokenizer, sents["attr1"], args.combine_method)
-                    encs_attr2 = bert.encode(model, tokenizer, sents["attr2"], args.combine_method)
+                    encs_targ1 = bert.encode(model, tokenizer, encs["targ1"]["examples"], args.combine_method)
+                    encs_targ2 = bert.encode(model, tokenizer, encs["targ2"]["examples"], args.combine_method)
+                    encs_attr1 = bert.encode(model, tokenizer, encs["attr1"]["examples"], args.combine_method)
+                    encs_attr2 = bert.encode(model, tokenizer, encs["attr2"]["examples"], args.combine_method)
 
                 elif model_name == "openai":
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)
-                    encs_targ1, encs_targ2, encs_attr1, encs_attr2 = load_jiant_encodings(
-                        load_encs_from, n_header=1, is_openai=True)
+                    encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
 
                 else:
                     raise ValueError("Model %s not found!" % model_name)
 
+                encs["targ1"]["encs"] = encs_targ1
+                encs["targ2"]["encs"] = encs_targ2
+                encs["attr1"]["encs"] = encs_attr1
+                encs["attr2"]["encs"] = encs_attr2
+
                 log.info("\tDone!")
                 if not args.dont_cache_encs:
                     log.info("Saving encodings to %s", enc_file)
-                    all_encs = dict(
-                        targ1=encs_targ1,
-                        targ2=encs_targ2,
-                        attr1=encs_attr1,
-                        attr2=encs_attr2)
-                    save_encodings(all_encs, enc_file)
+                    save_encodings(encs, enc_file)
 
-            enc = [e for e in encs_targ1.values()][0]
+            enc = [e for e in encs_targ1['encs'].values()][0]
             d_rep = enc.size if isinstance(enc, np.ndarray) else len(enc)
 
             # run the test on the encodings
             log.info("Running SEAT")
             log.info("Representation dimension: {}".format(d_rep))
-            esize, pval = weat.run_test(X=encs_targ1, Y=encs_targ2, A=encs_attr1,
-                                        B=encs_attr2, n_samples=args.n_samples)
+            esize, pval = weat.run_test(encs, n_samples=args.n_samples)
+
             results.append((test, pval, esize))
 
         log.info("Model: %s", model_name)

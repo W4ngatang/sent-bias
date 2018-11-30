@@ -134,13 +134,18 @@ def convert_keys_to_ints(X, Y):
     )
 
 
-def run_test(A, B, X, Y, n_samples):
+# def run_test(A, B, X, Y, names, n_samples):
+def run_test(encs, n_samples):
     ''' Run a WEAT.
     args:
+        - encs (Dict[str: Dict]): dictionary mapping targ1, targ2, attr1, attr2
+            to dictionaries containing the category and the encodings
         - A, B, X, Y (Dict[str: np.array]): dictionaries mapping words
             to their encodings
     '''
     # First convert all keys to ints to facilitate array lookups
+    X, Y = encs["targ1"]["encs"], encs["targ2"]["encs"]
+    A, B = encs["attr1"]["encs"], encs["attr2"]["encs"]
     (X, Y) = convert_keys_to_ints(X, Y)
     (A, B) = convert_keys_to_ints(A, B)
 
@@ -152,6 +157,9 @@ def run_test(A, B, X, Y, n_samples):
     log.info("Computing cosine similarities...")
     cossims = construct_cossim_lookup(XY, AB)
 
+    log.info("Hypothesis: no difference between %s and %s in association to attributes %s and %s",
+             encs["targ1"]["category"], encs["targ2"]["category"],
+             encs["attr1"]["category"], encs["attr2"]["category"])
     log.info("Computing pval...")
     pval = p_val_permutation_test(X, Y, A, B, n_samples, cossims=cossims)
     log.info("pval: %g", pval)
