@@ -32,7 +32,7 @@ TESTS = ['angry_black_woman_stereotype_b', 'angry_black_woman_stereotype',
          'weat5b', 'weat5', 'weat6b', 'weat6',
          'weat7b', 'weat7', 'weat8b', 'weat8',
          'weat9', 'weat10']
-TEST_EXT = '.jsonl'
+TEST_EXT = 'jsonl'
 MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
 
@@ -122,7 +122,7 @@ def main(arguments):
     tests = split_comma_and_check(
         args.tests,
         [
-            entry[:-len(TEST_EXT)]
+            entry[:-(len(TEST_EXT) + 1)]
             for entry in os.listdir(args.data_dir)
             if not entry.startswith('.') and entry.endswith(TEST_EXT)
         ],

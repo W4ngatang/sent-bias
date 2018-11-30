@@ -24,7 +24,6 @@ def load_json(sent_file, split_sentence_into_list=True):
     return all_data #data
 
 
-
 def load_encodings(enc_file):
     ''' Load cached vectors from a model. '''
     encs = dict()
