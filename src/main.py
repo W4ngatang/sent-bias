@@ -41,14 +41,18 @@ def handle_arguments(arguments):
     parser = argparse.ArgumentParser(
         description='Run specified SEAT tests on specified models.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--seed', '-s', type=int, help="Random seed", default=1111)
-    parser.add_argument('--log_file', '-l', type=str,
-                        help="File to log to")
     parser.add_argument('--data_dir', '-d', type=str, required=True,
                         help="Directory containing examples for each test")
     parser.add_argument('--exp_dir', type=str, required=True,
                         help="Directory from which to load and save vectors. " +
                         "Files should be stored as h5py files.")
+    parser.add_argument('--tests', '-t', type=str, required=True,
+                        help="WEAT tests to run (a comma-separated list; options: {})".format(','.join(TESTS)))
+    parser.add_argument('--models', '-m', type=str, required=True,
+                        help="Models to evaluate (a comma-separated list; options: {})".format(','.join(MODELS)))
+    parser.add_argument('--seed', '-s', type=int, help="Random seed", default=1111)
+    parser.add_argument('--log_file', '-l', type=str,
+                        help="File to log to")
     parser.add_argument('--glove_path', '-g', type=str,
                         help="File to GloVe vectors. Required if glove model is specified.")
     parser.add_argument('--ignore_cached_encs', '-i', action='store_true',
@@ -56,15 +60,11 @@ def handle_arguments(arguments):
     parser.add_argument('--dont_cache_encs', action='store_true',
                         help="If set, don't cache encodings to disk.")
 
-    parser.add_argument('--tests', '-t', type=str, required=True,
-                        help="WEAT tests to run (a comma-separated list; options: {})".format(','.join(TESTS)))
     parser.add_argument('--n_samples', type=int,
                         help="Number of permutation test samples used when estimate p-values (exact test is used if "
                              "there are fewer than this many permutations)",
                         default=100000)
 
-    parser.add_argument('--models', '-m', type=str,
-                        help="Models to evaluate (a comma-separated list; options: {})".format(','.join(MODELS)))
     parser.add_argument('--combine_method', type=str, choices=["max", "mean", "last", "concat"],
                         default="max", help="How to combine vector sequences")
     parser.add_argument('--infersent_dir', type=str,
