@@ -29,15 +29,6 @@ path to the resultant text file.
 
 ### ELMo
 
-```
-cd scripts
-./weat_glove2elmo.py $WEATTESTNAME
-./generate_elmo_embeddings.sh $WEATTESTNAME
-# for example
-./weat_glove2elmo.py weat1
-./generate_elmo_embeddings.sh weat1
-```
-
 ### Infersent
 
 Download the model checkpoints from the [original repo](https://github.com/facebookresearch/InferSent) and put them in `sentbias/encoders`:
