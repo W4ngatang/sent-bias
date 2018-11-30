@@ -9,7 +9,6 @@ import numpy as np
 from data import load_json, \
                  load_encodings, save_encodings, load_jiant_encodings
 import weat
-import encoders.glove as glove
 import encoders.bow as bow
 import encoders.infersent as infersent
 import encoders.gensen as gensen
@@ -20,7 +19,7 @@ import tensorflow_hub as hub
 
 
 TEST_EXT = '.jsonl'
-MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
+MODELS = ["infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
 
 
@@ -145,11 +144,7 @@ def main(arguments):
 
                 # load the model and do model-specific encoding procedure
                 log.info('Computing sentence encodings')
-                if model_name == 'glove':
-                    log.warn("GloVe is deprecating; use 'bow' instead!")
-                    encs_targ1, encs_targ2, encs_attr1, encs_attr2 = weat.load_weat_test(test, path=args.data_dir)
-
-                elif model_name == 'bow':
+                if model_name == 'bow':
                     encs_targ1 = bow.encode(sents["targ1"], args.glove_path, tokenize=True)
                     encs_targ2 = bow.encode(sents["targ2"], args.glove_path, tokenize=True)
                     encs_attr1 = bow.encode(sents["attr1"], args.glove_path, tokenize=True)

@@ -6,7 +6,6 @@ import itertools as it
 import numpy as np
 import scipy.special
 
-import encoders.glove as glove
 import encoders.elmo as elmo
 
 # X and Y are two sets of target words of equal size.
@@ -113,20 +112,6 @@ def effect_size(X, Y, A, B, cossims):
     numerator = mean_s_wAB(X, A, B, cossims=cossims) - mean_s_wAB(Y, A, B, cossims=cossims)
     denominator = stdev_s_wAB(X + Y, A, B, cossims=cossims)
     return numerator / denominator
-
-
-def load_weat_test(weatname, path=None):
-    ''' Load pre-extracted GloVe vectors '''
-    if path is None:
-        path = "../tests/"
-    else:
-        path = path.rstrip('/')+'/'
-
-    A = glove.load_glove_file(path+weatname+".A.vec")
-    B = glove.load_glove_file(path+weatname+".B.vec")
-    X = glove.load_glove_file(path+weatname+".X.vec")
-    Y = glove.load_glove_file(path+weatname+".Y.vec")
-    return (A, B, X, Y)
 
 
 def load_elmo_weat_test(weatname, path=None):

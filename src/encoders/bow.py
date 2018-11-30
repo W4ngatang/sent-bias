@@ -2,7 +2,6 @@
 import io
 import logging as log
 import numpy as np
-import encoders.glove as glove
 import ipdb
 
 def get_word_dict(sentences, tokenize):
