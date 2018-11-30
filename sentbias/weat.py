@@ -6,7 +6,7 @@ import itertools as it
 import numpy as np
 import scipy.special
 
-import encoders.elmo as elmo
+import sentbias.encoders.elmo as elmo
 
 # X and Y are two sets of target words of equal size.
 # A and B are two sets of attribute words.

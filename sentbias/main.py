@@ -1,21 +1,24 @@
 ''' Main script for loading models and running WEAT tests '''
+
 import os
 import sys
 import random
 import argparse
 import logging as log
-import h5py  # pylint: disable=import-error
+
 import numpy as np
-from data import load_json, \
-    load_encodings, save_encodings, load_jiant_encodings
-import weat
-import encoders.bow as bow
-import encoders.infersent as infersent
-import encoders.gensen as gensen
-import encoders.elmo as elmo
-import encoders.bert as bert
 import tensorflow as tf
 import tensorflow_hub as hub
+
+from sentbias.data import (
+    load_json, load_encodings, save_encodings, load_jiant_encodings,
+)
+import sentbias.weat as weat
+import sentbias.encoders.bow as bow
+import sentbias.encoders.infersent as infersent
+import sentbias.encoders.gensen as gensen
+import sentbias.encoders.elmo as elmo
+import sentbias.encoders.bert as bert
 
 
 TEST_EXT = '.jsonl'
@@ -153,8 +156,9 @@ def main(arguments):
                 elif model_name == 'infersent':
                     if model is None:
                         model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
-                    model.build_vocab([s for s in sents["targ1"] + sents["targ2"] +
-                                       sents["attr1"] + sents["attr2"]], tokenize=False)
+                    model.build_vocab(
+                        [s for s in sents["targ1"] + sents["targ2"] + sents["attr1"] + sents["attr2"]],
+                        tokenize=False)
                     log.info("Encoding sentences for test %s with model %s...", test, model_name)
                     encs_targ1 = infersent.encode(model, sents["targ1"])
                     encs_targ2 = infersent.encode(model, sents["targ2"])
@@ -205,7 +209,8 @@ def main(arguments):
                     encs_targ1, encs_targ2, encs_attr1, encs_attr2 = load_jiant_encodings(load_encs_from, n_header=1)
 
                 elif model_name == 'elmo':
-                    #encs_attr11, encs_attr21, encs_targ11, encs_targ21 = weat.load_elmo_weat_test(test, path='encodings/elmo/')
+                    # encs_attr11, encs_attr21, encs_targ11, encs_targ21 = weat.load_elmo_weat_test(
+                    #     test, path='encodings/elmo/')
                     encs_targ1 = elmo.encode(sents["targ1"], args.combine_method, args.elmo_combine)
                     encs_targ2 = elmo.encode(sents["targ2"], args.combine_method, args.elmo_combine)
                     encs_attr1 = elmo.encode(sents["attr1"], args.combine_method, args.elmo_combine)
