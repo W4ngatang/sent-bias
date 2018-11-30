@@ -4,6 +4,7 @@ import json
 from collections import defaultdict
 import numpy as np
 import h5py
+import logging as log
 
 WEAT_SETS = ["targ1", "targ2", "attr1", "attr2"]
 
