@@ -2,7 +2,9 @@
 
 ## Setup 
 
-Use `environment.yml` to create a conda environment with all necessary
+First, install Anaconda and a C++ compiler (for example, `g++`) if you
+do not have them.  Then
+use `environment.yml` to create a conda environment with all necessary
 code dependencies: `conda env create -f environment.yml`.
 Activate the environment with `source activate sentbias`.
 
