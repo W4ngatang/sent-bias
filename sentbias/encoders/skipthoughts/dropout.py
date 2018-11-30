@@ -2,7 +2,6 @@ import torch
 import numpy as np
 from torch import nn
 from torch.autograd import Variable
-from itertools import repeat
 
 
 class EmbeddingDropout():

@@ -1,16 +1,14 @@
 import os
-import sys
 import numpy
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from torch.autograd import Variable
 from collections import OrderedDict
 
-from gru import BayesianGRU, GRU
-from dropout import EmbeddingDropout, SequentialDropout
+from gru import BayesianGRU
+from dropout import SequentialDropout
 
 
 urls = {}
@@ -101,7 +99,7 @@ class AbstractSkipThoughts(nn.Module):
                 id_params = dictionary[word]
                 params = parameters[id_params]
             else:
-                #print('Warning: word `{}` not in dictionary'.format(word))
+                # print('Warning: word `{}` not in dictionary'.format(word))
                 params = unknown_params
                 nb_unknown += 1
             weight[id_weight + 1] = torch.from_numpy(params)
@@ -113,7 +111,7 @@ class AbstractSkipThoughts(nn.Module):
 
     def _select_last(self, x, lengths):
         batch_size = x.size(0)
-        seq_length = x.size(1)
+        # seq_length = x.size(1)
         mask = x.data.new().resize_as_(x.data).fill_(0)
         for i in range(batch_size):
             mask[i][lengths[i] - 1].fill_(1)
@@ -397,7 +395,7 @@ class BiSkip(AbstractBiSkip):
 if __name__ == '__main__':
     dir_st = '/home/cadene/data/skip-thoughts'
     vocab = ['robots', 'are', 'very', 'cool', '<eos>', 'BiDiBu']
-    #model = BayesianUniSkip(dir_st, vocab)
+    # model = BayesianUniSkip(dir_st, vocab)
     model = BiSkip(dir_st, vocab)
 
     # batch_size x seq_len

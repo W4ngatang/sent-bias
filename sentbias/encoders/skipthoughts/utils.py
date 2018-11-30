@@ -1,96 +1,12 @@
 import _pickle as pk
 import gzip
-import ipdb
-import nltk
-import h5py  # pylint: disable=import-error
-import json
-from nltk.tokenize import word_tokenize
 import numpy as np
-import torch
-from torch.autograd import Variable
 import os
-import sys
-import argparse
-import logging as log
-log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
-
-def handle_arguments(arguments):
-    ''' Helper function for handling argument parsing '''
-    parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--log_file', '-l', type=str, help="File to log to")
-    parser.add_argument('--data_dir', '-d', type=str,
-                        help="Directory containing examples for each test")
-    parser.add_argument('--exp_dir', '-sd', type=str,
-                        help="Directory from which to load and save vectors. " +
-                        "Files should be stored as h5py files.")
-    parser.add_argument('--glove_path', '-g', type=str, help="File to GloVe vectors")
-    parser.add_argument('--ignore_cached_encs', '-i', type=str,
-                        help="1 if ignore existing encodings and encode from scratch")
-
-    parser.add_argument('--tests', '-t', type=str, help="WEAT tests to run")
-    parser.add_argument('--models', '-m', type=str, help="Model to evaluate")
-    return parser.parse_args(arguments)
-
-
-def split_comma_and_check(arg_str, allowed_set, item_type):
-    ''' Given a comma-separated string of items,
-    split on commas and check if all items are in allowed_set.
-    item_type is just for the assert message. '''
-    items = arg_str.split(',')
-    for item in items:
-        if item not in allowed_set:
-            raise ValueError("Unknown %s: %s!" % (item_type, item))
-    return items
-
-
-def maybe_make_dir(dirname):
-    ''' Maybe make directory '''
-    os.makedirs(dirname, exist_ok=True)
-
-
-def load_encodings(enc_file):
-    ''' Search to see if we already dumped the vectors for a model somewhere
-    and return it, else return None. '''
-    if not os.path.exists(enc_file):
-        return None
-    encs = []
-    with h5py.File(enc_file, 'r') as enc_fh:
-        for split_name, split in enc_fh.items():
-            split_d = {}
-            for ex, enc in split.items():
-                split_d[ex] = enc[:]
-            encs.append(split_d)
-    return encs
-
-
-def save_encodings(encodings, enc_file):
-    ''' Save encodings to file '''
-    with h5py.File(enc_file, 'w') as enc_fh:
-        for split_name, split_encodings in zip(['A', 'B', 'X', 'Y'], encodings):
-            split = enc_fh.create_group(split_name)
-            for ex, enc in split_encodings.items():
-                split['%s' % ex] = enc
-    return
-
-
-def load_json(sent_file, split_sentence_into_list=True):
-    ''' Load from json. We expect a certain format later, so do some post processing '''
-    print("Loading %s..." % sent_file)
-    all_data = json.load(open(sent_file, 'r'))
-    data = {}
-    for k, v in all_data.items():
-        if split_sentence_into_list:
-            examples = [e.split() for e in v["examples"]]
-        else:
-            examples = v["examples"]
-        data[k] = examples
-    return data
+from sentbias.data import load_json
 
 
 def preprocess_file(filepath, output_path):
-    with open(filepath, 'r') as f:
-        text = f.read()
     dict_of_sentences = load_json(filepath, False)
     assert len(dict_of_sentences) == 4
     tmp_output_path = output_path[:-3] + 'tmp'
