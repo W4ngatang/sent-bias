@@ -4,10 +4,10 @@ import sys
 import random
 import argparse
 import logging as log
-import h5py # pylint: disable=import-error
+import h5py  # pylint: disable=import-error
 import numpy as np
 from data import load_json, \
-                 load_encodings, save_encodings, load_jiant_encodings
+    load_encodings, save_encodings, load_jiant_encodings
 import weat
 import encoders.bow as bow
 import encoders.infersent as infersent
@@ -153,14 +153,15 @@ def main(arguments):
                 elif model_name == 'infersent':
                     if model is None:
                         model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
-                    model.build_vocab([s for s in sents["targ1"] + sents["targ2"] + sents["attr1"] + sents["attr2"]], tokenize=False)
+                    model.build_vocab([s for s in sents["targ1"] + sents["targ2"] +
+                                       sents["attr1"] + sents["attr2"]], tokenize=False)
                     log.info("Encoding sentences for test %s with model %s...", test, model_name)
                     encs_targ1 = infersent.encode(model, sents["targ1"])
                     encs_targ2 = infersent.encode(model, sents["targ2"])
                     encs_attr1 = infersent.encode(model, sents["attr1"])
                     encs_attr2 = infersent.encode(model, sents["attr2"])
 
-                elif model_name =='gensen':
+                elif model_name == 'gensen':
                     if model is None:
                         model = gensen.GenSenSingle(model_folder=os.path.join(args.gensen_dir, 'models'),
                                                     filename_prefix=args.gensen_version,
@@ -171,18 +172,18 @@ def main(arguments):
                     encs_attr1 = gensen.encode(model, sents["attr1"])
                     encs_attr2 = gensen.encode(model, sents["attr2"])
 
-                elif model_name =='guse':
+                elif model_name == 'guse':
                     enc = [[] * 512 for _ in range(4)]
                     encs_targ1, encs_targ2, encs_attr1, encs_attr2 = {}, {}, {}, {}
 
                     model = hub.Module("https://tfhub.dev/google/universal-sentence-encoder/2")
-                    os.environ["CUDA_VISIBLE_DEVICES"] = '0' #use GPU with ID=0
+                    os.environ["CUDA_VISIBLE_DEVICES"] = '0'  # use GPU with ID=0
                     config = tf.ConfigProto()
-                    config.gpu_options.per_process_gpu_memory_fraction = 0.5 # maximum alloc gpu50% of MEM
-                    config.gpu_options.allow_growth = True #allocate dynamically
+                    config.gpu_options.per_process_gpu_memory_fraction = 0.5  # maximum alloc gpu50% of MEM
+                    config.gpu_options.allow_growth = True  # allocate dynamically
 
-                    for i, sent in enumerate(sents): # iterate through the four word sets
-                        embeddings = model(sent) # embed the word set
+                    for i, sent in enumerate(sents):  # iterate through the four word sets
+                        embeddings = model(sent)  # embed the word set
                         with tf.Session(config=config) as session:
                             session.run([tf.global_variables_initializer(), tf.tables_initializer()])
                             enc[i] = session.run(embeddings)
@@ -220,10 +221,10 @@ def main(arguments):
                     encs_attr1 = bert.encode(model, tokenizer, sents["attr1"], args.combine_method)
                     encs_attr2 = bert.encode(model, tokenizer, sents["attr2"], args.combine_method)
 
-
                 elif model_name == "openai":
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)
-                    encs_targ1, encs_targ2, encs_attr1, encs_attr2 = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
+                    encs_targ1, encs_targ2, encs_attr1, encs_attr2 = load_jiant_encodings(
+                        load_encs_from, n_header=1, is_openai=True)
 
                 else:
                     raise ValueError("Model %s not found!" % model_name)
@@ -244,7 +245,8 @@ def main(arguments):
             # run the test on the encodings
             log.info("Running SEAT")
             log.info("Representation dimension: {}".format(d_rep))
-            esize, pval = weat.run_test(X=encs_targ1, Y=encs_targ2, A=encs_attr1, B=encs_attr2, n_samples=args.n_samples)
+            esize, pval = weat.run_test(X=encs_targ1, Y=encs_targ2, A=encs_attr1,
+                                        B=encs_attr2, n_samples=args.n_samples)
             results.append((test, pval, esize))
 
         log.info("Model: %s", model_name)

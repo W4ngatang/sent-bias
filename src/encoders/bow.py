@@ -4,6 +4,7 @@ import logging as log
 import numpy as np
 import ipdb
 
+
 def get_word_dict(sentences, tokenize):
     ''' From sentences create vocab of words '''
     word_dict = {}
@@ -18,12 +19,13 @@ def get_word_dict(sentences, tokenize):
     #word_dict['</s>'] = ''
     return tokenized_sents, word_dict
 
+
 def get_vecs(sentences, word_vec, dim):
     ''' Create BoW representations for sentences using word_vecs '''
     bow_vec = {}
     for sent in sentences:
         key = []
-        vec = np.zeros(dim) # initialize w/ zeros
+        vec = np.zeros(dim)  # initialize w/ zeros
 
         for word in sent:
             key.append(word)
@@ -49,6 +51,7 @@ def get_glove(vocab, glove_path):
                     assert len(word_vecs[word]) == dim
     log.info('Found %d/%d words with glove vectors', len(word_vecs), len(vocab))
     return word_vecs, dim
+
 
 def encode(sentences, glove_path, tokenize=False):
     ''' Encode sentences into BoW representation '''

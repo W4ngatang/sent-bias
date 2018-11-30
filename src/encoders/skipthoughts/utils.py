@@ -1,3 +1,9 @@
+import _pickle as pk
+import gzip
+import ipdb
+import nltk
+import h5py  # pylint: disable=import-error
+import json
 from nltk.tokenize import word_tokenize
 import numpy as np
 import torch
@@ -7,13 +13,6 @@ import sys
 import argparse
 import logging as log
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
-import json
-import h5py # pylint: disable=import-error
-import nltk
-import ipdb
-import gzip
-import _pickle as pk
-
 
 
 def handle_arguments(arguments):
@@ -98,28 +97,28 @@ def preprocess_file(filepath, output_path):
     tokens = set()
     sentence_tokens = []
     MAX_SENTENCE_LENGTH = 0
-    
+
     for sentences in dict_of_sentences.values():
         for j in range(len(sentences)):
             sents = sentences[j]
-            
-            sent_length =len(sents.split())
-            #print(len(sents.split()))
+
+            sent_length = len(sents.split())
+            # print(len(sents.split()))
             if sent_length > MAX_SENTENCE_LENGTH:
-                MAX_SENTENCE_LENGTH= sent_length
-                
+                MAX_SENTENCE_LENGTH = sent_length
+
             sent_tokens = []
             for w in sents.split():
                 sent_tokens.append(w)
                 tokens.add(w)
                 sentence_tokens.append(sent_tokens)
     with gzip.open(tmp_output_path, 'w') as f:
-        pk.dump(sentence_tokens,f)
+        pk.dump(sentence_tokens, f)
     tokens = set()
     for sent in sentence_tokens:
         tokens.update(set(sent))
-    os.remove(tmp_output_path)    
-    return tokens,MAX_SENTENCE_LENGTH
+    os.remove(tmp_output_path)
+    return tokens, MAX_SENTENCE_LENGTH
 
 
 def read_vocab(vocab_path):
@@ -133,33 +132,34 @@ def read_vocab(vocab_path):
 
     return vocab
 
-def encode_sentences(sentences, word_to_idx,MAX_SENTENCE_LENGTH):
+
+def encode_sentences(sentences, word_to_idx, MAX_SENTENCE_LENGTH):
     """
     Encode tokens in sentences by vocab indices
     """
-    sent2vec={}
-    encoded_sentences =[]
-    encoded_sentences_lengths=[]
+    sent2vec = {}
+    encoded_sentences = []
+    encoded_sentences_lengths = []
     for sent in sentences:
-        
-        i =0
+
+        i = 0
         encoder = np.zeros(MAX_SENTENCE_LENGTH).tolist()
-        encoded_sentences_length=len(sent.split())
+        encoded_sentences_length = len(sent.split())
         for w in sent.split():
-            encoder[i]=word_to_idx[w]
-            i+=1
+            encoder[i] = word_to_idx[w]
+            i += 1
         encoded_sentences.append(encoder)
         encoded_sentences_lengths.append(encoded_sentences_length)
-        sent2vec[sent]=encoded_sentences
-    return encoded_sentences,encoded_sentences_lengths,sent2vec
+        sent2vec[sent] = encoded_sentences
+    return encoded_sentences, encoded_sentences_lengths, sent2vec
 
 
 def get_embedding_dictionary(sentences, sent2vec):
     ''' Use model to encode skipthougt sents '''
     assert len(sentences) == len(sent2vec)
-    i=0
+    i = 0
     for s in sent2vec:
-        sent2vec[s]= sentences[i]
-        i+=1
-        
+        sent2vec[s] = sentences[i]
+        i += 1
+
     return sent2vec

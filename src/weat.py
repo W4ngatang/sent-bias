@@ -13,7 +13,7 @@ import encoders.elmo as elmo
 
 
 def cossim(x, y):
-    return np.dot(x, y) / math.sqrt(np.dot(x, x)*np.dot(y, y))
+    return np.dot(x, y) / math.sqrt(np.dot(x, x) * np.dot(y, y))
 
 
 def construct_cossim_lookup(XY, AB):
@@ -119,11 +119,11 @@ def load_elmo_weat_test(weatname, path=None):
     if path is None:
         path = "../encodings/elmo/"
     else:
-        path = path.rstrip('/')+'/'
-    A = elmo.load_elmo_hdf5(path+weatname+".A.elmo.hdf5")
-    B = elmo.load_elmo_hdf5(path+weatname+".B.elmo.hdf5")
-    X = elmo.load_elmo_hdf5(path+weatname+".X.elmo.hdf5")
-    Y = elmo.load_elmo_hdf5(path+weatname+".Y.elmo.hdf5")
+        path = path.rstrip('/') + '/'
+    A = elmo.load_elmo_hdf5(path + weatname + ".A.elmo.hdf5")
+    B = elmo.load_elmo_hdf5(path + weatname + ".B.elmo.hdf5")
+    X = elmo.load_elmo_hdf5(path + weatname + ".X.elmo.hdf5")
+    Y = elmo.load_elmo_hdf5(path + weatname + ".Y.elmo.hdf5")
     return (A, B, X, Y)
 
 
@@ -161,11 +161,12 @@ def run_test(A, B, X, Y, n_samples):
     log.info("esize: %g", esize)
     return esize, pval
 
+
 if __name__ == "__main__":
-    X = {"x"+str(i):2*np.random.rand(10)-1 for i in range(25)}
-    Y = {"y"+str(i):2*np.random.rand(10)-1 for i in range(25)}
-    A = {"a"+str(i):2*np.random.rand(10)-1 for i in range(25)}
-    B = {"b"+str(i):2*np.random.rand(10)-1 for i in range(25)}
+    X = {"x" + str(i): 2 * np.random.rand(10) - 1 for i in range(25)}
+    Y = {"y" + str(i): 2 * np.random.rand(10) - 1 for i in range(25)}
+    A = {"a" + str(i): 2 * np.random.rand(10) - 1 for i in range(25)}
+    B = {"b" + str(i): 2 * np.random.rand(10) - 1 for i in range(25)}
     A = X
     B = Y
 
@@ -185,4 +186,3 @@ if __name__ == "__main__":
     log.info("computing effect size...")
     esize = effect_size(X, Y, A, B, cossims=cossims)
     log.info("esize: %g", esize)
-

@@ -119,7 +119,7 @@ class BLSTMEncoder(nn.Module):
                     if word in ['<s>', '</s>']:
                         word_vec[word] = np.fromstring(vec, sep=' ')
 
-                if k>K and all([w in word_vec for w in ['<s>', '</s>']]):
+                if k > K and all([w in word_vec for w in ['<s>', '</s>']]):
                     break
         return word_vec
 
@@ -170,8 +170,8 @@ class BLSTMEncoder(nn.Module):
         tic = time.time()
         if tokenize:
             from nltk.tokenize import word_tokenize
-        sentences = [['<s>']+s.split()+['</s>'] if not tokenize else
-                     ['<s>']+word_tokenize(s)+['</s>'] for s in sentences]
+        sentences = [['<s>'] + s.split() + ['</s>'] if not tokenize else
+                     ['<s>'] + word_tokenize(s) + ['</s>'] for s in sentences]
         n_w = np.sum([len(x) for x in sentences])
 
         # filters words without glove vectors
@@ -211,7 +211,7 @@ class BLSTMEncoder(nn.Module):
 
         if verbose:
             print('Speed : {0} sentences/s ({1} mode, bsize={2})'
-                  .format(round(len(embeddings)/(time.time()-tic), 2),
+                  .format(round(len(embeddings) / (time.time() - tic), 2),
                           'gpu' if self.use_cuda else 'cpu', bsize))
         return embeddings
 
@@ -240,7 +240,7 @@ class BLSTMEncoder(nn.Module):
         # visualize model
         import matplotlib.pyplot as plt
         x = range(len(sent[0]))
-        y = [100.0*n/np.sum(argmaxs) for n in argmaxs]
+        y = [100.0 * n / np.sum(argmaxs) for n in argmaxs]
 
         plt.xticks(x, sent[0], rotation=45)
         plt.bar(x, y)

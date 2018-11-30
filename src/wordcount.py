@@ -2,19 +2,21 @@ import os
 import gzip
 import json
 
-main_path ='/scratch/sb6416/'
-datasets = ['word_count_wikitext-103','/scratch/sb6416/word_count_TBC']
+main_path = '/scratch/sb6416/'
+datasets = ['word_count_wikitext-103', '/scratch/sb6416/word_count_TBC']
 word_data = ["weat1", "weat2", "weat3", "weat4"]
 
-data =[]
+data = []
 
 fullpath = '/home/sb6416/sentbias/tests'
 
 """code to read words in weat file"""
+
+
 def read_weat_words():
 
 	for word in word_data:
-	    sent_file =os.path.join(fullpath,word+'.txt')
+	    sent_file = os.path.join(fullpath, word + '.txt')
 	    with open(sent_file, 'r') as sent_fh:
 
 	        for row in sent_fh:
@@ -43,8 +45,8 @@ for dataset in datasets:
                     word  = line.split(",")[0][1:]
                     freq = line.split(",")[1][:-2]
                     if word in data:
-                        #print(line)
-                        #print(word, freq)
+                        # print(line)
+                        # print(word, freq)
                         try:
 
                             word_counts[word] = int(freq)
@@ -56,8 +58,8 @@ for dataset in datasets:
     for x in data:
         if x not in word_counts:
             y.append(x)
-            #print(x+',')# +  ' not present in ' + dataset)
-    #print(y)
+            # print(x+',')# +  ' not present in ' + dataset)
+    # print(y)
 
     with open(output_path, 'w') as f:
             json.dumps(word_counts)
