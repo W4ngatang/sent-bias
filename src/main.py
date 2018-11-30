@@ -41,11 +41,6 @@ def handle_arguments(arguments):
     parser = argparse.ArgumentParser(
         description='Run specified SEAT tests on specified models.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--data_dir', '-d', type=str, required=True,
-                        help="Directory containing examples for each test")
-    parser.add_argument('--exp_dir', type=str, required=True,
-                        help="Directory from which to load and save vectors. " +
-                        "Files should be stored as h5py files.")
     parser.add_argument('--tests', '-t', type=str, required=True,
                         help="WEAT tests to run (a comma-separated list; options: {})".format(','.join(TESTS)))
     parser.add_argument('--models', '-m', type=str, required=True,
@@ -60,6 +55,13 @@ def handle_arguments(arguments):
     parser.add_argument('--dont_cache_encs', action='store_true',
                         help="If set, don't cache encodings to disk.")
 
+    parser.add_argument('--data_dir', '-d', type=str,
+                        help="Directory containing examples for each test",
+                        default='tests')
+    parser.add_argument('--exp_dir', type=str,
+                        help="Directory from which to load and save vectors. "
+                             "Files should be stored as h5py files.",
+                        default='output')
     parser.add_argument('--n_samples', type=int,
                         help="Number of permutation test samples used when estimate p-values (exact test is used if "
                              "there are fewer than this many permutations)",
