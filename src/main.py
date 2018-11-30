@@ -249,7 +249,7 @@ def main(arguments):
             # run the test on the encodings
             log.info("Running SEAT")
             log.info("Representation dimension: {}".format(d_rep))
-            esize, pval = weat.run_test(encs_targ1, encs_targ2, encs_attr1, encs_attr2, args.n_samples)
+            esize, pval = weat.run_test(X=encs_targ1, Y=encs_targ2, A=encs_attr1, B=encs_attr2, n_samples=args.n_samples)
             results.append((test, pval, esize))
 
         log.info("Model: %s", model_name)
