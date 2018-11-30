@@ -40,7 +40,11 @@ cd scripts
 
 ### Infersent
 
-Download the model checkpoints from the [original repo](https://github.com/facebookresearch/InferSent) and put them in `sentbias/encoders`.
+Download the model checkpoints from the [original repo](https://github.com/facebookresearch/InferSent) and put them in `sentbias/encoders`:
+
+```
+curl -Lo sentbias/encoders/infersent.allnli.pickle https://s3.amazonaws.com/senteval/infersent/infersent1.pkl
+```
 
 ### GenSen
 
