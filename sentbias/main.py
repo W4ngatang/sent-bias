@@ -1,4 +1,5 @@
 ''' Main script for loading models and running WEAT tests '''
+
 import os
 import sys
 import random
@@ -6,36 +7,22 @@ import argparse
 import logging as log
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
-import h5py
 import numpy as np
-
-from data import load_json, \
-                 load_encodings, save_encodings, load_jiant_encodings
-import weat
-import encoders.glove as glove
-import encoders.bow as bow
-import encoders.infersent as infersent
-import encoders.gensen as gensen
-import encoders.elmo as elmo
-import encoders.bert as bert
 import tensorflow as tf
 import tensorflow_hub as hub
 
-TESTS = ['angry_black_woman_stereotype_b', 'angry_black_woman_stereotype',
-         'heilman_double_bind_ambiguous_1+3-', 'heilman_double_bind_ambiguous_1-',
-         'heilman_double_bind_ambiguous_1', 'heilman_double_bind_clear_1+3-',
-         'heilman_double_bind_clear_1-', 'heilman_double_bind_clear_1',
-         'project_implicit_arab-muslim', 'project_implicit_disability',
-         'project_implicit_native', 'project_implicit_religion',
-         'project_implicit_sexuality', 'project_implicit_skin-tone',
-         'project_implicit_weapons', 'project_implicit_weight',
-         'sent-weat1', 'sent-weat2', 'sent-weat3', 'sent-weat4',
-         'weat1', 'weat2', 'weat3b', 'weat3', 'weat4',
-         'weat5b', 'weat5', 'weat6b', 'weat6',
-         'weat7b', 'weat7', 'weat8b', 'weat8',
-         'weat9', 'weat10']
-TEST_EXT = 'jsonl'
-MODELS = ["glove", "infersent", "elmo", "gensen", "bow", "guse",
+from sentbias.data import (
+    load_json, load_encodings, save_encodings, load_jiant_encodings,
+)
+import sentbias.weat as weat
+import sentbias.encoders.bow as bow
+import sentbias.encoders.infersent as infersent
+import sentbias.encoders.gensen as gensen
+import sentbias.encoders.elmo as elmo
+import sentbias.encoders.bert as bert
+
+TEST_EXT = '.jsonl'
+MODELS = ["infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
 
 
@@ -124,7 +111,7 @@ def main(arguments):
     tests = split_comma_and_check(
         args.tests,
         [
-            entry[:-(len(TEST_EXT) + 1)]
+            entry[:-len(TEST_EXT)]
             for entry in os.listdir(args.data_dir)
             if not entry.startswith('.') and entry.endswith(TEST_EXT)
         ],
@@ -155,16 +142,12 @@ def main(arguments):
                 encs_attr2 = encs['attr2']
             else:
                 # load the test data
-                encs = load_json(os.path.join(args.data_dir, "%s.%s" % (test, TEST_EXT)),
-                                  split_sentence_into_list=bool(model == "bert"))
+                encs = load_json(os.path.join(args.data_dir, "%s%s" % (test, TEST_EXT)),
+                                 split_sentence_into_list=bool(model == "bert"))
 
                 # load the model and do model-specific encoding procedure
                 log.info('Computing sentence encodings')
-                if model_name == 'glove':
-                    log.warn("GloVe is deprecating; use 'bow' instead!")
-                    encs_targ1, encs_targ2, encs_attr1, encs_attr2 = weat.load_weat_test(test, path=args.data_dir)
-
-                elif model_name == 'bow':
+                if model_name == 'bow':
                     encs_targ1 = bow.encode(encs["targ1"]["examples"], args.glove_path, tokenize=True)
                     encs_targ2 = bow.encode(encs["targ2"]["examples"], args.glove_path, tokenize=True)
                     encs_attr1 = bow.encode(encs["attr1"]["examples"], args.glove_path, tokenize=True)
@@ -173,14 +156,20 @@ def main(arguments):
                 elif model_name == 'infersent':
                     if model is None:
                         model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
-                    model.build_vocab([s for s in encs["targ1"]["examples"] + encs["targ2"]["examples"] + encs["attr1"]["examples"] + encs["attr2"]["examples"]], tokenize=False)
+                    model.build_vocab(
+                        [
+                            example
+                            for k in ('targ1', 'targ2', 'attr1', 'attr2')
+                            for example in encs[k]['examples']
+                        ],
+                        tokenize=False)
                     log.info("Encoding sentences for test %s with model %s...", test, model_name)
                     encs_targ1 = infersent.encode(model, encs["targ1"]["examples"])
                     encs_targ2 = infersent.encode(model, encs["targ2"]["examples"])
                     encs_attr1 = infersent.encode(model, encs["attr1"]["examples"])
                     encs_attr2 = infersent.encode(model, encs["attr2"]["examples"])
 
-                elif model_name =='gensen':
+                elif model_name == 'gensen':
                     if model is None:
                         model = gensen.GenSenSingle(model_folder=os.path.join(args.gensen_dir, 'models'),
                                                     filename_prefix=args.gensen_version,
@@ -191,19 +180,19 @@ def main(arguments):
                     encs_attr1 = gensen.encode(model, encs["attr1"]["examples"])
                     encs_attr2 = gensen.encode(model, encs["attr2"]["examples"])
 
-                elif model_name =='guse':
+                elif model_name == 'guse':
                     enc = [[] * 512 for _ in range(4)]
                     encs_targ1, encs_targ2, encs_attr1, encs_attr2 = {}, {}, {}, {}
 
                     model = hub.Module("https://tfhub.dev/google/universal-sentence-encoder/2")
-                    os.environ["CUDA_VISIBLE_DEVICES"] = '0' #use GPU with ID=0
+                    os.environ["CUDA_VISIBLE_DEVICES"] = '0'  # use GPU with ID=0
                     config = tf.ConfigProto()
-                    config.gpu_options.per_process_gpu_memory_fraction = 0.5 # maximum alloc gpu50% of MEM
-                    config.gpu_options.allow_growth = True #allocate dynamically
+                    config.gpu_options.per_process_gpu_memory_fraction = 0.5  # maximum alloc gpu50% of MEM
+                    config.gpu_options.allow_growth = True  # allocate dynamically
 
                     # TODO(Alex): I don't think this is compatible with dictionaries
-                    for i, sent in enumerate(encs): # iterate through the four word sets
-                        embeddings = model(sent) # embed the word set
+                    for i, sent in enumerate(encs):  # iterate through the four word sets
+                        embeddings = model(sent)  # embed the word set
                         with tf.Session(config=config) as session:
                             session.run([tf.global_variables_initializer(), tf.tables_initializer()])
                             enc[i] = session.run(embeddings)
@@ -225,7 +214,8 @@ def main(arguments):
                     encs = load_jiant_encodings(load_encs_from, n_header=1)
 
                 elif model_name == 'elmo':
-                    #encs_attr11, encs_attr21, encs_targ11, encs_targ21 = weat.load_elmo_weat_test(test, path='encodings/elmo/')
+                    # encs_attr11, encs_attr21, encs_targ11, encs_targ21 = weat.load_elmo_weat_test(
+                    #     test, path='encodings/elmo/')
                     encs_targ1 = elmo.encode(encs["targ1"]["examples"], args.combine_method, args.elmo_combine)
                     encs_targ2 = elmo.encode(encs["targ2"]["examples"], args.combine_method, args.elmo_combine)
                     encs_attr1 = elmo.encode(encs["attr1"]["examples"], args.combine_method, args.elmo_combine)
@@ -240,7 +230,6 @@ def main(arguments):
                     encs_targ2 = bert.encode(model, tokenizer, encs["targ2"]["examples"], args.combine_method)
                     encs_attr1 = bert.encode(model, tokenizer, encs["attr1"]["examples"], args.combine_method)
                     encs_attr2 = bert.encode(model, tokenizer, encs["attr2"]["examples"], args.combine_method)
-
 
                 elif model_name == "openai":
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)

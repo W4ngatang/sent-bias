@@ -4,10 +4,11 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from dropout import SequentialDropout
 
+
 class AbstractGRUCell(nn.Module):
 
     def __init__(self, input_size, hidden_size,
-                       bias_ih=True, bias_hh=False):
+                 bias_ih=True, bias_hh=False):
         super(AbstractGRUCell, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -29,7 +30,7 @@ class AbstractGRUCell(nn.Module):
 class GRUCell(AbstractGRUCell):
 
     def __init__(self, input_size, hidden_size,
-                       bias_ih=True, bias_hh=False):
+                 bias_ih=True, bias_hh=False):
         super(GRUCell, self).__init__(input_size, hidden_size,
                                       bias_ih, bias_hh)
 
@@ -45,10 +46,10 @@ class GRUCell(AbstractGRUCell):
 
 class BayesianGRUCell(AbstractGRUCell):
     def __init__(self, input_size, hidden_size,
-                       bias_ih=True, bias_hh=False,
-                       dropout=0.25):
+                 bias_ih=True, bias_hh=False,
+                 dropout=0.25):
         super(BayesianGRUCell, self).__init__(input_size, hidden_size,
-                                          bias_ih, bias_hh)
+                                              bias_ih, bias_hh)
         self.set_dropout(dropout)
 
     def set_dropout(self, dropout):
@@ -87,7 +88,7 @@ class BayesianGRUCell(AbstractGRUCell):
 class AbstractGRU(nn.Module):
 
     def __init__(self, input_size, hidden_size,
-                       bias_ih=True, bias_hh=False):
+                 bias_ih=True, bias_hh=False):
         super(AbstractGRU, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -105,7 +106,7 @@ class AbstractGRU(nn.Module):
             max_length = seq_length
         output = []
         for i in range(max_length):
-            hx = self.gru_cell(x[:,i,:], hx=hx)
+            hx = self.gru_cell(x[:, i, :], hx=hx)
             output.append(hx.view(batch_size, 1, self.hidden_size))
         output = torch.cat(output, 1)
         return output, hx
@@ -114,9 +115,9 @@ class AbstractGRU(nn.Module):
 class GRU(AbstractGRU):
 
     def __init__(self, input_size, hidden_size,
-                       bias_ih=True, bias_hh=False):
+                 bias_ih=True, bias_hh=False):
         super(GRU, self).__init__(input_size, hidden_size,
-                                          bias_ih, bias_hh)
+                                  bias_ih, bias_hh)
 
     def _load_gru_cell(self):
         self.gru_cell = GRUCell(self.input_size, self.hidden_size,
@@ -126,8 +127,8 @@ class GRU(AbstractGRU):
 class BayesianGRU(AbstractGRU):
 
     def __init__(self, input_size, hidden_size,
-                       bias_ih=True, bias_hh=False,
-                       dropout=0.25):
+                 bias_ih=True, bias_hh=False,
+                 dropout=0.25):
         self.dropout = dropout
         super(BayesianGRU, self).__init__(input_size, hidden_size,
                                           bias_ih, bias_hh)
@@ -148,9 +149,8 @@ class BayesianGRU(AbstractGRU):
             max_length = seq_length
         output = []
         for i in range(max_length):
-            hx = self.gru_cell(x[:,i,:], hx=hx)
+            hx = self.gru_cell(x[:, i, :], hx=hx)
             output.append(hx.view(batch_size, 1, self.hidden_size))
         self.gru_cell.end_of_sequence()
         output = torch.cat(output, 1)
         return output, hx
-

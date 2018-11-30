@@ -1,7 +1,7 @@
 ''' Convenience functions for handling BERT '''
-import ipdb
 import torch
 import pytorch_pretrained_bert as bert
+
 
 def load_model(version='bert-large-uncased'):
     ''' Load BERT model and corresponding tokenizer '''
@@ -10,6 +10,7 @@ def load_model(version='bert-large-uncased'):
     model.eval()
 
     return model, tokenizer
+
 
 def encode(model, tokenizer, texts, combine_method="mean"):
     ''' Use tokenizer and model to encode texts '''
@@ -22,6 +23,6 @@ def encode(model, tokenizer, texts, combine_method="mean"):
         segments_tensor = torch.tensor([segment_idxs])
         enc, _ = model(tokens_tensor, segments_tensor, output_all_encoded_layers=False)
 
-        enc = enc[:, 0, :] # extract the last rep of the first input
+        enc = enc[:, 0, :]  # extract the last rep of the first input
         encs[text] = enc.detach().view(-1).numpy()
     return encs

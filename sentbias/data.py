@@ -1,13 +1,12 @@
 ''' Helper functions related to loading and saving data '''
-import os
 import json
-from collections import defaultdict
 import numpy as np
 import h5py
 import logging as log
 
 WEAT_SETS = ["targ1", "targ2", "attr1", "attr2"]
 CATEGORY = "category"
+
 
 def load_json(sent_file, split_sentence_into_list=True):
     ''' Load from json. We expect a certain format later, so do some post processing '''
@@ -21,7 +20,7 @@ def load_json(sent_file, split_sentence_into_list=True):
             examples = v["examples"]
         data[k] = examples
         v["examples"] = examples
-    return all_data #data
+    return all_data  # data
 
 
 def load_encodings(enc_file):
@@ -57,20 +56,20 @@ def load_jiant_encodings(enc_file, n_header=1, is_openai=False):
     last_cat = None
     with open(enc_file, 'r') as enc_fh:
         for _ in range(n_header):
-            enc_fh.readline() # header
+            enc_fh.readline()  # header
         for row in enc_fh:
             idx, category, string, enc = row.strip().split('\t')
             if is_openai:
                 string = " ".join([w.rstrip("</w>") for w in string])
             enc = [float(n) for n in enc[1:-1].split(',')]
-            #encs[category][string] = np.array(enc)
+            # encs[category][string] = np.array(enc)
             if last_cat is None or last_cat != category:
-                #encs.append([np.array(enc)])
+                # encs.append([np.array(enc)])
                 encs.append({string: np.array(enc)})
             else:
-                #encs[-1].append(np.array(enc))
+                # encs[-1].append(np.array(enc))
                 encs[-1][string] = np.array(enc)
             last_cat = category
-            #encs[category].append(np.array(enc))
+            # encs[category].append(np.array(enc))
 
     return encs

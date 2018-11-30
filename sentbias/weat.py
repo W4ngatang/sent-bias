@@ -6,15 +6,14 @@ import itertools as it
 import numpy as np
 import scipy.special
 
-import encoders.glove as glove
-import encoders.elmo as elmo
+import sentbias.encoders.elmo as elmo
 
 # X and Y are two sets of target words of equal size.
 # A and B are two sets of attribute words.
 
 
 def cossim(x, y):
-    return np.dot(x, y) / math.sqrt(np.dot(x, x)*np.dot(y, y))
+    return np.dot(x, y) / math.sqrt(np.dot(x, x) * np.dot(y, y))
 
 
 def construct_cossim_lookup(XY, AB):
@@ -115,30 +114,16 @@ def effect_size(X, Y, A, B, cossims):
     return numerator / denominator
 
 
-def load_weat_test(weatname, path=None):
-    ''' Load pre-extracted GloVe vectors '''
-    if path is None:
-        path = "../tests/"
-    else:
-        path = path.rstrip('/')+'/'
-
-    A = glove.load_glove_file(path+weatname+".A.vec")
-    B = glove.load_glove_file(path+weatname+".B.vec")
-    X = glove.load_glove_file(path+weatname+".X.vec")
-    Y = glove.load_glove_file(path+weatname+".Y.vec")
-    return (A, B, X, Y)
-
-
 def load_elmo_weat_test(weatname, path=None):
     ''' Load pre-computed ELMo vectors '''
     if path is None:
         path = "../encodings/elmo/"
     else:
-        path = path.rstrip('/')+'/'
-    A = elmo.load_elmo_hdf5(path+weatname+".A.elmo.hdf5")
-    B = elmo.load_elmo_hdf5(path+weatname+".B.elmo.hdf5")
-    X = elmo.load_elmo_hdf5(path+weatname+".X.elmo.hdf5")
-    Y = elmo.load_elmo_hdf5(path+weatname+".Y.elmo.hdf5")
+        path = path.rstrip('/') + '/'
+    A = elmo.load_elmo_hdf5(path + weatname + ".A.elmo.hdf5")
+    B = elmo.load_elmo_hdf5(path + weatname + ".B.elmo.hdf5")
+    X = elmo.load_elmo_hdf5(path + weatname + ".X.elmo.hdf5")
+    Y = elmo.load_elmo_hdf5(path + weatname + ".Y.elmo.hdf5")
     return (A, B, X, Y)
 
 
@@ -149,7 +134,7 @@ def convert_keys_to_ints(X, Y):
     )
 
 
-#def run_test(A, B, X, Y, names, n_samples):
+# def run_test(A, B, X, Y, names, n_samples):
 def run_test(encs, n_samples):
     ''' Run a WEAT.
     args:
@@ -182,11 +167,12 @@ def run_test(encs, n_samples):
     log.info("esize: %g", esize)
     return esize, pval
 
+
 if __name__ == "__main__":
-    X = {"x"+str(i):2*np.random.rand(10)-1 for i in range(25)}
-    Y = {"y"+str(i):2*np.random.rand(10)-1 for i in range(25)}
-    A = {"a"+str(i):2*np.random.rand(10)-1 for i in range(25)}
-    B = {"b"+str(i):2*np.random.rand(10)-1 for i in range(25)}
+    X = {"x" + str(i): 2 * np.random.rand(10) - 1 for i in range(25)}
+    Y = {"y" + str(i): 2 * np.random.rand(10) - 1 for i in range(25)}
+    A = {"a" + str(i): 2 * np.random.rand(10) - 1 for i in range(25)}
+    B = {"b" + str(i): 2 * np.random.rand(10) - 1 for i in range(25)}
     A = X
     B = Y
 
@@ -206,4 +192,3 @@ if __name__ == "__main__":
     log.info("computing effect size...")
     esize = effect_size(X, Y, A, B, cossims=cossims)
     log.info("esize: %g", esize)
-

@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from torch import nn
 from torch.autograd import Variable
-from itertools import repeat
+
 
 class EmbeddingDropout():
 
@@ -77,10 +77,11 @@ class SequentialDropout(nn.Module):
     def __repr__(self):
         return type(self).__name__ + '({:.4f})'.format(self.p)
 
+
 if __name__ == '__main__':
 
     dp = SequentialDropout(p=0.5)
-    input = Variable(torch.ones(1,10), volatile=True)
+    input = Variable(torch.ones(1, 10), volatile=True)
 
     dist_total = torch.zeros(1)
     output_last = dp(input)
@@ -88,7 +89,7 @@ if __name__ == '__main__':
         output_new = dp(input)
         dist_total += torch.dist(output_new, output_last).data
         output_last = output_new
-    
+
     if not torch.equal(dist_total, torch.zeros(1)):
         print('Error')
         print(dist_total)
@@ -106,6 +107,6 @@ if __name__ == '__main__':
     ####
 
     dp = EmbeddingDropout(p=0.15)
-    input = torch.Tensor([[1,2,3,0,0],[5,3,2,2,0]]).long()
+    input = torch.Tensor([[1, 2, 3, 0, 0], [5, 3, 2, 2, 0]]).long()
     print(input)
     print(dp.forward(input))
