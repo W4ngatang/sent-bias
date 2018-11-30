@@ -6,8 +6,6 @@ import itertools as it
 import numpy as np
 import scipy.special
 
-import encoders.elmo as elmo
-
 # X and Y are two sets of target words of equal size.
 # A and B are two sets of attribute words.
 
@@ -112,19 +110,6 @@ def effect_size(X, Y, A, B, cossims):
     numerator = mean_s_wAB(X, A, B, cossims=cossims) - mean_s_wAB(Y, A, B, cossims=cossims)
     denominator = stdev_s_wAB(X + Y, A, B, cossims=cossims)
     return numerator / denominator
-
-
-def load_elmo_weat_test(weatname, path=None):
-    ''' Load pre-computed ELMo vectors '''
-    if path is None:
-        path = "../encodings/elmo/"
-    else:
-        path = path.rstrip('/') + '/'
-    A = elmo.load_elmo_hdf5(path + weatname + ".A.elmo.hdf5")
-    B = elmo.load_elmo_hdf5(path + weatname + ".B.elmo.hdf5")
-    X = elmo.load_elmo_hdf5(path + weatname + ".X.elmo.hdf5")
-    Y = elmo.load_elmo_hdf5(path + weatname + ".Y.elmo.hdf5")
-    return (A, B, X, Y)
 
 
 def convert_keys_to_ints(X, Y):
