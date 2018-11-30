@@ -10,15 +10,15 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
 
-from sentbias.data import (
+from data import (
     load_json, load_encodings, save_encodings, load_jiant_encodings,
 )
-import sentbias.weat as weat
-import sentbias.encoders.bow as bow
-import sentbias.encoders.infersent as infersent
-import sentbias.encoders.gensen as gensen
-import sentbias.encoders.elmo as elmo
-import sentbias.encoders.bert as bert
+import weat
+import encoders.bow as bow
+import encoders.infersent as infersent
+import encoders.gensen as gensen
+import encoders.elmo as elmo
+import encoders.bert as bert
 
 
 TEST_EXT = '.jsonl'

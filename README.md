@@ -66,13 +66,13 @@ Then copy `scripts/run_tests.sh` to another location, edit as desired, and run i
 To run bias tests directly, run `main` with one or more tests and one or more models.  Note that each model may require additional command-line flags specifying locations of resources and other options. For example:
 
 ```
-python -m sentbias.main \
+python sentbias/main.py
     -t weat1,weat2,weat3,weat4,sent-weat1,sent-weat2,sent-weat3,sent-weat4 \
     -m bow \
     --glove_path /export/b01/cmay/gbo/context-indep/glove.840B.300d.txt
 ```
 
-Run `python -m sentbias.main --help` to see a full list of options.
+Run `python sentbias/main.py --help` to see a full list of options.
 
 ## Code Tests
 
