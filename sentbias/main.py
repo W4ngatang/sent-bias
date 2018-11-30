@@ -248,7 +248,7 @@ def main(arguments):
                     log.info("Saving encodings to %s", enc_file)
                     save_encodings(encs, enc_file)
 
-            enc = [e for e in encs_targ1['encs'].values()][0]
+            enc = [e for e in encs["targ1"]['encs'].values()][0]
             d_rep = enc.size if isinstance(enc, np.ndarray) else len(enc)
 
             # run the test on the encodings
