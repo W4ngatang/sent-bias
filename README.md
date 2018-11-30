@@ -2,7 +2,9 @@
 
 ## Setup 
 
-Use `environment.yml` to create a conda environment with all necessary
+First, install Anaconda and a C++ compiler (for example, `g++`) if you
+do not have them.  Then
+use `environment.yml` to create a conda environment with all necessary
 code dependencies: `conda env create -f environment.yml`.
 Activate the environment with `source activate sentbias`.
 
@@ -47,19 +49,22 @@ Note, you need to process your GloVe word vectors into an HDF5 format. Run `src/
 
 ## Running Bias Tests
 
-Create user-specific paths `${EXP_DIR}` and `${GLOVE_PATH}` in `user_config.sh`, e.g.: 
+To run bias tests, run `src/main.py` with one or more tests and one or more models.  Note that each model may require additional command-line flags specifying locations of resources and other options. For example:
 
 ```
-EXP_DIR=path/to/save/stuff
-GLOVE_PATH=path/to/glove/vectors
+python src/main.py \
+    -t weat1,weat2,weat3,weat4,sent-weat1,sent-weat2,sent-weat3,sent-weat4 \
+    -m bow \
+    --glove_path /export/b01/cmay/gbo/context-indep/glove.840B.300d.txt
 ```
 
-Put that config file in the top level directory.
+Run `python src/main.py --help` to see a full list of options.
 
-An example script to run things is in `scripts/weat.sh`. To change the test, change the `-t` flag. To change the model, change the `-m` flag (currently accepted: InferSent, GloVe, ELMo)..
+## Code Tests
 
-## Tests
-
+```
+flake8
+```
 
 ## TODO
 
