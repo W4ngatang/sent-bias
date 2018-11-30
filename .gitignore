@@ -6,3 +6,4 @@
 *.sw*
 *~
 /user_config.sh
+/output/
