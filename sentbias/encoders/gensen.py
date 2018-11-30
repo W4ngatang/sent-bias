@@ -48,10 +48,8 @@ class Encoder(nn.Module):
 
     def set_pretrained_embeddings(self, embedding_matrix):
         """Set embedding weights."""
-        if (
-            embedding_matrix.shape[0] != self.src_embedding.weight.size(0) or
-            embedding_matrix.shape[1] != self.src_embedding.weight.size(1)
-        ):
+        if embedding_matrix.shape[0] != self.src_embedding.weight.size(0) or \
+                embedding_matrix.shape[1] != self.src_embedding.weight.size(1):
             print('''
                 Warning pretrained embedding shape mismatch %d x %d
                 expected %d x %d''' % (
@@ -128,7 +126,7 @@ class GenSen(nn.Module):
                 np.concatenate([x[1] for x in representations], axis=1)
         else:
             return torch.cat([x[0] for x in representations], 2), \
-                torch.cat([x[1] for x in rerepresentations], 1)
+                torch.cat([x[1] for x in representations], 1)
 
 
 class GenSenSingle(nn.Module):
@@ -156,10 +154,10 @@ class GenSenSingle(nn.Module):
 
         print(path)
         model_vocab = pickle.load(open(path, 'rb'), encoding='latin')
-       # with open(path,'rb') as file:
-        # print(file.type)
-        #    model_vocab = pickle.load(file,encoding='bytes')
-        #   print("here")
+        # with open(path,'rb') as file:
+        #     print(file.type)
+        #     model_vocab = pickle.load(file,encoding='bytes')
+        #     print("here")
 
         # Word to index mappings
         self.word2id = model_vocab['word2id']
@@ -303,8 +301,9 @@ class GenSenSingle(nn.Module):
         max_len = max(sorted_lens)
 
         sentences = [
-            [self.task_word2id[w] if w in self.task_word2id else self.task_word2id['<unk>'] for w in sentence] +
-            [self.task_word2id['<pad>']] * (max_len - len(sentence))
+            [
+                self.task_word2id[w] if w in self.task_word2id else self.task_word2id['<unk>'] for w in sentence
+            ] + [self.task_word2id['<pad>']] * (max_len - len(sentence))
             for sentence in sorted_sentences
         ]
 

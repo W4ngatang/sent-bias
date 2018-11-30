@@ -7,7 +7,6 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
-import ipdb
 import numpy as np
 import time
 import io
@@ -220,8 +219,7 @@ class BLSTMEncoder(nn.Module):
             from nltk.tokenize import word_tokenize
 
         sent = sent.split() if not tokenize else word_tokenize(sent)
-        sent = [['<s>'] + [word for word in sent if word in self.word_vec] +
-                ['</s>']]
+        sent = [['<s>'] + [word for word in sent if word in self.word_vec] + ['</s>']]
 
         if ' '.join(sent[0]) == '<s> </s>':
             import warnings

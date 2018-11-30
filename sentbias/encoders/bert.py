@@ -1,5 +1,4 @@
 ''' Convenience functions for handling BERT '''
-import ipdb
 import torch
 import pytorch_pretrained_bert as bert
 
