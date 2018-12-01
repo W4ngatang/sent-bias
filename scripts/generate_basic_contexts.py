@@ -165,7 +165,7 @@ def pluralize(s):
         return WOMAN_RE.sub('women', s)
     elif MAN_RE.search(s) is not None:
         return MAN_RE.sub('men', s)
-    elif s.endswith('y'):
+    elif s.endswith('y') and s[-2] not in 'aeiou':
         return s[:-1] + 'ies'
     elif s.endswith('ch'):
         return s + 'es'
