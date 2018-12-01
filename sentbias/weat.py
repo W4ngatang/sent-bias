@@ -10,6 +10,19 @@ import scipy.special
 # A and B are two sets of attribute words.
 
 
+def truncate_dicts(dict1, dict2, deterministic=False):
+    orig_state = random.getstate()
+    if deterministic:
+        random.seed(0)
+    list1 = sorted(dict1.items())
+    list2 = sorted(dict2.items())
+    random.shuffle(list1)
+    random.shuffle(list2)
+    min_len = min(len(list1), len(list2))
+    random.setstate(orig_state)
+    return (dict(list1[:min_len]), dict(list2[:min_len]))
+
+
 def cossim(x, y):
     return np.dot(x, y) / math.sqrt(np.dot(x, x) * np.dot(y, y))
 
@@ -63,7 +76,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
         # reflect that.
         total_true += 1
         total += 1
-        log.info('Drawing {} samples'.format(n_samples))
+        log.info('Drawing {} samples (and biasing by 1)'.format(n_samples))
         while total < n_samples:
             random.shuffle(XY)
             Xi = XY[:size]
@@ -125,12 +138,18 @@ def run_test(encs, n_samples):
     args:
         - encs (Dict[str: Dict]): dictionary mapping targ1, targ2, attr1, attr2
             to dictionaries containing the category and the encodings
-        - A, B, X, Y (Dict[str: np.array]): dictionaries mapping words
-            to their encodings
+        - n_samples (int): number of samples to draw to estimate p-value
+            (use exact test if number of permutations is less than or
+            equal to n_samples)
     '''
-    # First convert all keys to ints to facilitate array lookups
     X, Y = encs["targ1"]["encs"], encs["targ2"]["encs"]
     A, B = encs["attr1"]["encs"], encs["attr2"]["encs"]
+
+    if len(X) != len(Y):
+        log.info('Truncating X, Y to have same size (current sizes: {}, {})'.format(len(X), len(Y)))
+        (X, Y) = truncate_dicts(X, Y, deterministic=True)
+
+    # First convert all keys to ints to facilitate array lookups
     (X, Y) = convert_keys_to_ints(X, Y)
     (A, B) = convert_keys_to_ints(A, B)
 

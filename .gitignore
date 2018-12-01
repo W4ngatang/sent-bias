@@ -6,4 +6,5 @@
 *.sw*
 *~
 /user_config.sh
-/output/
+/output
+/.pytest_cache
