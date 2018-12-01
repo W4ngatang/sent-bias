@@ -29,6 +29,12 @@ path to the resultant text file.
 
 ### ELMo
 
+ELMo weights will be downloaded and cached at runtime.  Set `ALLENNLP_CACHE_ROOT` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `~/.allennlp`.  For example, if using bash, run this before running ELMo bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
+
+```
+export ALLENNLP_CACHE_ROOT=/data/allennlp_cache
+```
+
 ### Infersent
 
 Download the model checkpoints from the [original repo](https://github.com/facebookresearch/InferSent) and put them in `sentbias/encoders`:
