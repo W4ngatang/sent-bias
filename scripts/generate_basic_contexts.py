@@ -9,7 +9,7 @@ import re
 
 WOMAN_RE = re.compile(r'\b(?:woman)\b')
 MAN_RE = re.compile(r'\b(?:man)\b')
-PERSON_RE = re.compile(r'\b(?:woman|man|female|male)\b')
+PERSON_RE = re.compile(r'\b(?:woman|man|female|male|girl|boy)\b')
 
 OUTPUT_PREFIX = 'sent-'
 
