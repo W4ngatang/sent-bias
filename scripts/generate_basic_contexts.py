@@ -226,17 +226,15 @@ def pluralize(s):
         return s + 's'
 
 
-def truncate_dicts(dict1, dict2):
+def truncate_lists(list1, list2):
     '''
-    Truncate `dict1`, `dict2` to the minimum of their lengths by
-    randomly removing pairs.
+    Truncate `list1`, `list2` to the minimum of their lengths by
+    randomly removing items.
     '''
-    list1 = sorted(dict1.items())
-    list2 = sorted(dict2.items())
-    random.shuffle(list1)
-    random.shuffle(list2)
     min_len = min(len(list1), len(list2))
-    return (dict(list1[:min_len]), dict(list2[:min_len]))
+    list1 = [x for (i, x) in sorted(random.sample(list(enumerate(list1)), min_len))]
+    list2 = [x for (i, x) in sorted(random.sample(list(enumerate(list2)), min_len))]
+    return (list1, list2)
 
 
 def main():
@@ -258,9 +256,6 @@ def main():
         logging.info('Loading word-level test from {}'.format(input_path))
         with open(input_path) as f:
             sets = json.load(f)
-
-        logging.info('Fixing random seed')
-        random.seed(0)
 
         for (set_type, set_dict) in sets.items():
             sentences = []
@@ -327,11 +322,12 @@ def main():
 
             set_dict['examples'] = sentences
 
-        if len(sets['targ1']) != len(sets['targ2']):
+        if len(sets['targ1']['examples']) != len(sets['targ2']['examples']):
             logging.info(
                 'Truncating targ1, targ2 to have same size (current sizes: {}, {})'.format(
-                    len(sets['targ1']), len(sets['targ2'])))
-            (sets['targ1'], sets['targ2']) = truncate_dicts(sets['targ1'], sets['targ2'])
+                    len(sets['targ1']['examples']), len(sets['targ2']['examples'])))
+            (sets['targ1']['examples'], sets['targ2']['examples']) = truncate_lists(
+                sets['targ1']['examples'], sets['targ2']['examples'])
 
         (dirname, basename) = os.path.split(input_path)
         output_path = os.path.join(dirname, OUTPUT_PREFIX + basename)
