@@ -106,6 +106,8 @@ print_tests() {
     print_attributes "$attribute_2" "$role" "$attribute_context"
 }
 
+echo 'Note: this script should be called from the "scripts" directory' >&2
+
 for sentences_to_keep in 1 1- 1,3-
 do
     print_tests \

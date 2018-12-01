@@ -17,6 +17,10 @@ def convert_file(filename):
 
 
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logging.info('Note: this script should be called from the "tests" directory')
+
     files = []
     for entry in os.listdir('.'):
         if not entry.startswith('.') and entry.endswith('.txt'):

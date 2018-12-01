@@ -2,6 +2,8 @@
 
 set -e
 
+echo 'Note: this script should be called from the root of the repository' >&2
+
 #TESTS=weat1,weat2,weat3,weat3b,weat4,weat5,weat5b,weat6,weat6b,weat7,weat7b,weat8,weat8b,weat9,weat10,sent-weat1,sent-weat2,sent-weat3,sent-weat4,angry_black_woman_stereotype,angry_black_woman_stereotype_b,heilman_double_bind_ambiguous_1,heilman_double_bind_clear_1,heilman_double_bind_ambiguous_1+3-,heilman_double_bind_clear_1+3-
 TESTS=weat1
 SAVE_DIR=output

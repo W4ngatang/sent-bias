@@ -6,6 +6,10 @@ import json
 TESTS_DIR = '../tests'
 
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logging.info('Note: this script should be called from the "scripts" directory')
+
     for json_filename in os.listdir(TESTS_DIR):
         if not json_filename.startswith('.') and \
                 json_filename.endswith('.jsonl'):
