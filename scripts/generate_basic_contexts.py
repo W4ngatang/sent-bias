@@ -10,7 +10,7 @@ import random
 
 WOMAN_RE = re.compile(r'\b(?:woman)\b')
 MAN_RE = re.compile(r'\b(?:man)\b')
-PERSON_RE = re.compile(r'\b(?:woman|man|female|male|girl|boy)\b')
+PERSON_RE = re.compile(r'\b(?:woman|man|female|male|girl|boy|sister|brother|daughter|son|American)\b')
 
 OUTPUT_PREFIX = 'sent-'
 
@@ -58,6 +58,13 @@ ADJECTIVES = {
     'aggressive',
     'opinionated',
     'domineering',
+    'wonderful',
+    'terrible',
+    'horrible',
+    'nasty',
+    'awful',
+    'professional',
+    'evil',
 }
 
 MASS_NOUNS = {
@@ -77,11 +84,20 @@ MASS_NOUNS = {
     'agony',
     'dynamite',
     'teargas',
+    'joy',
+}
+
+PLURAL_NOUNS = {
+    'parents',
+    'children',
+    'cousins',
+    'relatives',
 }
 
 VERBS = {
     'pollute',
     'kill',
+    'stink',
 }
 
 NAME_TEMPLATES = (
@@ -95,6 +111,30 @@ NAME_TEMPLATES = (
     'The person\'s name is {term}.',
 )
 
+SUBJECT_PRONOUN_TEMPLATES = (
+    '{term} is here.',
+    '{term} is there.',
+    'Here {term} is.',
+    'There {term} is.',
+    '{term} is a person.',
+)
+
+OBJECT_PRONOUN_TEMPLATES = (
+    'It is {term}.',
+    'This is {term}.',
+    'That is {term}.',
+)
+
+POSSESSIVE_PRONOUN_TEMPLATES = (
+    'This is {term}.',
+    'That is {term}.',
+    'There is {term}.',
+    'Here is {term}.',
+    'It is {term}.',
+    '{term} is there.',
+    '{term} is here.',
+)
+
 ADJECTIVE_TEMPLATES = (
     'This is {term}.',
     'That is {term}.',
@@ -105,7 +145,6 @@ MASS_NOUN_TEMPLATES = (
     'This is {term}.',
     'That is {term}.',
     'There is {term}.',
-    'Here is {term}.',
     'It is {term}.',
 )
 
@@ -159,6 +198,15 @@ def fill_template(template, term):
     article = 'an' if any(term.startswith(c) for c in 'aeiouAEIOU') else 'a'
     sentence = template.format(article=article, term=term)
     return sentence[0].upper() + sentence[1:]
+
+
+def singularize(s):
+    if s == 'children':
+        return 'child'
+    elif s.endswith('s'):
+        return s[:-1]
+    else:
+        return s
 
 
 def pluralize(s):
@@ -217,7 +265,8 @@ def main():
         for (set_type, set_dict) in sets.items():
             sentences = []
             for term in set_dict['examples']:
-                if any(term.startswith(c) for c in string.ascii_uppercase):
+                if any(term.startswith(c) for c in string.ascii_uppercase) and \
+                        not term.endswith('American'):
                     sentences += [
                         fill_template(template, term)
                         for template in NAME_TEMPLATES
@@ -237,9 +286,30 @@ def main():
                         fill_template(template, term)
                         for template in MASS_NOUN_TEMPLATES
                     ]
-                else:
+                elif term in ('he', 'she'):
                     sentences += [
                         fill_template(template, term)
+                        for template in SUBJECT_PRONOUN_TEMPLATES
+                    ]
+                elif term in ('him', 'her'):
+                    sentences += [
+                        fill_template(template, term)
+                        for template in OBJECT_PRONOUN_TEMPLATES
+                    ]
+                elif term in ('his', 'hers'):
+                    sentences += [
+                        fill_template(template, term)
+                        for template in POSSESSIVE_PRONOUN_TEMPLATES
+                    ]
+                else:
+                    if term in PLURAL_NOUNS:
+                        singular_term = singularize(term)
+                        plural_term = term
+                    else:
+                        singular_term = term
+                        plural_term = pluralize(term)
+                    sentences += [
+                        fill_template(template, singular_term)
                         for template in SINGULAR_NOUN_TEMPLATES + (
                             SINGULAR_PERSON_TEMPLATES
                             if PERSON_RE.search(term) is not None
@@ -247,7 +317,7 @@ def main():
                         )
                     ]
                     sentences += [
-                        fill_template(template, pluralize(term))
+                        fill_template(template, plural_term)
                         for template in PLURAL_NOUN_TEMPLATES + (
                             PLURAL_PERSON_TEMPLATES
                             if PERSON_RE.search(term) is not None
@@ -258,7 +328,7 @@ def main():
             set_dict['examples'] = sentences
 
         if len(sets['targ1']) != len(sets['targ2']):
-            log.info(
+            logging.info(
                 'Truncating targ1, targ2 to have same size (current sizes: {}, {})'.format(
                     len(sets['targ1']), len(sets['targ2'])))
             (sets['targ1'], sets['targ2']) = truncate_dicts(sets['targ1'], sets['targ2'])
