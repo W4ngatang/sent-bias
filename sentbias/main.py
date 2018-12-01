@@ -100,9 +100,10 @@ def main(arguments):
     log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
     args = handle_arguments(arguments)
-    seed = random.randint(1, 100000) if args.seed < 0 else args.seed
-    random.seed(seed)
-    np.random.seed(seed)
+    if args.seed >= 0:
+        log.info('Seeding random number generators with {}'.format(args.seed))
+        random.seed(args.seed)
+        np.random.seed(args.seed)
     maybe_make_dir(args.exp_dir)
     if args.log_file:
         log.getLogger().addHandler(log.FileHandler(args.log_file))
