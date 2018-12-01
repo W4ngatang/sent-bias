@@ -4,7 +4,12 @@ import logging
 import json
 import string
 import os
+import re
 
+
+WOMAN_RE = re.compile(r'\b(?:woman)\b')
+MAN_RE = re.compile(r'\b(?:man)\b')
+PERSON_RE = re.compile(r'\b(?:woman|man|female|male)\b')
 
 OUTPUT_PREFIX = 'sent-'
 
@@ -78,70 +83,88 @@ VERBS = {
     'kill',
 }
 
-PERSON_CONTEXTS = {
-    'This is {}.',
-    'That is {}.',
-    'There is {}.',
-    'Here is {}.',
-    '{} is here.',
-    '{} is there.',
-    '{} is a person.',
-}
+NAME_TEMPLATES = (
+    'This is {term}.',
+    'That is {term}.',
+    'There is {term}.',
+    'Here is {term}.',
+    '{term} is here.',
+    '{term} is there.',
+    '{term} is a person.',
+    'The person\'s name is {term}.',
+)
 
-ADJECTIVE_CONTEXTS = {
-    'This is {}.',
-    'That is {}.',
-}
+ADJECTIVE_TEMPLATES = (
+    'This is {term}.',
+    'That is {term}.',
+    'They are {term}.',
+)
 
-MASS_NOUN_CONTEXTS = {
-    'This is {}.',
-    'That is {}.',
-    'There is {}.',
-    'Here is {}.',
-}
+MASS_NOUN_TEMPLATES = (
+    'This is {term}.',
+    'That is {term}.',
+    'There is {term}.',
+    'Here is {term}.',
+    'It is {term}.',
+)
 
-VERB_CONTEXTS = {
-    'This will {}.',
-    'This did {}.',
-    'This can {}.',
-    'This may {}.',
-    'That will {}.',
-    'That did {}.',
-    'That can {}.',
-    'That may {}.',
-}
+VERB_TEMPLATES = (
+    'This will {term}.',
+    'This did {term}.',
+    'This can {term}.',
+    'This may {term}.',
+    'That will {term}.',
+    'That did {term}.',
+    'That can {term}.',
+    'That may {term}.',
+)
 
-SINGULAR_VOWEL_CONTEXTS = {
-    'This is an {}.',
-    'That is an {}.',
-    'There is an {}.',
-    'Here is an {}.',
-    'The {} is here.',
-    'The {} is there.',
-}
+SINGULAR_NOUN_TEMPLATES = (
+    'This is {article} {term}.',
+    'That is {article} {term}.',
+    'There is {article} {term}.',
+    'Here is {article} {term}.',
+    'The {term} is here.',
+    'The {term} is there.',
+)
 
-SINGULAR_CONSONANT_CONTEXTS = {
-    'This is a {}.',
-    'That is a {}.',
-    'There is a {}.',
-    'Here is a {}.',
-    'The {} is here.',
-    'The {} is there.',
-}
+PLURAL_NOUN_TEMPLATES = (
+    'These are {term}.',
+    'Those are {term}.',
+    'They are {term}.',
+    'The {term} are here.',
+    'The {term} are there.',
+)
 
-PLURAL_CONTEXTS = {
-    'These are {}.',
-    'Those are {}.',
-    'The {} are here.',
-    'The {} are there.',
-}
+SINGULAR_PERSON_TEMPLATES = (
+    'A {term} is a person.',
+)
+
+PLURAL_PERSON_TEMPLATES = (
+    '{term} are people.',
+)
+
+SINGULAR_THING_TEMPLATES = (
+    'A {term} is a thing.',
+    'It is a {term}.',
+)
+
+PLURAL_THING_TEMPLATES = (
+    '{term} are things.',
+)
+
+
+def fill_template(template, term):
+    article = 'an' if any(term.startswith(c) for c in 'aeiouAEIOU') else 'a'
+    sentence = template.format(article=article, term=term)
+    return sentence[0].upper() + sentence[1:]
 
 
 def pluralize(s):
-    if s == 'woman' or s.startswith('woman ') or s.endswith(' woman'):
-        return s.replace('woman', 'women')
-    elif s == 'man' or s.startswith('man ') or s.endswith(' man'):
-        return s.replace('man', 'men')
+    if WOMAN_RE.search(s) is not None:
+        return WOMAN_RE.sub('women', s)
+    elif MAN_RE.search(s) is not None:
+        return MAN_RE.sub('men', s)
     elif s.endswith('y'):
         return s[:-1] + 'ies'
     elif s.endswith('ch'):
@@ -158,7 +181,7 @@ def main():
     from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
     parser = ArgumentParser(
         'Read word-level tests and generate corresponding sentence-level '
-        'tests next to them using simple contexts.',
+        'tests next to them using simple sentence templates.',
         formatter_class=ArgumentDefaultsHelpFormatter
     )
     parser.add_argument('input_paths', nargs='+', metavar='input_path',
@@ -176,42 +199,45 @@ def main():
 
         for (set_type, set_dict) in sets.items():
             sentences = []
-            for example in set_dict['examples']:
-                if any(example.startswith(c) for c in string.ascii_uppercase):
+            for term in set_dict['examples']:
+                if any(term.startswith(c) for c in string.ascii_uppercase):
                     sentences += [
-                        context.format(example)
-                        for context in PERSON_CONTEXTS
+                        fill_template(template, term)
+                        for template in NAME_TEMPLATES
                     ]
-                elif example in MASS_NOUNS:
+                elif term in ADJECTIVES:
                     sentences += [
-                        context.format(example)
-                        for context in MASS_NOUN_CONTEXTS
+                        fill_template(template, term)
+                        for template in ADJECTIVE_TEMPLATES
                     ]
-                elif example in ADJECTIVES:
+                elif term in VERBS:
                     sentences += [
-                        context.format(example)
-                        for context in ADJECTIVE_CONTEXTS
+                        fill_template(template, term)
+                        for template in VERB_TEMPLATES
                     ]
-                elif example in VERBS:
+                elif term in MASS_NOUNS:
                     sentences += [
-                        context.format(example)
-                        for context in VERB_CONTEXTS
+                        fill_template(template, term)
+                        for template in MASS_NOUN_TEMPLATES
                     ]
                 else:
-                    if any(example.startswith(c) for c in 'aeiou'):
-                        sentences += [
-                            context.format(example)
-                            for context in SINGULAR_VOWEL_CONTEXTS
-                        ]
-                    else:
-                        sentences += [
-                            context.format(example)
-                            for context in SINGULAR_CONSONANT_CONTEXTS
-                        ]
                     sentences += [
-                        context.format(pluralize(example))
-                        for context in PLURAL_CONTEXTS
+                        fill_template(template, term)
+                        for template in SINGULAR_NOUN_TEMPLATES + (
+                            SINGULAR_PERSON_TEMPLATES
+                            if PERSON_RE.search(term) is not None
+                            else SINGULAR_THING_TEMPLATES
+                        )
                     ]
+                    sentences += [
+                        fill_template(template, pluralize(term))
+                        for template in PLURAL_NOUN_TEMPLATES + (
+                            PLURAL_PERSON_TEMPLATES
+                            if PERSON_RE.search(term) is not None
+                            else PLURAL_THING_TEMPLATES
+                        )
+                    ]
+
             set_dict['examples'] = sentences
 
         (dirname, basename) = os.path.split(input_path)
