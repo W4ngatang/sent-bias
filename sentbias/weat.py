@@ -10,19 +10,6 @@ import scipy.special
 # A and B are two sets of attribute words.
 
 
-def truncate_dicts(dict1, dict2, deterministic=False):
-    orig_state = random.getstate()
-    if deterministic:
-        random.seed(0)
-    list1 = sorted(dict1.items())
-    list2 = sorted(dict2.items())
-    random.shuffle(list1)
-    random.shuffle(list2)
-    min_len = min(len(list1), len(list2))
-    random.setstate(orig_state)
-    return (dict(list1[:min_len]), dict(list2[:min_len]))
-
-
 def cossim(x, y):
     return np.dot(x, y) / math.sqrt(np.dot(x, x) * np.dot(y, y))
 
@@ -144,10 +131,6 @@ def run_test(encs, n_samples):
     '''
     X, Y = encs["targ1"]["encs"], encs["targ2"]["encs"]
     A, B = encs["attr1"]["encs"], encs["attr2"]["encs"]
-
-    if len(X) != len(Y):
-        log.info('Truncating X, Y to have same size (current sizes: {}, {})'.format(len(X), len(Y)))
-        (X, Y) = truncate_dicts(X, Y, deterministic=True)
 
     # First convert all keys to ints to facilitate array lookups
     (X, Y) = convert_keys_to_ints(X, Y)

@@ -5,6 +5,7 @@ import json
 import string
 import os
 import re
+import random
 
 
 WOMAN_RE = re.compile(r'\b(?:woman)\b')
@@ -177,6 +178,19 @@ def pluralize(s):
         return s + 's'
 
 
+def truncate_dicts(dict1, dict2):
+    '''
+    Truncate `dict1`, `dict2` to the minimum of their lengths by
+    randomly removing pairs.
+    '''
+    list1 = sorted(dict1.items())
+    list2 = sorted(dict2.items())
+    random.shuffle(list1)
+    random.shuffle(list2)
+    min_len = min(len(list1), len(list2))
+    return (dict(list1[:min_len]), dict(list2[:min_len]))
+
+
 def main():
     from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
     parser = ArgumentParser(
@@ -196,6 +210,9 @@ def main():
         logging.info('Loading word-level test from {}'.format(input_path))
         with open(input_path) as f:
             sets = json.load(f)
+
+        logging.info('Fixing random seed')
+        random.seed(0)
 
         for (set_type, set_dict) in sets.items():
             sentences = []
@@ -239,6 +256,12 @@ def main():
                     ]
 
             set_dict['examples'] = sentences
+
+        if len(sets['targ1']) != len(sets['targ2']):
+            log.info(
+                'Truncating targ1, targ2 to have same size (current sizes: {}, {})'.format(
+                    len(sets['targ1']), len(sets['targ2'])))
+            (sets['targ1'], sets['targ2']) = truncate_dicts(sets['targ1'], sets['targ2'])
 
         (dirname, basename) = os.path.split(input_path)
         output_path = os.path.join(dirname, OUTPUT_PREFIX + basename)
