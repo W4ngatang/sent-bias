@@ -142,7 +142,7 @@ def run_test(encs, n_samples):
     log.info("Computing cosine similarities...")
     cossims = construct_cossim_lookup(XY, AB)
 
-    log.info("Hypothesis: no difference between %s and %s in association to attributes %s and %s",
+    log.info("Null hypothesis: no difference between %s and %s in association to attributes %s and %s",
              encs["targ1"]["category"], encs["targ2"]["category"],
              encs["attr1"]["category"], encs["attr2"]["category"])
     log.info("Computing pval...")
