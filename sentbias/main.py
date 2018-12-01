@@ -40,7 +40,7 @@ def handle_arguments(arguments):
     parser.add_argument('--log_file', '-l', type=str,
                         help="File to log to")
     parser.add_argument('--glove_path', '-g', type=str,
-                        help="File to GloVe vectors. Required if glove model is specified.")
+                        help="File to GloVe vectors. Required if bow, gensen, or infersent models are specified.")
     parser.add_argument('--ignore_cached_encs', '-i', action='store_true',
                         help="If set, ignore existing encodings and encode from scratch.")
     parser.add_argument('--dont_cache_encs', action='store_true',
