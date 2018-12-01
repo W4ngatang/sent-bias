@@ -8,28 +8,99 @@ import os
 
 OUTPUT_PREFIX = 'sent-'
 
-PROPER_NOUN_CONTEXTS = [
+ADJECTIVES = {
+    'loyal',
+    'honest',
+    'gentle',
+    'lucky',
+    'happy',
+    'ugly',
+    'rotten',
+    'soft',
+    'quiet',
+    'compromising',
+    'rational',
+    'calm',
+    'kind',
+    'agreeable',
+    'servile',
+    'pleasant',
+    'cautious',
+    'friendly',
+    'supportive',
+    'nice',
+    'mild',
+    'demure',
+    'passive',
+    'indifferent',
+    'submissive',
+    'shrill',
+    'loud',
+    'argumentative',
+    'irrational',
+    'angry',
+    'abusive',
+    'obnoxious',
+    'controlling',
+    'nagging',
+    'brash',
+    'hostile',
+    'emasculating',
+    'mean',
+    'harsh',
+    'sassy',
+    'aggressive',
+    'opinionated',
+    'domineering',
+}
+
+MASS_NOUNS = {
+    'freedom',
+    'health',
+    'love',
+    'peace',
+    'cheer',
+    'heaven',
+    'loyalty',
+    'pleasure',
+    'laughter',
+    'filth',
+    'grief',
+    'hatred',
+    'poverty',
+    'agony',
+    'dynamite',
+    'teargas',
+}
+
+VERBS = {
+    'pollute',
+    'kill',
+}
+
+PERSON_CONTEXTS = {
     'This is {}.',
     'That is {}.',
     'There is {}.',
     'Here is {}.',
     '{} is here.',
     '{} is there.',
-]
+    '{} is a person.',
+}
 
-ADJECTIVE_CONTEXTS = [
+ADJECTIVE_CONTEXTS = {
     'This is {}.',
     'That is {}.',
-]
+}
 
-MASS_NOUN_CONTEXTS = [
+MASS_NOUN_CONTEXTS = {
     'This is {}.',
     'That is {}.',
     'There is {}.',
     'Here is {}.',
-]
+}
 
-VERB_CONTEXTS = [
+VERB_CONTEXTS = {
     'This will {}.',
     'This did {}.',
     'This can {}.',
@@ -38,40 +109,39 @@ VERB_CONTEXTS = [
     'That did {}.',
     'That can {}.',
     'That may {}.',
-]
+}
 
-SINGULAR_VOWEL_CONTEXTS = [
+SINGULAR_VOWEL_CONTEXTS = {
     'This is an {}.',
     'That is an {}.',
     'There is an {}.',
     'Here is an {}.',
     'The {} is here.',
     'The {} is there.',
-]
+}
 
-SINGULAR_CONSONANT_CONTEXTS = [
+SINGULAR_CONSONANT_CONTEXTS = {
     'This is a {}.',
     'That is a {}.',
     'There is a {}.',
     'Here is a {}.',
     'The {} is here.',
     'The {} is there.',
-]
+}
 
-PLURAL_CONTEXTS = [
+PLURAL_CONTEXTS = {
     'These are {}.',
     'Those are {}.',
     'The {} are here.',
     'The {} are there.',
-]
-
-'A {} is a thing.'
-'{} are things.'
+}
 
 
 def pluralize(s):
-    if s.startswith('woman') or s.endswith('women'):
+    if s == 'woman' or s.startswith('woman ') or s.endswith(' woman'):
         return s.replace('woman', 'women')
+    elif s == 'man' or s.startswith('man ') or s.endswith(' man'):
+        return s.replace('man', 'men')
     elif s.endswith('y'):
         return s[:-1] + 'ies'
     elif s.endswith('ch'):
@@ -107,87 +177,28 @@ def main():
         for (set_type, set_dict) in sets.items():
             sentences = []
             for example in set_dict['examples']:
-                if example.startswith(string.ascii_uppercase):
+                if any(example.startswith(c) for c in string.ascii_uppercase):
                     sentences += [
                         context.format(example)
-                        for context in PROPER_NOUN_CONTEXTS
+                        for context in PERSON_CONTEXTS
                     ]
-                elif example in (
-                        'freedom',
-                        'health',
-                        'love',
-                        'peace',
-                        'cheer',
-                        'heaven',
-                        'loyalty',
-                        'pleasure',
-                        'laughter',
-                        'filth',
-                        'grief',
-                        'hatred',
-                        'poverty',
-                        'agony',
-                        'dynamite',
-                        'teargas'):
+                elif example in MASS_NOUNS:
                     sentences += [
                         context.format(example)
                         for context in MASS_NOUN_CONTEXTS
                     ]
-                elif example in (
-                        'loyal',
-                        'honest',
-                        'gentle',
-                        'lucky',
-                        'happy',
-                        'ugly',
-                        'rotten',
-                        "soft",
-                        "quiet",
-                        "compromising",
-                        "rational",
-                        "calm",
-                        "kind",
-                        "agreeable",
-                        "servile",
-                        "pleasant",
-                        "cautious",
-                        "friendly",
-                        "supportive",
-                        "nice",
-                        "mild",
-                        "demure",
-                        "passive",
-                        "indifferent",
-                        "submissive",
-                        "shrill",
-                        "loud",
-                        "argumentative",
-                        "irrational",
-                        "angry",
-                        "abusive",
-                        "obnoxious",
-                        "controlling",
-                        "nagging",
-                        "brash",
-                        "hostile",
-                        "emasculating",
-                        "mean",
-                        "harsh",
-                        "sassy",
-                        "aggressive",
-                        "opinionated",
-                        "domineering"):
+                elif example in ADJECTIVES:
                     sentences += [
                         context.format(example)
                         for context in ADJECTIVE_CONTEXTS
                     ]
-                elif example in ('pollute', 'kill'):
+                elif example in VERBS:
                     sentences += [
                         context.format(example)
                         for context in VERB_CONTEXTS
                     ]
                 else:
-                    if any(example.startswith(v) for v in 'aeiou'):
+                    if any(example.startswith(c) for c in 'aeiou'):
                         sentences += [
                             context.format(example)
                             for context in SINGULAR_VOWEL_CONTEXTS
