@@ -85,4 +85,3 @@ flake8
 - track down NaNs in GenSen [Shikha]: looks like the denominator (stddev) of the effect size is 0 because a lot of the vectors are the same...possibly a problem with OOV, but all these words should be in GloVe (base word representations used). Can you make sure the vocab expansion method they implemented is being used?
 - add options for concatenation of GenSen models [Shikha]
 - implement SkipThought [Shikha]
-- make sure BoW and GloVe results are the same for single-word WEAT tests [Shikha]
