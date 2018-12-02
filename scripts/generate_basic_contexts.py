@@ -10,7 +10,7 @@ import random
 
 WOMAN_RE = re.compile(r'\b(?:woman)\b')
 MAN_RE = re.compile(r'\b(?:man)\b')
-PERSON_RE = re.compile(r'\b(?:woman|man|female|male|girl|boy|sister|brother|daughter|son|American)\b')
+PERSON_RE = re.compile(r'\b(?:woman|man|female|male|girl|boy|sister|brother|daughter|son|American|mother|father|aunt|uncle|grandmother|grandfather)\b')
 
 OUTPUT_PREFIX = 'sent-'
 
@@ -65,6 +65,7 @@ ADJECTIVES = {
     'awful',
     'professional',
     'evil',
+    'hopeless',
 }
 
 MASS_NOUNS = {
@@ -85,6 +86,18 @@ MASS_NOUNS = {
     'dynamite',
     'teargas',
     'joy',
+    'physics',
+    'calculus',
+    'science',
+    'chemistry',
+    'astronomy',
+    'NASA',
+    'poetry',
+    'art',
+    'literature',
+    'math',
+    'algebra',
+    'geometry',
 }
 
 PLURAL_NOUNS = {
@@ -92,6 +105,8 @@ PLURAL_NOUNS = {
     'children',
     'cousins',
     'relatives',
+    'numbers',
+    'equations',
 }
 
 VERBS = {
@@ -261,7 +276,8 @@ def main():
             sentences = []
             for term in set_dict['examples']:
                 if any(term.startswith(c) for c in string.ascii_uppercase) and \
-                        not term.endswith('American'):
+                        not term.endswith('American') and \
+                        term != term.upper():
                     sentences += [
                         fill_template(template, term)
                         for template in NAME_TEMPLATES
