@@ -10,7 +10,9 @@ import random
 
 WOMAN_RE = re.compile(r'\b(?:woman)\b')
 MAN_RE = re.compile(r'\b(?:man)\b')
-PERSON_RE = re.compile(r'\b(?:woman|man|female|male|girl|boy|sister|brother|daughter|son|American|mother|father|aunt|uncle|grandmother|grandfather)\b')
+PERSON_RE = re.compile(
+    r'\b(?:woman|man|female|male|girl|boy|sister|brother|daughter|son|'
+    r'mother|father|aunt|uncle|grandmother|grandfather|American)\b')
 
 OUTPUT_PREFIX = 'sent-'
 
@@ -192,7 +194,7 @@ PLURAL_NOUN_TEMPLATES = (
 )
 
 SINGULAR_PERSON_TEMPLATES = (
-    'A {term} is a person.',
+    '{article} {term} is a person.',
 )
 
 PLURAL_PERSON_TEMPLATES = (
@@ -201,7 +203,7 @@ PLURAL_PERSON_TEMPLATES = (
 
 SINGULAR_THING_TEMPLATES = (
     'A {term} is a thing.',
-    'It is a {term}.',
+    'It is {article} {term}.',
 )
 
 PLURAL_THING_TEMPLATES = (
@@ -210,7 +212,17 @@ PLURAL_THING_TEMPLATES = (
 
 
 def fill_template(template, term):
-    article = 'an' if any(term.startswith(c) for c in 'aeiouAEIOU') else 'a'
+    article = (
+        'an'
+        if (
+            any(
+                term.startswith(c) for c in 'aeiouAEIOU'
+            ) and not (
+                term.startswith('European') or term.startswith('Ukrainian')
+            )
+        )
+        else 'a'
+    )
     sentence = template.format(article=article, term=term)
     return sentence[0].upper() + sentence[1:]
 
