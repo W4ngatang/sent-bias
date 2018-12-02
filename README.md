@@ -19,13 +19,14 @@ You will also need to download pretrained model weights for each model
 you want to test.  Instructions for each supported model are as
 follows.
 
-### GloVe 
+### Bag-of-words (bow), others
 
+Several models require GloVe words vectors.
 Download and unzip the [GloVe Common Crawl 840B 300d
 vectors](http://nlp.stanford.edu/data/glove.840B.300d.zip) from the
 [Stanford NLP GloVe web
 page](https://nlp.stanford.edu/projects/glove/).  Make note of the
-path to the resultant text file.
+path to the resultant text file; you will need to pass it to `sentbias/main.py` using the `--glove_path` flag.
 
 ### ELMo
 
