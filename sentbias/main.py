@@ -3,6 +3,7 @@
 import os
 import sys
 import random
+import re
 import argparse
 import logging as log
 
@@ -26,16 +27,33 @@ MODELS = ["infersent", "elmo", "gensen", "bow", "guse",
           "bert", "cove", "openai"]
 
 
+def test_sort_key(test):
+    '''
+    Return tuple to be used as a sort key for the specified test name.
+    Break test name into pieces consisting of the integers in the name
+    and the strings in between them.
+    '''
+    key = ()
+    prev_end = 0
+    for match in re.finditer(r'\d+', test):
+        key = key + (test[prev_end:match.start()], int(match.group(0)))
+        prev_end = match.end()
+    key = key + (test[prev_end:],)
+
+    return key
+
+
 def handle_arguments(arguments):
     ''' Helper function for handling argument parsing '''
     parser = argparse.ArgumentParser(
         description='Run specified SEAT tests on specified models.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--tests', '-t', type=str, required=True,
+    parser.add_argument('--tests', '-t', type=str,
                         help="WEAT tests to run (a comma-separated list; test files should be in `data_dir` and "
-                             "have corresponding names, with extension {})".format(TEST_EXT))
-    parser.add_argument('--models', '-m', type=str, required=True,
-                        help="Models to evaluate (a comma-separated list; options: {})".format(','.join(MODELS)))
+                             "have corresponding names, with extension {}). Default: all tests.".format(TEST_EXT))
+    parser.add_argument('--models', '-m', type=str,
+                        help="Models to evaluate (a comma-separated list; options: {}). "
+                             "Default: all models.".format(','.join(MODELS)))
     parser.add_argument('--seed', '-s', type=int, help="Random seed", default=1111)
     parser.add_argument('--log_file', '-l', type=str,
                         help="File to log to")
@@ -109,15 +127,28 @@ def main(arguments):
         log.getLogger().addHandler(log.FileHandler(args.log_file))
     log.info("Parsed args: \n%s", args)
 
-    tests = split_comma_and_check(
-        args.tests,
+    all_tests = sorted(
         [
             entry[:-len(TEST_EXT)]
             for entry in os.listdir(args.data_dir)
             if not entry.startswith('.') and entry.endswith(TEST_EXT)
         ],
-        "test")
-    models = split_comma_and_check(args.models, MODELS, "model")
+        key=test_sort_key
+    )
+    log.debug('Tests found:')
+    for test in all_tests:
+        log.debug('\t{}'.format(test))
+
+    tests = split_comma_and_check(args.tests, all_tests, "test") if args.tests is not None else all_tests
+    log.info('Tests selected:')
+    for test in tests:
+        log.info('\t{}'.format(test))
+
+    models = split_comma_and_check(args.models, MODELS, "model") if args.models is not None else MODELS
+    log.info('Models selected:')
+    for model in models:
+        log.info('\t{}'.format(model))
+
     results = []
     for model_name in models:
         # Different models have different interfaces for things, but generally want to:

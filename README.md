@@ -53,20 +53,18 @@ Note, you need to process your GloVe word vectors into an HDF5 format. Run `scri
 We provide a script that demonstrates how to run the bias tests for each model.  To use it, minimally set the path to the GloVe vectors as `GLOVE_PATH` in a file called `user_config.sh`:
  
 ```
-GLOVE_PATH=path/to/glove/vectors
+GLOVE_PATH=path/to/glove/vectors.txt
 ```
  
 Then copy `scripts/run_tests.sh` to another location, edit as desired, and run it with `bash`.
 
 ### Details
 
-To run bias tests directly, run `main` with one or more tests and one or more models.  Note that each model may require additional command-line flags specifying locations of resources and other options. For example:
+To run bias tests directly, run `main` with one or more tests and one or more models.  Note that each model may require additional command-line flags specifying locations of resources and other options. For example, to run all tests against the bag-of-words (GloVe) and ELMo models:
 
 ```
-python sentbias/main.py
-    -t weat1,weat2,weat3,weat4,sent-weat1,sent-weat2,sent-weat3,sent-weat4 \
-    -m bow \
-    --glove_path /export/b01/cmay/gbo/context-indep/glove.840B.300d.txt
+python sentbias/main.py -m bow,elmo
+    --glove_path path/to/glove/vectors.txt
 ```
 
 Run `python sentbias/main.py --help` to see a full list of options.
