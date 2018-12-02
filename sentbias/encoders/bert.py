@@ -12,7 +12,7 @@ def load_model(version='bert-large-uncased'):
     return model, tokenizer
 
 
-def encode(model, tokenizer, texts, combine_method="mean"):
+def encode(model, tokenizer, texts):
     ''' Use tokenizer and model to encode texts '''
     encs = {}
     for text in texts:

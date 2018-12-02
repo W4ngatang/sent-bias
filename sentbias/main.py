@@ -57,13 +57,10 @@ def handle_arguments(arguments):
     parser.add_argument('--seed', '-s', type=int, help="Random seed", default=1111)
     parser.add_argument('--log_file', '-l', type=str,
                         help="File to log to")
-    parser.add_argument('--glove_path', '-g', type=str,
-                        help="File to GloVe vectors. Required if bow, gensen, or infersent models are specified.")
     parser.add_argument('--ignore_cached_encs', '-i', action='store_true',
                         help="If set, ignore existing encodings and encode from scratch.")
     parser.add_argument('--dont_cache_encs', action='store_true',
                         help="If set, don't cache encodings to disk.")
-
     parser.add_argument('--data_dir', '-d', type=str,
                         help="Directory containing examples for each test",
                         default='tests')
@@ -75,25 +72,40 @@ def handle_arguments(arguments):
                         help="Number of permutation test samples used when estimate p-values (exact test is used if "
                              "there are fewer than this many permutations)",
                         default=100000)
+    parser.add_argument('--glove_path', '-g', type=str,
+                        help="File to GloVe vectors. Required if bow, gensen, or infersent models are specified.")
 
-    parser.add_argument('--combine_method', type=str, choices=["max", "mean", "last", "concat"],
-                        default="max", help="How to combine vector sequences")
-    parser.add_argument('--infersent_dir', type=str,
-                        help="Directory containing model files. Required if infersent model is specified.")
-    parser.add_argument('--gensen_dir', type=str,
-                        help="Directory containing model files. Required if gensen model is specified.")
-    parser.add_argument('--gensen_version', type=str,
-                        choices=["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer"],
-                        default="nli_large_bothskip_parse", help="Version of gensen to use.")
-    parser.add_argument('--cove_encs', type=str,
-                        help="Directory containing precomputed CoVe encodings. Required if cove model is specified.")
-    parser.add_argument('--elmo_combine', type=str, choices=["add", "concat"],
-                        help="TODO", default="add")
-    parser.add_argument('--openai_encs', type=str,
-                        help="Directory containing precomputed OpenAI encodings. "
-                             "Required if openai model is specified.")
-    parser.add_argument('--bert_version', type=str, choices=["base", "large"],
-                        help="Version of BERT to use.", default="base")
+    elmo_group = parser.add_argument_group('elmo', 'Options for ELMo model')
+    elmo_group.add_argument('--combine_method', type=str, choices=["max", "mean", "last", "concat"],
+                            help="How to combine word representations in ELMo", default="max")
+    elmo_group.add_argument('--elmo_combine', type=str, choices=["add", "concat"],
+                            help="How to combine layers in ELMo", default="add")
+
+    infersent_group = parser.add_argument_group('infersent', 'Options for InferSent model')
+    infersent_group.add_argument('--infersent_dir', type=str,
+                                 help="Directory containing model files. Required if infersent model is specified.")
+
+    gensen_group = parser.add_argument_group('gensen', 'Options for GenSen model')
+    gensen_group.add_argument('--gensen_dir', type=str,
+                              help="Directory containing model files. Required if gensen model is specified.")
+    gensen_group.add_argument('--gensen_version', type=str,
+                              choices=["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer"],
+                              default="nli_large_bothskip_parse", help="Version of gensen to use.")
+
+    cove_group = parser.add_argument_group('cove', 'Options for CoVe model')
+    cove_group.add_argument('--cove_encs', type=str,
+                            help="Directory containing precomputed CoVe encodings. "
+                                 "Required if cove model is specified.")
+
+    openai_group = parser.add_argument_group('openai', 'Options for OpenAI model')
+    openai_group.add_argument('--openai_encs', type=str,
+                              help="Directory containing precomputed OpenAI encodings. "
+                                   "Required if openai model is specified.")
+
+    bert_group = parser.add_argument_group('bert', 'Options for BERT model')
+    bert_group.add_argument('--bert_version', type=str, choices=["base", "large"],
+                            help="Version of BERT to use.", default="base")
+
     return parser.parse_args(arguments)
 
 
@@ -180,12 +192,18 @@ def main(arguments):
                 # load the model and do model-specific encoding procedure
                 log.info('Computing sentence encodings')
                 if model_name == 'bow':
+                    if args.glove_path is None:
+                        raise Exception('glove_path must be specified for {} model'.format(model_name))
                     encs_targ1 = bow.encode(encs["targ1"]["examples"], args.glove_path, tokenize=True)
                     encs_targ2 = bow.encode(encs["targ2"]["examples"], args.glove_path, tokenize=True)
                     encs_attr1 = bow.encode(encs["attr1"]["examples"], args.glove_path, tokenize=True)
                     encs_attr2 = bow.encode(encs["attr2"]["examples"], args.glove_path, tokenize=True)
 
                 elif model_name == 'infersent':
+                    if args.glove_path is None:
+                        raise Exception('glove_path must be specified for {} model'.format(model_name))
+                    if args.infersent_dir is None:
+                        raise Exception('infersent_dir must be specified for {} model'.format(model_name))
                     if model is None:
                         model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
                     model.build_vocab(
@@ -202,6 +220,10 @@ def main(arguments):
                     encs_attr2 = infersent.encode(model, encs["attr2"]["examples"])
 
                 elif model_name =='gensen':
+                    if args.glove_path is None:
+                        raise Exception('glove_path must be specified for {} model'.format(model_name))
+                    if args.gensen_dir is None:
+                        raise Exception('gensen_dir must be specified for {} model'.format(model_name))
                     gensen_choices=["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer","nli_large"]
                     
                     prefixes = split_comma_and_check(args.gensen_version, gensen_choices, "gensen_prefix")
@@ -268,26 +290,31 @@ def main(arguments):
                                     encs_attr2[sent[j]] = embedding
 
                 elif model_name == "cove":
+                    if args.cove_encs is None:
+                        raise Exception('cove_encs must be specified for {} model'.format(model_name))
                     load_encs_from = os.path.join(args.cove_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1)
 
                 elif model_name == 'elmo':
-                    encs_targ1 = elmo.encode(encs["targ1"]["examples"], args.combine_method, args.elmo_combine)
-                    encs_targ2 = elmo.encode(encs["targ2"]["examples"], args.combine_method, args.elmo_combine)
-                    encs_attr1 = elmo.encode(encs["attr1"]["examples"], args.combine_method, args.elmo_combine)
-                    encs_attr2 = elmo.encode(encs["attr2"]["examples"], args.combine_method, args.elmo_combine)
+                    kwargs = dict(time_combine_method=args.combine_method, layer_combine_method=args.elmo_combine)
+                    encs_targ1 = elmo.encode(encs["targ1"]["examples"], **kwargs)
+                    encs_targ2 = elmo.encode(encs["targ2"]["examples"], **kwargs)
+                    encs_attr1 = elmo.encode(encs["attr1"]["examples"], **kwargs)
+                    encs_attr2 = elmo.encode(encs["attr2"]["examples"], **kwargs)
 
                 elif model_name == "bert":
                     if args.bert_version == "large":
                         model, tokenizer = bert.load_model('bert-large-uncased')
                     else:
                         model, tokenizer = bert.load_model('bert-base-uncased')
-                    encs_targ1 = bert.encode(model, tokenizer, encs["targ1"]["examples"], args.combine_method)
-                    encs_targ2 = bert.encode(model, tokenizer, encs["targ2"]["examples"], args.combine_method)
-                    encs_attr1 = bert.encode(model, tokenizer, encs["attr1"]["examples"], args.combine_method)
-                    encs_attr2 = bert.encode(model, tokenizer, encs["attr2"]["examples"], args.combine_method)
+                    encs_targ1 = bert.encode(model, tokenizer, encs["targ1"]["examples"])
+                    encs_targ2 = bert.encode(model, tokenizer, encs["targ2"]["examples"])
+                    encs_attr1 = bert.encode(model, tokenizer, encs["attr1"]["examples"])
+                    encs_attr2 = bert.encode(model, tokenizer, encs["attr2"]["examples"])
 
                 elif model_name == "openai":
+                    if args.openai_encs is None:
+                        raise Exception('openai_encs must be specified for {} model'.format(model_name))
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
 
