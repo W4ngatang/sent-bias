@@ -48,6 +48,14 @@ curl -Lo sentbias/encoders/infersent.allnli.pickle https://s3.amazonaws.com/sent
 Download the model checkpoints.
 Note, you need to process your GloVe word vectors into an HDF5 format. Run `scripts/glove2h5.py` in a directory containing the GloVe vectors.
 
+### BERT
+
+BERT weights will be downloaded and cached at runtime.  Set `PYTORCH_PRETRAINED_BERT_CACHE` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `~/.pytorch_pretrained_bert`.  For example, if using bash, run this before running BERT bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
+
+```
+export PYTORCH_PRETRAINED_BERT_CACHE=/data/bert_cache
+```
+
 ## Running Bias Tests
 
 We provide a script that demonstrates how to run the bias tests for each model.  To use it, minimally set the path to the GloVe vectors as `GLOVE_PATH` in a file called `user_config.sh`:
