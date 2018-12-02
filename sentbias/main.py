@@ -6,6 +6,7 @@ import random
 import re
 import argparse
 import logging as log
+from csv import DictWriter
 
 import numpy as np
 import tensorflow as tf
@@ -57,6 +58,8 @@ def handle_arguments(arguments):
     parser.add_argument('--seed', '-s', type=int, help="Random seed", default=1111)
     parser.add_argument('--log_file', '-l', type=str,
                         help="File to log to")
+    parser.add_argument('--results_path', type=str,
+                        help="Path where TSV results file will be written")
     parser.add_argument('--ignore_cached_encs', '-i', action='store_true',
                         help="If set, ignore existing encodings and encode from scratch.")
     parser.add_argument('--dont_cache_encs', action='store_true',
@@ -339,11 +342,27 @@ def main(arguments):
             log.info("Representation dimension: {}".format(d_rep))
             esize, pval = weat.run_test(encs, n_samples=args.n_samples)
 
-            results.append((test, pval, esize))
+            results.append(dict(
+                model=model_name,
+                test=test,
+                p_value=pval,
+                effect_size=esize,
+                num_targ1=len(encs['targ1']['encs']),
+                num_targ2=len(encs['targ2']['encs']),
+                num_attr1=len(encs['attr1']['encs']),
+                num_attr2=len(encs['attr2']['encs'])))
 
         log.info("Model: %s", model_name)
-        for test, pval, esize in results:
-            log.info("\tTest %s:\tp-val: %.5f\tesize: %.5f", test, pval, esize)
+        for r in results:
+            log.info("\tTest {test}:\tp-val: {p_value:.5f}\tesize: {effect_size:.5f}".format(**r))
+
+    if args.results_path is not None:
+        log.info('Writing results to {}'.format(args.results_path))
+        with open(args.results_path, 'w') as f:
+            writer = DictWriter(f, fieldnames=results[0].keys(), delimiter='\t')
+            writer.writeheader()
+            for r in results:
+                writer.writerow(r)
 
 
 if __name__ == "__main__":
