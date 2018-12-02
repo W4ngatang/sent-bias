@@ -37,16 +37,38 @@ export ALLENNLP_CACHE_ROOT=/data/allennlp_cache
 
 ### Infersent
 
-Download the model checkpoints from the [original repo](https://github.com/facebookresearch/InferSent) and put them in `sentbias/encoders`:
+Download the model checkpoints from the [InferSent repo](https://github.com/facebookresearch/InferSent):
 
 ```
-curl -Lo sentbias/encoders/infersent.allnli.pickle https://s3.amazonaws.com/senteval/infersent/infersent1.pkl
+wget https://s3.amazonaws.com/senteval/infersent/infersent1.pkl
+wget https://s3.amazonaws.com/senteval/infersent/infersent2.pkl
+ln -s $PWD/infersent1.pkl infersent.allnli.pickle
 ```
+
+Make a note of the directory you download them to; you will need to pass it to `sentbias/main.py` using the `--infersent_dir` flag.
 
 ### GenSen
 
-Download the model checkpoints.
-Note, you need to process your GloVe word vectors into an HDF5 format. Run `scripts/glove2h5.py` in a directory containing the GloVe vectors.
+Download the model checkpoints from the [GenSen repo](https://github.com/Maluuba/gensen#setting-up-models--pre-trained-word-vecotrs):
+
+```
+wget https://genseniclr2018.blob.core.windows.net/models/nli_large_bothskip_2layer_vocab.pkl
+wget https://genseniclr2018.blob.core.windows.net/models/nli_large_bothskip_2layer.model
+wget https://genseniclr2018.blob.core.windows.net/models/nli_large_bothskip_parse_vocab.pkl
+wget https://genseniclr2018.blob.core.windows.net/models/nli_large_bothskip_parse.model
+wget https://genseniclr2018.blob.core.windows.net/models/nli_large_bothskip_vocab.pkl
+wget https://genseniclr2018.blob.core.windows.net/models/nli_large_bothskip.model
+wget https://genseniclr2018.blob.core.windows.net/models/nli_large_vocab.pkl
+wget https://genseniclr2018.blob.core.windows.net/models/nli_large.model
+```
+
+Make a note of the directory you download them to; you will need to pass it to `sentbias/main.py` using the `--gensen_dir` flag.
+
+You will also need to process your GloVe word vectors into an HDF5 format.  To do this run `scripts/glove2h5.py` on the path to your GloVe vectors:
+
+```
+python scripts/glove2h5.py path/to/glove/vectors.txt
+```
 
 ### BERT
 
