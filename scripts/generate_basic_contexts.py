@@ -68,6 +68,24 @@ ADJECTIVES = {
     'professional',
     'evil',
     'hopeless',
+    'sad',
+    'gloomy',
+    'tearful',
+    'miserable',
+    'depressed',
+    'sick',
+    'impermanent',
+    'unstable',
+    'variable',
+    'fleeting',
+    'short-term',
+    'brief',
+    'occasional',
+    'stable',
+    'constant',
+    'persistent',
+    'chronic',
+    'prolonged',
 }
 
 MASS_NOUNS = {
@@ -100,6 +118,8 @@ MASS_NOUNS = {
     'math',
     'algebra',
     'geometry',
+    'always',
+    'forever',
 }
 
 PLURAL_NOUNS = {
