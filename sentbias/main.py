@@ -24,8 +24,8 @@ import encoders.bert as bert
 
 
 TEST_EXT = '.jsonl'
-MODELS = ["infersent", "elmo", "gensen", "bow", "guse",
-          "bert", "cove", "openai"]
+MODELS = ["infersent", "elmo", "gensen", "bow", "guse", "bert", "cove", "openai"]
+GENSEN_VERSIONS = ["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer", "nli_large"]
 
 
 def test_sort_key(test):
@@ -92,8 +92,10 @@ def handle_arguments(arguments):
     gensen_group.add_argument('--gensen_dir', type=str,
                               help="Directory containing model files. Required if gensen model is specified.")
     gensen_group.add_argument('--gensen_version', type=str,
-                              choices=["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer"],
-                              default="nli_large_bothskip_parse", help="Version of gensen to use.")
+                              help="Version of gensen to use.  Two versions may be passed, separated by commas, in "
+                                   "which case the respective models will be concatenated.  "
+                                   "Options: {}".format(','.join(GENSEN_VERSIONS)),
+                              default="nli_large_bothskip_parse")
 
     cove_group = parser.add_argument_group('cove', 'Options for CoVe model')
     cove_group.add_argument('--cove_encs', type=str,
@@ -183,6 +185,7 @@ def main(arguments):
             if not args.ignore_cached_encs and os.path.isfile(enc_file):
                 log.info("Loading encodings from %s", enc_file)
                 encs = load_encodings(enc_file)
+                model_options = ''
                 encs_targ1 = encs['targ1']
                 encs_targ2 = encs['targ2']
                 encs_attr1 = encs['attr1']
@@ -197,6 +200,7 @@ def main(arguments):
                 if model_name == 'bow':
                     if args.glove_path is None:
                         raise Exception('glove_path must be specified for {} model'.format(model_name))
+                    model_options = ''
                     encs_targ1 = bow.encode(encs["targ1"]["examples"], args.glove_path, tokenize=True)
                     encs_targ2 = bow.encode(encs["targ2"]["examples"], args.glove_path, tokenize=True)
                     encs_attr1 = bow.encode(encs["attr1"]["examples"], args.glove_path, tokenize=True)
@@ -207,6 +211,7 @@ def main(arguments):
                         raise Exception('glove_path must be specified for {} model'.format(model_name))
                     if args.infersent_dir is None:
                         raise Exception('infersent_dir must be specified for {} model'.format(model_name))
+                    model_options = ''
                     if model is None:
                         model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
                     model.build_vocab(
@@ -227,9 +232,10 @@ def main(arguments):
                         raise Exception('glove_path must be specified for {} model'.format(model_name))
                     if args.gensen_dir is None:
                         raise Exception('gensen_dir must be specified for {} model'.format(model_name))
-                    gensen_choices=["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer","nli_large"]
-                    
-                    prefixes = split_comma_and_check(args.gensen_version, gensen_choices, "gensen_prefix")
+                    if len(args.gensen_version) > 2:
+                        raise ValueError('gensen_version can only have one or two elements')
+                    prefixes = split_comma_and_check(args.gensen_version, GENSEN_VERSIONS, "gensen_prefix")
+                    model_options = 'version=' + args.gensen_version
                     
                     if model is None:
                         gensen_1=gensen.GenSenSingle(model_folder=os.path.join(args.gensen_dir, 'models'),
@@ -295,17 +301,21 @@ def main(arguments):
                 elif model_name == "cove":
                     if args.cove_encs is None:
                         raise Exception('cove_encs must be specified for {} model'.format(model_name))
+                    model_options = ''
                     load_encs_from = os.path.join(args.cove_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1)
 
                 elif model_name == 'elmo':
                     kwargs = dict(time_combine_method=args.combine_method, layer_combine_method=args.elmo_combine)
+                    model_options = 'time_combine={time_combine_method};layer_combine={layer_combine_method}'.format(
+                        **kwargs)
                     encs_targ1 = elmo.encode(encs["targ1"]["examples"], **kwargs)
                     encs_targ2 = elmo.encode(encs["targ2"]["examples"], **kwargs)
                     encs_attr1 = elmo.encode(encs["attr1"]["examples"], **kwargs)
                     encs_attr2 = elmo.encode(encs["attr2"]["examples"], **kwargs)
 
                 elif model_name == "bert":
+                    model_options = 'version=' + args.bert_version
                     if args.bert_version == "large":
                         model, tokenizer = bert.load_model('bert-large-uncased')
                     else:
@@ -318,6 +328,7 @@ def main(arguments):
                 elif model_name == "openai":
                     if args.openai_encs is None:
                         raise Exception('openai_encs must be specified for {} model'.format(model_name))
+                    model_options = ''
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
 
@@ -344,6 +355,7 @@ def main(arguments):
 
             results.append(dict(
                 model=model_name,
+                options=model_options,
                 test=test,
                 p_value=pval,
                 effect_size=esize,
