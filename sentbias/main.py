@@ -255,8 +255,11 @@ def main(arguments):
                                 cuda=True)
                             model = gensen.GenSen(gensen_1, gensen_2)
 
-                    vocab = gensen.build_vocab(
-                        [s for s in sents["targ1"] + sents["targ2"] + sents["attr1"] + sents["attr2"]])
+                    vocab = gensen.build_vocab([
+                        s
+                        for set_name in ('targ1', 'targ2', 'attr1', 'attr2')
+                        for s in encs[set_name]["examples"]
+                    ])
 
                     params_senteval = {'task_path': args.gensen_dir, 'usepytorch': True, 'kfold': 10}
                     params_senteval['classifier'] = {'nhid': 0, 'optim': 'adam', 'batch_size': 64,
@@ -264,10 +267,10 @@ def main(arguments):
 
                     model.vocab_expansion(vocab)
 
-                    encs_targ1 = gensen.encode(model, sents["targ1"])
-                    encs_targ2 = gensen.encode(model, sents["targ2"])
-                    encs_attr1 = gensen.encode(model, sents["attr1"])
-                    encs_attr2 = gensen.encode(model, sents["attr2"])
+                    encs_targ1 = gensen.encode(model, encs["targ1"]["examples"])
+                    encs_targ2 = gensen.encode(model, encs["targ2"]["examples"])
+                    encs_attr1 = gensen.encode(model, encs["attr1"]["examples"])
+                    encs_attr2 = gensen.encode(model, encs["attr2"]["examples"])
 
                 elif model_name == 'guse':
                     enc = [[] * 512 for _ in range(4)]
