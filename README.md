@@ -41,9 +41,8 @@ export ALLENNLP_CACHE_ROOT=/data/allennlp_cache
 Download the model checkpoints from the [InferSent repo](https://github.com/facebookresearch/InferSent):
 
 ```
-wget https://s3.amazonaws.com/senteval/infersent/infersent1.pkl
-wget https://s3.amazonaws.com/senteval/infersent/infersent2.pkl
-ln -s $PWD/infersent1.pkl infersent.allnli.pickle
+wget https://s3.amazonaws.com/senteval/infersent/infersent.allnli.pickle
+wget https://s3.amazonaws.com/senteval/infersent/infersent.snli.pickle
 ```
 
 Make a note of the directory you download them to; you will need to pass it to `sentbias/main.py` using the `--infersent_dir` flag.
