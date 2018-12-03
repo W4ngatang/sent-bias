@@ -185,6 +185,9 @@ def main(arguments):
             if not args.ignore_cached_encs and os.path.isfile(enc_file):
                 log.info("Loading encodings from %s", enc_file)
                 encs = load_encodings(enc_file)
+                # TODO model options are neither saved/loaded to/from
+                # the cache, nor is the cache named in a way unique to
+                # model options
                 model_options = ''
                 encs_targ1 = encs['targ1']
                 encs_targ2 = encs['targ2']
