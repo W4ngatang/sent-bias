@@ -227,7 +227,7 @@ def main(arguments):
                     encs_attr1 = infersent.encode(model, encs["attr1"]["examples"])
                     encs_attr2 = infersent.encode(model, encs["attr2"]["examples"])
 
-                elif model_name =='gensen':
+                elif model_name == 'gensen':
                     if args.glove_path is None:
                         raise Exception('glove_path must be specified for {} model'.format(model_name))
                     if args.gensen_dir is None:
@@ -236,38 +236,34 @@ def main(arguments):
                         raise ValueError('gensen_version can only have one or two elements')
                     prefixes = split_comma_and_check(args.gensen_version, GENSEN_VERSIONS, "gensen_prefix")
                     model_options = 'version=' + args.gensen_version
-                    
+
                     if model is None:
-                        gensen_1=gensen.GenSenSingle(model_folder=os.path.join(args.gensen_dir, 'models'),
-                                                   filename_prefix=prefixes[0],
-                                                   pretrained_emb=os.path.join(args.glove_path, 'glove.840B.300d.h5'),
-                                                     cuda =True)
-                        
-                        model=gensen_1
-                        if(len(prefixes)==2):
-                                gensen_2=GenSenSingle(model_folder=os.path.join(args.gensen_dir, 'models'),
-                                                        filename_prefix=prefixes[1],
-                                                        pretrained_emb=os.path.join(args.glove_path, 'glove.840B.300d.h5'),
-                                                          cuda =True)
-                                model=GenSen(gensen_1,gensen_2)
-                         
-                        
-                        
-                    
-                    vocab = gensen.build_vocab([s for s in sents["targ1"] + sents["targ2"] + sents["attr1"] + sents["attr2"]])
-                    
+                        gensen_1 = gensen.GenSenSingle(
+                            model_folder=os.path.join(
+                                args.gensen_dir, 'models'), filename_prefix=prefixes[0], pretrained_emb=os.path.join(
+                                args.glove_path, 'glove.840B.300d.h5'), cuda=True)
+
+                        model = gensen_1
+                        if(len(prefixes) == 2):
+                            gensen_2 = GenSenSingle(model_folder=os.path.join(args.gensen_dir, 'models'),
+                                                    filename_prefix=prefixes[1],
+                                                    pretrained_emb=os.path.join(args.glove_path, 'glove.840B.300d.h5'),
+                                                    cuda=True)
+                            model = GenSen(gensen_1, gensen_2)
+
+                    vocab = gensen.build_vocab(
+                        [s for s in sents["targ1"] + sents["targ2"] + sents["attr1"] + sents["attr2"]])
+
                     params_senteval = {'task_path': args.gensen_dir, 'usepytorch': True, 'kfold': 10}
                     params_senteval['classifier'] = {'nhid': 0, 'optim': 'adam', 'batch_size': 64,
                                                      'tenacity': 5, 'epoch_size': 4}
 
-                    
                     model.vocab_expansion(vocab)
-                            
+
                     encs_targ1 = gensen.encode(model, sents["targ1"])
                     encs_targ2 = gensen.encode(model, sents["targ2"])
                     encs_attr1 = gensen.encode(model, sents["attr1"])
                     encs_attr2 = gensen.encode(model, sents["attr2"])
-                    
 
                 elif model_name == 'guse':
                     enc = [[] * 512 for _ in range(4)]

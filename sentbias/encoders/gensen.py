@@ -12,21 +12,24 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
 
+
 def encode(model, sents):
     ''' Use model to encode gensen sents '''
     sent2vec = {}
     reps_h, reps_h_t = model.get_representation(sents, pool='last', return_numpy=True, tokenize=True)
-    for j in range(0,len(sents)):
+    for j in range(0, len(sents)):
         sent2vec[sents[j]] = reps_h_t[j]
     return sent2vec
 
+
 def build_vocab(sentences):
-    vocab =[]
+    vocab = []
     for s in sentences:
-        words = s.replace('.',' ').split()
+        words = s.replace('.', ' ').split()
         for w in words:
             vocab.append(w)
     return set(vocab)
+
 
 class Encoder(nn.Module):
     """GenSen Encoder."""
@@ -74,7 +77,7 @@ class Encoder(nn.Module):
 
         try:
             self.src_embedding.weight.data.set_(torch.from_numpy(embedding_matrix))
-        except:
+        except BaseException:
             self.src_embedding.weight.data.set_(torch.from_numpy(embedding_matrix).cuda())
 
         self.src_embedding.cuda()
@@ -159,10 +162,10 @@ class GenSenSingle(nn.Module):
         """Load pretrained params."""
         # Read vocab pickle files
 
-        path = os.path.join(self.model_folder,'%s_vocab.pkl' % (self.filename_prefix))
+        path = os.path.join(self.model_folder, '%s_vocab.pkl' % (self.filename_prefix))
 
         print(path)
-        model_vocab = pickle.load(open(path,'rb'),encoding='latin')
+        model_vocab = pickle.load(open(path, 'rb'), encoding='latin')
         self.word2id = model_vocab['word2id']
         self.id2word = model_vocab['id2word']
         self.task_word2id = self.word2id
@@ -199,11 +202,11 @@ class GenSenSingle(nn.Module):
     def first_expansion(self):
         """Traing linear regression model for the first time."""
         # Read pre-trained word embedding h5 file
-        print ('Loading pretrained word embeddings')
+        print('Loading pretrained word embeddings')
         pretrained_embeddings = h5py.File(self.pretrained_emb)
         pretrained_embedding_matrix = pretrained_embeddings['embedding'].value
         pretrain_vocab = \
-            pretrained_embeddings['words_flatten'].value#.split('\n')
+            pretrained_embeddings['words_flatten'].value  # .split('\n')
         pretrain_word2id = {
             word: ind for ind, word in enumerate(pretrain_vocab)
         }
@@ -221,7 +224,7 @@ class GenSenSingle(nn.Module):
                     pretrained_embedding_matrix[pretrain_word2id[word]]
                 )
 
-        print ('Training vocab expansion on model')
+        print('Training vocab expansion on model')
         lreg = LinearRegression()
         lreg.fit(pretrain_train, model_train)
         self.lreg = lreg
@@ -276,8 +279,8 @@ class GenSenSingle(nn.Module):
                     self.model_embedding_matrix[self.word2id['<unk>']]
                 )
 
-        print ('Found %d task OOVs ' % (oov_task))
-        print ('Found %d pretrain OOVs ' % (oov_pretrain))
+        print('Found %d task OOVs ' % (oov_task))
+        print('Found %d pretrain OOVs ' % (oov_pretrain))
         task_embeddings = np.stack(task_embeddings)
         self.encoder.set_pretrained_embeddings(task_embeddings)
         self.vocab_expanded = True
