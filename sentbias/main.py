@@ -238,18 +238,22 @@ def main(arguments):
                     model_options = 'version=' + args.gensen_version
 
                     if model is None:
+                        model_folder = os.path.join(args.gensen_dir, 'models')
+                        glove_h5_path = os.path.join(args.glove_path, 'glove.840B.300d.h5')
                         gensen_1 = gensen.GenSenSingle(
-                            model_folder=os.path.join(
-                                args.gensen_dir, 'models'), filename_prefix=prefixes[0], pretrained_emb=os.path.join(
-                                args.glove_path, 'glove.840B.300d.h5'), cuda=True)
-
+                            model_folder=model_folder,
+                            filename_prefix=prefixes[0],
+                            pretrained_emb=glove_h5_path,
+                            cuda=True)
                         model = gensen_1
-                        if(len(prefixes) == 2):
-                            gensen_2 = GenSenSingle(model_folder=os.path.join(args.gensen_dir, 'models'),
-                                                    filename_prefix=prefixes[1],
-                                                    pretrained_emb=os.path.join(args.glove_path, 'glove.840B.300d.h5'),
-                                                    cuda=True)
-                            model = GenSen(gensen_1, gensen_2)
+
+                        if len(prefixes) == 2:
+                            gensen_2 = gensen.GenSenSingle(
+                                model_folder=model_folder,
+                                filename_prefix=prefixes[1],
+                                pretrained_emb=glove_h5_path,
+                                cuda=True)
+                            model = gensen.GenSen(gensen_1, gensen_2)
 
                     vocab = gensen.build_vocab(
                         [s for s in sents["targ1"] + sents["targ2"] + sents["attr1"] + sents["attr2"]])
