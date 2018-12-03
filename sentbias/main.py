@@ -190,7 +190,7 @@ def main(arguments):
             else:
                 # load the test data
                 encs = load_json(os.path.join(args.data_dir, "%s%s" % (test, TEST_EXT)),
-                                 split_sentence_into_list=bool(model == "bert"))
+                                 split_sentence_into_list=bool(model_name == "bert"))
 
                 # load the model and do model-specific encoding procedure
                 log.info('Computing sentence encodings')
