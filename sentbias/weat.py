@@ -63,7 +63,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
         # reflect that.
         total_true += 1
         total += 1
-        log.info('Drawing {} samples'.format(n_samples))
+        log.info('Drawing {} samples (and biasing by 1)'.format(n_samples))
         while total < n_samples:
             random.shuffle(XY)
             Xi = XY[:size]
@@ -125,10 +125,14 @@ def run_test(encs, n_samples):
     args:
         - encs (Dict[str: Dict]): dictionary mapping targ1, targ2, attr1, attr2
             to dictionaries containing the category and the encodings
+        - n_samples (int): number of samples to draw to estimate p-value
+            (use exact test if number of permutations is less than or
+            equal to n_samples)
     '''
-    # First convert all keys to ints to facilitate array lookups
     X, Y = encs["targ1"]["encs"], encs["targ2"]["encs"]
     A, B = encs["attr1"]["encs"], encs["attr2"]["encs"]
+
+    # First convert all keys to ints to facilitate array lookups
     (X, Y) = convert_keys_to_ints(X, Y)
     (A, B) = convert_keys_to_ints(A, B)
 
@@ -140,7 +144,7 @@ def run_test(encs, n_samples):
     log.info("Computing cosine similarities...")
     cossims = construct_cossim_lookup(XY, AB)
 
-    log.info("Hypothesis: no difference between %s and %s in association to attributes %s and %s",
+    log.info("Null hypothesis: no difference between %s and %s in association to attributes %s and %s",
              encs["targ1"]["category"], encs["targ2"]["category"],
              encs["attr1"]["category"], encs["attr2"]["category"])
     log.info("Computing pval...")

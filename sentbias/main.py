@@ -3,9 +3,13 @@
 import os
 import sys
 import random
+import re
 import argparse
 import logging as log
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
+
+from csv import DictWriter
+from enum import Enum
 
 import numpy as np
 import tensorflow as tf
@@ -21,9 +25,35 @@ import encoders.gensen as gensen
 import encoders.elmo as elmo
 import encoders.bert as bert
 
+class ModelName(Enum):
+    INFERSENT = 'infersent'
+    ELMO = 'elmo'
+    GENSEN = 'gensen'
+    BOW = 'bow'
+    GUSE = 'guse'
+    BERT = 'bert'
+    COVE = 'cove'
+    OPENAI = 'openai'
+
 TEST_EXT = '.jsonl'
-MODELS = ["infersent", "elmo", "gensen", "bow", "guse",
-          "bert", "cove", "openai"]
+MODEL_NAMES = [m.value for m in ModelName]
+GENSEN_VERSIONS = ["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer", "nli_large"]
+
+
+def test_sort_key(test):
+    '''
+    Return tuple to be used as a sort key for the specified test name.
+   Break test name into pieces consisting of the integers in the name
+    and the strings in between them.
+    '''
+    key = ()
+    prev_end = 0
+    for match in re.finditer(r'\d+', test):
+        key = key + (test[prev_end:match.start()], int(match.group(0)))
+        prev_end = match.end()
+    key = key + (test[prev_end:],)
+
+    return key
 
 
 def handle_arguments(arguments):
@@ -31,21 +61,21 @@ def handle_arguments(arguments):
     parser = argparse.ArgumentParser(
         description='Run specified SEAT tests on specified models.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--tests', '-t', type=str, required=True,
+    parser.add_argument('--tests', '-t', type=str,
                         help="WEAT tests to run (a comma-separated list; test files should be in `data_dir` and "
-                             "have corresponding names, with extension {})".format(TEST_EXT))
-    parser.add_argument('--models', '-m', type=str, required=True,
-                        help="Models to evaluate (a comma-separated list; options: {})".format(','.join(MODELS)))
+                             "have corresponding names, with extension {}). Default: all tests.".format(TEST_EXT))
+    parser.add_argument('--models', '-m', type=str,
+                        help="Models to evaluate (a comma-separated list; options: {}). "
+                             "Default: all models.".format(','.join(MODEL_NAMES)))
     parser.add_argument('--seed', '-s', type=int, help="Random seed", default=1111)
     parser.add_argument('--log_file', '-l', type=str,
                         help="File to log to")
-    parser.add_argument('--glove_path', '-g', type=str,
-                        help="File to GloVe vectors. Required if glove model is specified.")
+    parser.add_argument('--results_path', type=str,
+                        help="Path where TSV results file will be written")
     parser.add_argument('--ignore_cached_encs', '-i', action='store_true',
                         help="If set, ignore existing encodings and encode from scratch.")
     parser.add_argument('--dont_cache_encs', action='store_true',
                         help="If set, don't cache encodings to disk.")
-
     parser.add_argument('--data_dir', '-d', type=str,
                         help="Directory containing examples for each test",
                         default='tests')
@@ -57,25 +87,42 @@ def handle_arguments(arguments):
                         help="Number of permutation test samples used when estimate p-values (exact test is used if "
                              "there are fewer than this many permutations)",
                         default=100000)
+    parser.add_argument('--glove_path', '-g', type=str,
+                        help="File to GloVe vectors. Required if bow, gensen, or infersent models are specified.")
 
-    parser.add_argument('--combine_method', type=str, choices=["max", "mean", "last", "concat"],
-                        default="max", help="How to combine vector sequences")
-    parser.add_argument('--infersent_dir', type=str,
-                        help="Directory containing model files. Required if infersent model is specified.")
-    parser.add_argument('--gensen_dir', type=str,
-                        help="Directory containing model files. Required if gensen model is specified.")
-    parser.add_argument('--gensen_version', type=str,
-                        choices=["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer"],
-                        default="nli_large_bothskip_parse", help="Version of gensen to use.")
-    parser.add_argument('--cove_encs', type=str,
-                        help="Directory containing precomputed CoVe encodings. Required if cove model is specified.")
-    parser.add_argument('--elmo_combine', type=str, choices=["add", "concat"],
-                        help="TODO", default="add")
-    parser.add_argument('--openai_encs', type=str,
-                        help="Directory containing precomputed OpenAI encodings. "
-                             "Required if openai model is specified.")
-    parser.add_argument('--bert_version', type=str, choices=["base", "large"],
-                        help="Version of BERT to use.", default="base")
+    elmo_group = parser.add_argument_group(ModelName.ELMO.value, 'Options for ELMo model')
+    elmo_group.add_argument('--combine_method', type=str, choices=["max", "mean", "last", "concat"],
+                            help="How to combine word representations in ELMo", default="max")
+    elmo_group.add_argument('--elmo_combine', type=str, choices=["add", "concat"],
+                            help="How to combine layers in ELMo", default="add")
+
+    infersent_group = parser.add_argument_group(ModelName.INFERSENT.value, 'Options for InferSent model')
+    infersent_group.add_argument('--infersent_dir', type=str,
+                                 help="Directory containing model files. Required if infersent model is specified.")
+
+    gensen_group = parser.add_argument_group(ModelName.GENSEN.value, 'Options for GenSen model')
+    gensen_group.add_argument('--gensen_dir', type=str,
+                              help="Directory containing model files. Required if gensen model is specified.")
+    gensen_group.add_argument('--gensen_version', type=str,
+                              help="Version of gensen to use.  Two versions may be passed, separated by commas, in "
+                                   "which case the respective models will be concatenated.  "
+                                   "Options: {}".format(','.join(GENSEN_VERSIONS)),
+                              default="nli_large_bothskip_parse")
+
+    cove_group = parser.add_argument_group(ModelName.COVE.value, 'Options for CoVe model')
+    cove_group.add_argument('--cove_encs', type=str,
+                            help="Directory containing precomputed CoVe encodings. "
+                                 "Required if cove model is specified.")
+
+    openai_group = parser.add_argument_group(ModelName.OPENAI.value, 'Options for OpenAI model')
+    openai_group.add_argument('--openai_encs', type=str,
+                              help="Directory containing precomputed OpenAI encodings. "
+                                   "Required if openai model is specified.")
+
+    bert_group = parser.add_argument_group(ModelName.BERT.value, 'Options for BERT model')
+    bert_group.add_argument('--bert_version', type=str, choices=["base", "large"],
+                            help="Version of BERT to use.", default="base")
+
     return parser.parse_args(arguments)
 
 
@@ -100,23 +147,40 @@ def main(arguments):
     log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
     args = handle_arguments(arguments)
-    seed = random.randint(1, 100000) if args.seed < 0 else args.seed
-    random.seed(seed)
-    np.random.seed(seed)
+    if args.seed >= 0:
+        log.info('Seeding random number generators with {}'.format(args.seed))
+        random.seed(args.seed)
+        np.random.seed(args.seed)
     maybe_make_dir(args.exp_dir)
     if args.log_file:
         log.getLogger().addHandler(log.FileHandler(args.log_file))
     log.info("Parsed args: \n%s", args)
 
-    tests = split_comma_and_check(
-        args.tests,
+    all_tests = sorted(
         [
             entry[:-len(TEST_EXT)]
             for entry in os.listdir(args.data_dir)
             if not entry.startswith('.') and entry.endswith(TEST_EXT)
         ],
-        "test")
-    models = split_comma_and_check(args.models, MODELS, "model")
+        key=test_sort_key
+    )
+    log.debug('Tests found:')
+    for test in all_tests:
+        log.debug('\t{}'.format(test))
+
+    tests = split_comma_and_check(args.tests, all_tests, "test") if args.tests is not None else all_tests
+    log.info('Tests selected:')
+    for test in tests:
+        log.info('\t{}'.format(test))
+
+    models = split_comma_and_check(args.models, MODEL_NAMES, "model") if args.models is not None else MODEL_NAMES
+    log.info('Models selected:')
+    for model in models:
+        log.info('\t{}'.format(model))
+
+    elmo_time_combine = args.combine_method
+    elmo_layer_combine = args.elmo_combine
+
     results = []
     for model_name in models:
         # Different models have different interfaces for things, but generally want to:
@@ -128,11 +192,49 @@ def main(arguments):
         # - else load the saved vectors '''
         log.info('Running tests for model {}'.format(model_name))
 
+        if model_name == ModelName.BOW.value:
+            model_options = ''
+            if args.glove_path is None:
+                raise Exception('glove_path must be specified for {} model'.format(model_name))
+        elif model_name == ModelName.INFERSENT.value:
+            if args.glove_path is None:
+                raise Exception('glove_path must be specified for {} model'.format(model_name))
+            if args.infersent_dir is None:
+                raise Exception('infersent_dir must be specified for {} model'.format(model_name))
+            model_options = ''
+        elif model_name == ModelName.GENSEN.value:
+            if args.glove_path is None:
+                raise Exception('glove_path must be specified for {} model'.format(model_name))
+            if args.gensen_dir is None:
+                raise Exception('gensen_dir must be specified for {} model'.format(model_name))
+            if len(args.gensen_version) > 2:
+                raise ValueError('gensen_version can only have one or two elements')
+            model_options = 'version=' + args.gensen_version
+        elif model_name == ModelName.GUSE.value:
+            model_options = ''
+        elif model_name == ModelName.COVE.value:
+            if args.cove_encs is None:
+                raise Exception('cove_encs must be specified for {} model'.format(model_name))
+            model_options = ''
+        elif model_name == ModelName.ELMO.value:
+            model_options = 'time_combine={};layer_combine={}'.format(
+                elmo_time_combine, elmo_layer_combine)
+        elif model_name == ModelName.BERT.value:
+            model_options = 'version=' + args.bert_version
+        elif model_name == ModelName.OPENAI.value:
+            if args.openai_encs is None:
+                raise Exception('openai_encs must be specified for {} model'.format(model_name))
+            model_options = ''
+        else:
+            raise ValueError("Model %s not found!" % model_name)
+
         model = None
 
         for test in tests:
             log.info('Running test {} for model {}'.format(test, model_name))
-            enc_file = os.path.join(args.exp_dir, "%s.%s.h5" % (model_name, test))
+            enc_file = os.path.join(args.exp_dir, "%s.%s.h5" % (
+                "%s;%s" % (model_name, model_options) if model_options else model_name,
+                test))
             if not args.ignore_cached_encs and os.path.isfile(enc_file):
                 log.info("Loading encodings from %s", enc_file)
                 encs = load_encodings(enc_file)
@@ -143,17 +245,17 @@ def main(arguments):
             else:
                 # load the test data
                 encs = load_json(os.path.join(args.data_dir, "%s%s" % (test, TEST_EXT)),
-                                 split_sentence_into_list=bool(model == "bert"))
+                                 split_sentence_into_list=False)
 
                 # load the model and do model-specific encoding procedure
                 log.info('Computing sentence encodings')
-                if model_name == 'bow':
+                if model_name == ModelName.BOW.value:
                     encs_targ1 = bow.encode(encs["targ1"]["examples"], args.glove_path, tokenize=True)
                     encs_targ2 = bow.encode(encs["targ2"]["examples"], args.glove_path, tokenize=True)
                     encs_attr1 = bow.encode(encs["attr1"]["examples"], args.glove_path, tokenize=True)
                     encs_attr2 = bow.encode(encs["attr2"]["examples"], args.glove_path, tokenize=True)
 
-                elif model_name == 'infersent':
+                elif model_name == ModelName.INFERSENT.value:
                     if model is None:
                         model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
                     model.build_vocab(
@@ -169,18 +271,45 @@ def main(arguments):
                     encs_attr1 = infersent.encode(model, encs["attr1"]["examples"])
                     encs_attr2 = infersent.encode(model, encs["attr2"]["examples"])
 
-                elif model_name == 'gensen':
+                elif model_name == ModelName.GENSEN.value:
+                    prefixes = split_comma_and_check(args.gensen_version, GENSEN_VERSIONS, "gensen_prefix")
+
                     if model is None:
-                        model = gensen.GenSenSingle(model_folder=os.path.join(args.gensen_dir, 'models'),
-                                                    filename_prefix=args.gensen_version,
-                                                    pretrained_emb=os.path.join(args.glove_path, 'glove.840B.300d.h5'))
+                        model_folder = os.path.join(args.gensen_dir, 'models')
+                        glove_h5_path = os.path.join(args.glove_path, 'glove.840B.300d.h5')
+                        gensen_1 = gensen.GenSenSingle(
+                            model_folder=model_folder,
+                            filename_prefix=prefixes[0],
+                            pretrained_emb=glove_h5_path,
+                            cuda=True)
+                        model = gensen_1
+
+                        if len(prefixes) == 2:
+                            gensen_2 = gensen.GenSenSingle(
+                                model_folder=model_folder,
+                                filename_prefix=prefixes[1],
+                                pretrained_emb=glove_h5_path,
+                                cuda=True)
+                            model = gensen.GenSen(gensen_1, gensen_2)
+
+                    vocab = gensen.build_vocab([
+                        s
+                        for set_name in ('targ1', 'targ2', 'attr1', 'attr2')
+                        for s in encs[set_name]["examples"]
+                    ])
+
+                    params_senteval = {'task_path': args.gensen_dir, 'usepytorch': True, 'kfold': 10}
+                    params_senteval['classifier'] = {'nhid': 0, 'optim': 'adam', 'batch_size': 64,
+                                                     'tenacity': 5, 'epoch_size': 4}
+
+                    model.vocab_expansion(vocab)
 
                     encs_targ1 = gensen.encode(model, encs["targ1"]["examples"])
                     encs_targ2 = gensen.encode(model, encs["targ2"]["examples"])
                     encs_attr1 = gensen.encode(model, encs["attr1"]["examples"])
                     encs_attr2 = gensen.encode(model, encs["attr2"]["examples"])
 
-                elif model_name == 'guse':
+                elif model_name == ModelName.GUSE.value:
                     enc = [[] * 512 for _ in range(4)]
                     encs_targ1, encs_targ2, encs_attr1, encs_attr2 = {}, {}, {}, {}
 
@@ -209,27 +338,28 @@ def main(arguments):
                                 for j, embedding in enumerate(np.array(enc[i]).tolist()):
                                     encs_attr2[sent[j]] = embedding
 
-                elif model_name == "cove":
+                elif model_name == ModelName.COVE.value:
                     load_encs_from = os.path.join(args.cove_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1)
 
-                elif model_name == 'elmo':
-                    encs_targ1 = elmo.encode(encs["targ1"]["examples"], args.combine_method, args.elmo_combine)
-                    encs_targ2 = elmo.encode(encs["targ2"]["examples"], args.combine_method, args.elmo_combine)
-                    encs_attr1 = elmo.encode(encs["attr1"]["examples"], args.combine_method, args.elmo_combine)
-                    encs_attr2 = elmo.encode(encs["attr2"]["examples"], args.combine_method, args.elmo_combine)
+                elif model_name == ModelName.ELMO.value:
+                    kwargs = dict(time_combine_method=elmo_time_combine, layer_combine_method=elmo_layer_combine)
+                    encs_targ1 = elmo.encode(encs["targ1"]["examples"], **kwargs)
+                    encs_targ2 = elmo.encode(encs["targ2"]["examples"], **kwargs)
+                    encs_attr1 = elmo.encode(encs["attr1"]["examples"], **kwargs)
+                    encs_attr2 = elmo.encode(encs["attr2"]["examples"], **kwargs)
 
-                elif model_name == "bert":
+                elif model_name == ModelName.BERT.value:
                     if args.bert_version == "large":
                         model, tokenizer = bert.load_model('bert-large-uncased')
                     else:
                         model, tokenizer = bert.load_model('bert-base-uncased')
-                    encs_targ1 = bert.encode(model, tokenizer, encs["targ1"]["examples"], args.combine_method)
-                    encs_targ2 = bert.encode(model, tokenizer, encs["targ2"]["examples"], args.combine_method)
-                    encs_attr1 = bert.encode(model, tokenizer, encs["attr1"]["examples"], args.combine_method)
-                    encs_attr2 = bert.encode(model, tokenizer, encs["attr2"]["examples"], args.combine_method)
+                    encs_targ1 = bert.encode(model, tokenizer, encs["targ1"]["examples"])
+                    encs_targ2 = bert.encode(model, tokenizer, encs["targ2"]["examples"])
+                    encs_attr1 = bert.encode(model, tokenizer, encs["attr1"]["examples"])
+                    encs_attr2 = bert.encode(model, tokenizer, encs["attr2"]["examples"])
 
-                elif model_name == "openai":
+                elif model_name == ModelName.OPENAI.value:
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
 
@@ -253,12 +383,29 @@ def main(arguments):
             log.info("Running SEAT...")
             log.info("Representation dimension: {}".format(d_rep))
             esize, pval = weat.run_test(encs, n_samples=args.n_samples)
-            results.append((test, pval, esize))
-            log.info("\n")
+            results.append(dict(
+                model=model_name,
+                options=model_options,
+                test=test,
+                p_value=pval,
+                effect_size=esize,
+                num_targ1=len(encs['targ1']['encs']),
+                num_targ2=len(encs['targ2']['encs']),
+                num_attr1=len(encs['attr1']['encs']),
+                num_attr2=len(encs['attr2']['encs'])))
 
         log.info("Model: %s", model_name)
-        for test, pval, esize in results:
-            log.info("\tTest %s:\tp-val: %.5f\tesize: %.5f", test, pval, esize)
+        log.info('Options: {}'.format(model_options))
+        for r in results:
+            log.info("\tTest {test}:\tp-val: {p_value:.5f}\tesize: {effect_size:.5f}".format(**r))
+
+    if args.results_path is not None:
+        log.info('Writing results to {}'.format(args.results_path))
+        with open(args.results_path, 'w') as f:
+            writer = DictWriter(f, fieldnames=results[0].keys(), delimiter='\t')
+            writer.writeheader()
+            for r in results:
+                writer.writerow(r)
 
 
 if __name__ == "__main__":

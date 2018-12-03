@@ -22,6 +22,15 @@ def encode(model, sents):
     return sent2vec
 
 
+def build_vocab(sentences):
+    vocab = []
+    for s in sentences:
+        words = s.replace('.', ' ').split()
+        for w in words:
+            vocab.append(w)
+    return set(vocab)
+
+
 class Encoder(nn.Module):
     """GenSen Encoder."""
 
@@ -50,12 +59,13 @@ class Encoder(nn.Module):
         """Set embedding weights."""
         if embedding_matrix.shape[0] != self.src_embedding.weight.size(0) or \
                 embedding_matrix.shape[1] != self.src_embedding.weight.size(1):
+            """
             print('''
                 Warning pretrained embedding shape mismatch %d x %d
                 expected %d x %d''' % (
                 embedding_matrix.shape[0], embedding_matrix.shape[1],
                 self.src_embedding.weight.size(0), self.src_embedding.weight.size(1)
-            ))
+            ))"""
             self.src_embedding = nn.Embedding(
                 embedding_matrix.shape[0],
                 embedding_matrix.shape[1]
@@ -154,12 +164,6 @@ class GenSenSingle(nn.Module):
 
         print(path)
         model_vocab = pickle.load(open(path, 'rb'), encoding='latin')
-        # with open(path,'rb') as file:
-        #     print(file.type)
-        #     model_vocab = pickle.load(file,encoding='bytes')
-        #     print("here")
-
-        # Word to index mappings
         self.word2id = model_vocab['word2id']
         self.id2word = model_vocab['id2word']
         self.task_word2id = self.word2id
@@ -200,7 +204,7 @@ class GenSenSingle(nn.Module):
         pretrained_embeddings = h5py.File(self.pretrained_emb)
         pretrained_embedding_matrix = pretrained_embeddings['embedding'].value
         pretrain_vocab = \
-            pretrained_embeddings['words_flatten'].value.split('\n')
+            pretrained_embeddings['words_flatten'].value  # .split('\n')
         pretrain_word2id = {
             word: ind for ind, word in enumerate(pretrain_vocab)
         }
@@ -302,7 +306,8 @@ class GenSenSingle(nn.Module):
 
         sentences = [
             [
-                self.task_word2id[w] if w in self.task_word2id else self.task_word2id['<unk>'] for w in sentence
+                self.task_word2id[w] if w in self.task_word2id else self.task_word2id['<unk>']
+                for w in sentence
             ] + [self.task_word2id['<pad>']] * (max_len - len(sentence))
             for sentence in sorted_sentences
         ]
