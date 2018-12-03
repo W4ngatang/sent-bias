@@ -110,6 +110,7 @@ echo 'Note: this script should be called from the "scripts" directory' >&2
 
 for sentences_to_keep in 1 1- 1,3-
 do
+    suffix=`echo "$sentences_to_keep" | sed 's/,/+/g'`
     print_tests \
         "$long_ambig_success_text" \
         CompetentAchievementOriented "$competent" \
@@ -117,7 +118,7 @@ do
         $sentences_to_keep \
         "$long_role" \
         sent \
-        > ../tests/heilman_double_bind_competent_$sentences_to_keep.txt
+        > ../tests/heilman_double_bind_competent_${suffix}.txt
     print_tests \
         "$long_clear_success_text" \
         LikableNotHostile "$likable" \
@@ -125,7 +126,7 @@ do
         $sentences_to_keep \
         "$long_role" \
         sent \
-        > ../tests/heilman_double_bind_likable_$sentences_to_keep.txt
+        > ../tests/heilman_double_bind_likable_${suffix}.txt
 done
 
 print_tests \
