@@ -8,3 +8,4 @@
 /user_config.sh
 /output
 /.pytest_cache
+*.tsv
