@@ -178,8 +178,6 @@ def main(arguments):
     for model in models:
         log.info('\t{}'.format(model))
 
-    elmo_time_combine = args.combine_method
-    elmo_layer_combine = args.elmo_combine
 
     results = []
     for model_name in models:
@@ -217,6 +215,8 @@ def main(arguments):
                 raise Exception('cove_encs must be specified for {} model'.format(model_name))
             model_options = ''
         elif model_name == ModelName.ELMO.value:
+            elmo_layer_combine = args.elmo_combine
+            elmo_time_combine = args.combine_method
             model_options = 'time_combine={};layer_combine={}'.format(
                 elmo_time_combine, elmo_layer_combine)
         elif model_name == ModelName.BERT.value:
@@ -310,33 +310,43 @@ def main(arguments):
                     encs_attr2 = gensen.encode(model, encs["attr2"]["examples"])
 
                 elif model_name == ModelName.GUSE.value:
-                    enc = [[] * 512 for _ in range(4)]
-                    encs_targ1, encs_targ2, encs_attr1, encs_attr2 = {}, {}, {}, {}
-
                     model = hub.Module("https://tfhub.dev/google/universal-sentence-encoder/2")
                     os.environ["CUDA_VISIBLE_DEVICES"] = '0'  # use GPU with ID=0
                     config = tf.ConfigProto()
                     config.gpu_options.per_process_gpu_memory_fraction = 0.5  # maximum alloc gpu50% of MEM
                     config.gpu_options.allow_growth = True  # allocate dynamically
+                    with tf.Session(config=config) as session:
+                        session.run([tf.global_variables_initializer(), tf.tables_initializer()])
+                        def guse_encode(sents):
+                            encs_node = model(sents)
+                            encs = session.run(encs_node)
+                            encs_d = {sents[j]: enc for j, enc in enumerate(np.array(encs).tolist())}
+                            return encs_d
 
-                    # TODO(Alex): I don't think this is compatible with dictionaries
-                    for i, sent in enumerate(encs):  # iterate through the four word sets
-                        embeddings = model(sent)  # embed the word set
-                        with tf.Session(config=config) as session:
-                            session.run([tf.global_variables_initializer(), tf.tables_initializer()])
-                            enc[i] = session.run(embeddings)
-                            if i == 0:
-                                for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                                    encs_targ1[sent[j]] = embedding
-                            elif i == 1:
-                                for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                                    encs_targ2[sent[j]] = embedding
-                            elif i == 2:
-                                for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                                    encs_attr1[sent[j]] = embedding
-                            elif i == 3:
-                                for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                                    encs_attr2[sent[j]] = embedding
+                        encs_targ1 = guse_encode(encs["targ1"]["examples"])
+                        encs_targ2 = guse_encode(encs["targ2"]["examples"])
+                        encs_attr1 = guse_encode(encs["attr1"]["examples"])
+                        encs_attr2 = guse_encode(encs["attr2"]["examples"])
+
+
+
+                    #for i, sent in enumerate(encs):  # iterate through the four word sets
+                    #    embeddings = model(sent)  # embed the word set
+                    #    with tf.Session(config=config) as session:
+                    #        session.run([tf.global_variables_initializer(), tf.tables_initializer()])
+                    #        enc[i] = session.run(embeddings)
+                    #        if i == 0:
+                    #            for j, embedding in enumerate(np.array(enc[i]).tolist()):
+                    #                encs_targ1[sent[j]] = embedding
+                    #        elif i == 1:
+                    #            for j, embedding in enumerate(np.array(enc[i]).tolist()):
+                    #                encs_targ2[sent[j]] = embedding
+                    #        elif i == 2:
+                    #            for j, embedding in enumerate(np.array(enc[i]).tolist()):
+                    #                encs_attr1[sent[j]] = embedding
+                    #        elif i == 3:
+                    #            for j, embedding in enumerate(np.array(enc[i]).tolist()):
+                    #                encs_attr2[sent[j]] = embedding
 
                 elif model_name == ModelName.COVE.value:
                     load_encs_from = os.path.join(args.cove_encs, "%s.encs" % test)
