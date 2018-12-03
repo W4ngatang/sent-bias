@@ -7,6 +7,7 @@ import re
 import argparse
 import logging as log
 from csv import DictWriter
+from enum import Enum
 
 import numpy as np
 import tensorflow as tf
@@ -23,8 +24,19 @@ import encoders.elmo as elmo
 import encoders.bert as bert
 
 
+class ModelName(Enum):
+    INFERSENT = 'infersent'
+    ELMO = 'elmo'
+    GENSEN = 'gensen'
+    BOW = 'bow'
+    GUSE = 'guse'
+    BERT = 'bert'
+    COVE = 'cove'
+    OPENAI = 'openai'
+
+
 TEST_EXT = '.jsonl'
-MODELS = ["infersent", "elmo", "gensen", "bow", "guse", "bert", "cove", "openai"]
+MODEL_NAMES = [m.value for m in ModelName]
 GENSEN_VERSIONS = ["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer", "nli_large"]
 
 
@@ -54,7 +66,7 @@ def handle_arguments(arguments):
                              "have corresponding names, with extension {}). Default: all tests.".format(TEST_EXT))
     parser.add_argument('--models', '-m', type=str,
                         help="Models to evaluate (a comma-separated list; options: {}). "
-                             "Default: all models.".format(','.join(MODELS)))
+                             "Default: all models.".format(','.join(MODEL_NAMES)))
     parser.add_argument('--seed', '-s', type=int, help="Random seed", default=1111)
     parser.add_argument('--log_file', '-l', type=str,
                         help="File to log to")
@@ -78,17 +90,17 @@ def handle_arguments(arguments):
     parser.add_argument('--glove_path', '-g', type=str,
                         help="File to GloVe vectors. Required if bow, gensen, or infersent models are specified.")
 
-    elmo_group = parser.add_argument_group('elmo', 'Options for ELMo model')
+    elmo_group = parser.add_argument_group(ModelName.ELMO.value, 'Options for ELMo model')
     elmo_group.add_argument('--combine_method', type=str, choices=["max", "mean", "last", "concat"],
                             help="How to combine word representations in ELMo", default="max")
     elmo_group.add_argument('--elmo_combine', type=str, choices=["add", "concat"],
                             help="How to combine layers in ELMo", default="add")
 
-    infersent_group = parser.add_argument_group('infersent', 'Options for InferSent model')
+    infersent_group = parser.add_argument_group(ModelName.INFERSENT.value, 'Options for InferSent model')
     infersent_group.add_argument('--infersent_dir', type=str,
                                  help="Directory containing model files. Required if infersent model is specified.")
 
-    gensen_group = parser.add_argument_group('gensen', 'Options for GenSen model')
+    gensen_group = parser.add_argument_group(ModelName.GENSEN.value, 'Options for GenSen model')
     gensen_group.add_argument('--gensen_dir', type=str,
                               help="Directory containing model files. Required if gensen model is specified.")
     gensen_group.add_argument('--gensen_version', type=str,
@@ -97,17 +109,17 @@ def handle_arguments(arguments):
                                    "Options: {}".format(','.join(GENSEN_VERSIONS)),
                               default="nli_large_bothskip_parse")
 
-    cove_group = parser.add_argument_group('cove', 'Options for CoVe model')
+    cove_group = parser.add_argument_group(ModelName.COVE.value, 'Options for CoVe model')
     cove_group.add_argument('--cove_encs', type=str,
                             help="Directory containing precomputed CoVe encodings. "
                                  "Required if cove model is specified.")
 
-    openai_group = parser.add_argument_group('openai', 'Options for OpenAI model')
+    openai_group = parser.add_argument_group(ModelName.OPENAI.value, 'Options for OpenAI model')
     openai_group.add_argument('--openai_encs', type=str,
                               help="Directory containing precomputed OpenAI encodings. "
                                    "Required if openai model is specified.")
 
-    bert_group = parser.add_argument_group('bert', 'Options for BERT model')
+    bert_group = parser.add_argument_group(ModelName.BERT.value, 'Options for BERT model')
     bert_group.add_argument('--bert_version', type=str, choices=["base", "large"],
                             help="Version of BERT to use.", default="base")
 
@@ -161,10 +173,13 @@ def main(arguments):
     for test in tests:
         log.info('\t{}'.format(test))
 
-    models = split_comma_and_check(args.models, MODELS, "model") if args.models is not None else MODELS
+    models = split_comma_and_check(args.models, MODEL_NAMES, "model") if args.models is not None else MODEL_NAMES
     log.info('Models selected:')
     for model in models:
         log.info('\t{}'.format(model))
+
+    elmo_time_combine = args.combine_method
+    elmo_layer_combine = args.elmo_combine
 
     results = []
     for model_name in models:
@@ -177,18 +192,52 @@ def main(arguments):
         # - else load the saved vectors '''
         log.info('Running tests for model {}'.format(model_name))
 
+        if model_name == ModelName.BOW.value:
+            model_options = ''
+            if args.glove_path is None:
+                raise Exception('glove_path must be specified for {} model'.format(model_name))
+        elif model_name == ModelName.INFERSENT.value:
+            if args.glove_path is None:
+                raise Exception('glove_path must be specified for {} model'.format(model_name))
+            if args.infersent_dir is None:
+                raise Exception('infersent_dir must be specified for {} model'.format(model_name))
+            model_options = ''
+        elif model_name == ModelName.GENSEN.value:
+            if args.glove_path is None:
+                raise Exception('glove_path must be specified for {} model'.format(model_name))
+            if args.gensen_dir is None:
+                raise Exception('gensen_dir must be specified for {} model'.format(model_name))
+            if len(args.gensen_version) > 2:
+                raise ValueError('gensen_version can only have one or two elements')
+            model_options = 'version=' + args.gensen_version
+        elif model_name == ModelName.GUSE.value:
+            model_options = ''
+        elif model_name == ModelName.COVE.value:
+            if args.cove_encs is None:
+                raise Exception('cove_encs must be specified for {} model'.format(model_name))
+            model_options = ''
+        elif model_name == ModelName.ELMO.value:
+            model_options = 'time_combine={};layer_combine={}'.format(
+                elmo_time_combine, elmo_layer_combine)
+        elif model_name == ModelName.BERT.value:
+            model_options = 'version=' + args.bert_version
+        elif model_name == ModelName.OPENAI.value:
+            if args.openai_encs is None:
+                raise Exception('openai_encs must be specified for {} model'.format(model_name))
+            model_options = ''
+        else:
+            raise ValueError("Model %s not found!" % model_name)
+
         model = None
 
         for test in tests:
             log.info('Running test {} for model {}'.format(test, model_name))
-            enc_file = os.path.join(args.exp_dir, "%s.%s.h5" % (model_name, test))
+            enc_file = os.path.join(args.exp_dir, "%s.%s.h5" % (
+                "%s;%s" % (model_name, model_options) if model_options else model_name,
+                test))
             if not args.ignore_cached_encs and os.path.isfile(enc_file):
                 log.info("Loading encodings from %s", enc_file)
                 encs = load_encodings(enc_file)
-                # TODO model options are neither saved/loaded to/from
-                # the cache, nor is the cache named in a way unique to
-                # model options
-                model_options = ''
                 encs_targ1 = encs['targ1']
                 encs_targ2 = encs['targ2']
                 encs_attr1 = encs['attr1']
@@ -200,21 +249,13 @@ def main(arguments):
 
                 # load the model and do model-specific encoding procedure
                 log.info('Computing sentence encodings')
-                if model_name == 'bow':
-                    if args.glove_path is None:
-                        raise Exception('glove_path must be specified for {} model'.format(model_name))
-                    model_options = ''
+                if model_name == ModelName.BOW.value:
                     encs_targ1 = bow.encode(encs["targ1"]["examples"], args.glove_path, tokenize=True)
                     encs_targ2 = bow.encode(encs["targ2"]["examples"], args.glove_path, tokenize=True)
                     encs_attr1 = bow.encode(encs["attr1"]["examples"], args.glove_path, tokenize=True)
                     encs_attr2 = bow.encode(encs["attr2"]["examples"], args.glove_path, tokenize=True)
 
-                elif model_name == 'infersent':
-                    if args.glove_path is None:
-                        raise Exception('glove_path must be specified for {} model'.format(model_name))
-                    if args.infersent_dir is None:
-                        raise Exception('infersent_dir must be specified for {} model'.format(model_name))
-                    model_options = ''
+                elif model_name == ModelName.INFERSENT.value:
                     if model is None:
                         model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
                     model.build_vocab(
@@ -230,15 +271,8 @@ def main(arguments):
                     encs_attr1 = infersent.encode(model, encs["attr1"]["examples"])
                     encs_attr2 = infersent.encode(model, encs["attr2"]["examples"])
 
-                elif model_name == 'gensen':
-                    if args.glove_path is None:
-                        raise Exception('glove_path must be specified for {} model'.format(model_name))
-                    if args.gensen_dir is None:
-                        raise Exception('gensen_dir must be specified for {} model'.format(model_name))
-                    if len(args.gensen_version) > 2:
-                        raise ValueError('gensen_version can only have one or two elements')
+                elif model_name == ModelName.GENSEN.value:
                     prefixes = split_comma_and_check(args.gensen_version, GENSEN_VERSIONS, "gensen_prefix")
-                    model_options = 'version=' + args.gensen_version
 
                     if model is None:
                         model_folder = os.path.join(args.gensen_dir, 'models')
@@ -275,7 +309,7 @@ def main(arguments):
                     encs_attr1 = gensen.encode(model, encs["attr1"]["examples"])
                     encs_attr2 = gensen.encode(model, encs["attr2"]["examples"])
 
-                elif model_name == 'guse':
+                elif model_name == ModelName.GUSE.value:
                     enc = [[] * 512 for _ in range(4)]
                     encs_targ1, encs_targ2, encs_attr1, encs_attr2 = {}, {}, {}, {}
 
@@ -304,24 +338,18 @@ def main(arguments):
                                 for j, embedding in enumerate(np.array(enc[i]).tolist()):
                                     encs_attr2[sent[j]] = embedding
 
-                elif model_name == "cove":
-                    if args.cove_encs is None:
-                        raise Exception('cove_encs must be specified for {} model'.format(model_name))
-                    model_options = ''
+                elif model_name == ModelName.COVE.value:
                     load_encs_from = os.path.join(args.cove_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1)
 
-                elif model_name == 'elmo':
-                    kwargs = dict(time_combine_method=args.combine_method, layer_combine_method=args.elmo_combine)
-                    model_options = 'time_combine={time_combine_method};layer_combine={layer_combine_method}'.format(
-                        **kwargs)
+                elif model_name == ModelName.ELMO.value:
+                    kwargs = dict(time_combine_method=elmo_time_combine, layer_combine_method=elmo_layer_combine)
                     encs_targ1 = elmo.encode(encs["targ1"]["examples"], **kwargs)
                     encs_targ2 = elmo.encode(encs["targ2"]["examples"], **kwargs)
                     encs_attr1 = elmo.encode(encs["attr1"]["examples"], **kwargs)
                     encs_attr2 = elmo.encode(encs["attr2"]["examples"], **kwargs)
 
-                elif model_name == "bert":
-                    model_options = 'version=' + args.bert_version
+                elif model_name == ModelName.BERT.value:
                     if args.bert_version == "large":
                         model, tokenizer = bert.load_model('bert-large-uncased')
                     else:
@@ -331,10 +359,7 @@ def main(arguments):
                     encs_attr1 = bert.encode(model, tokenizer, encs["attr1"]["examples"])
                     encs_attr2 = bert.encode(model, tokenizer, encs["attr2"]["examples"])
 
-                elif model_name == "openai":
-                    if args.openai_encs is None:
-                        raise Exception('openai_encs must be specified for {} model'.format(model_name))
-                    model_options = ''
+                elif model_name == ModelName.OPENAI.value:
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
 
@@ -371,6 +396,7 @@ def main(arguments):
                 num_attr2=len(encs['attr2']['encs'])))
 
         log.info("Model: %s", model_name)
+        log.info('Options: {}'.format(model_options))
         for r in results:
             log.info("\tTest {test}:\tp-val: {p_value:.5f}\tesize: {effect_size:.5f}".format(**r))
 
