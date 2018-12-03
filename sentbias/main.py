@@ -87,6 +87,8 @@ def handle_arguments(arguments):
                         help="Number of permutation test samples used when estimate p-values (exact test is used if "
                              "there are fewer than this many permutations)",
                         default=100000)
+    parser.add_argument('--use_cpu', action='store_true',
+                        help='Use CPU to encode sentences.')
     parser.add_argument('--glove_path', '-g', type=str,
                         help="File to GloVe vectors. Required if bow, gensen, or infersent models are specified.")
 
@@ -257,7 +259,8 @@ def main(arguments):
 
                 elif model_name == ModelName.INFERSENT.value:
                     if model is None:
-                        model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all')
+                        model = infersent.load_infersent(args.infersent_dir, args.glove_path, train_data='all',
+                                                         use_cpu=args.use_cpu)
                     model.build_vocab(
                         [
                             example

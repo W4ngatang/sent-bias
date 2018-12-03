@@ -25,12 +25,19 @@ def batcher(params, batch):
     return embeddings
 
 
-def load_infersent(path_prefix, glove_path, train_data='all'):
+def load_infersent(path_prefix, glove_path, train_data='all', use_cpu=False):
     ''' Load pretrained infersent model '''
+    if use_cpu:
+        kwargs = dict(map_location='cpu')
+    else:
+        kwargs = dict()
     infersent = torch.load(
         os.path.join(
             path_prefix,
-            INFERSENT_PATHS[train_data]))  # , map_location='cpu') # TODO(Alex): make this an option
+            INFERSENT_PATHS[train_data]),
+        **kwargs)
+    if use_cpu:
+        infersent.use_cuda = False
     infersent.set_glove_path(glove_path)
     log.info("Successfully loaded infersent!")
     return infersent
