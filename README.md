@@ -89,6 +89,17 @@ wget https://s3.amazonaws.com/senteval/infersent/infersent.snli.pickle
 
 Make a note of the directory you download them to; you will need to pass it to `sentbias/main.py` using the `--infersent_dir` flag.
 
+### ULMFiT
+
+Download the model files from [the fast.ai website](http://nlp.fast.ai/category/classification.html):
+
+```
+wget http://files.fast.ai/models/wt103/fwd_wt103.h5
+wget http://files.fast.ai/models/wt103/itos_wt103.pkl
+```
+
+Make a note of the directory you download them to; you will need to pass it to `sentbias/main.py` using the `--ulmfit_dir` flag.
+
 ### Universal Sentence Encoder (Google)
 
 Universal Sentence Encoder weights will be downloaded and cached at runtime.  Set `TFHUB_CACHE_DIR` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `/tmp/tfhub_modules`.  For example, if using bash, run this before running Universal Sentence Encoder bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
