@@ -6,7 +6,6 @@ import random
 import re
 import argparse
 import logging as log
-log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
 from csv import DictWriter
 from enum import Enum
@@ -24,6 +23,8 @@ import encoders.infersent as infersent
 import encoders.gensen as gensen
 import encoders.elmo as elmo
 import encoders.bert as bert
+
+log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
 class ModelName(Enum):
     INFERSENT = 'infersent'
