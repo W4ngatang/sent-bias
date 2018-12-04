@@ -91,7 +91,8 @@ def handle_arguments(arguments):
     parser.add_argument('--use_cpu', action='store_true',
                         help='Use CPU to encode sentences.')
     parser.add_argument('--glove_path', '-g', type=str,
-                        help="File to GloVe vectors. Required if bow, gensen, or infersent models are specified.")
+                        help="File to GloVe vectors in .txt format. "
+                             "Required if bow or infersent models are specified.")
 
     elmo_group = parser.add_argument_group(ModelName.ELMO.value, 'Options for ELMo model')
     elmo_group.add_argument('--combine_method', type=str, choices=["max", "mean", "last", "concat"],
@@ -104,6 +105,8 @@ def handle_arguments(arguments):
                                  help="Directory containing model files. Required if infersent model is specified.")
 
     gensen_group = parser.add_argument_group(ModelName.GENSEN.value, 'Options for GenSen model')
+    gensen_group.add_argument('--glove_h5_path', type=str,
+                              help="File to GloVe vectors in .h5 (HDF5) format.")
     gensen_group.add_argument('--gensen_dir', type=str,
                               help="Directory containing model files. Required if gensen model is specified.")
     gensen_group.add_argument('--gensen_version', type=str,
@@ -204,8 +207,8 @@ def main(arguments):
                 raise Exception('infersent_dir must be specified for {} model'.format(model_name))
             model_options = ''
         elif model_name == ModelName.GENSEN.value:
-            if args.glove_path is None:
-                raise Exception('glove_path must be specified for {} model'.format(model_name))
+            if args.glove_h5_path is None:
+                raise Exception('glove_h5_path must be specified for {} model'.format(model_name))
             if args.gensen_dir is None:
                 raise Exception('gensen_dir must be specified for {} model'.format(model_name))
             gensen_version_list = split_comma_and_check(args.gensen_version, GENSEN_VERSIONS, "gensen_prefix")
@@ -278,20 +281,19 @@ def main(arguments):
 
                 elif model_name == ModelName.GENSEN.value:
                     if model is None:
-                        glove_h5_path = os.path.join(args.glove_path, 'glove.840B.300d.h5')
                         gensen_1 = gensen.GenSenSingle(
                             model_folder=args.gensen_dir,
                             filename_prefix=gensen_version_list[0],
-                            pretrained_emb=glove_h5_path,
-                            cuda=True)
+                            pretrained_emb=args.glove_h5_path,
+                            cuda=not args.use_cpu)
                         model = gensen_1
 
                         if len(gensen_version_list) == 2:
                             gensen_2 = gensen.GenSenSingle(
                                 model_folder=args.gensen_dir,
                                 filename_prefix=gensen_version_list[1],
-                                pretrained_emb=glove_h5_path,
-                                cuda=True)
+                                pretrained_emb=args.glove_h5_path,
+                                cuda=not args.use_cpu)
                             model = gensen.GenSen(gensen_1, gensen_2)
 
                     vocab = gensen.build_vocab([
