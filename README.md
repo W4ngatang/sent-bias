@@ -89,6 +89,14 @@ wget https://s3.amazonaws.com/senteval/infersent/infersent.snli.pickle
 
 Make a note of the directory you download them to; you will need to pass it to `sentbias/main.py` using the `--infersent_dir` flag.
 
+### Universal Sentence Encoder (Google)
+
+Universal Sentence Encoder weights will be downloaded and cached at runtime.  Set `TFHUB_CACHE_DIR` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `/tmp/tfhub_modules`.  For example, if using bash, run this before running Universal Sentence Encoder bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
+
+```
+export TFHUB_CACHE_DIR=/data/tfhub_cache
+```
+
 ## Running Bias Tests
 
 We provide a script that demonstrates how to run the bias tests for each model.  To use it, minimally set the path to the GloVe vectors as `GLOVE_PATH` in a file called `user_config.sh`:

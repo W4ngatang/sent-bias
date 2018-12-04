@@ -311,8 +311,11 @@ def main(arguments):
 
                 elif model_name == ModelName.GUSE.value:
                     model = hub.Module("https://tfhub.dev/google/universal-sentence-encoder/2")
-                    os.environ["CUDA_VISIBLE_DEVICES"] = '0'  # use GPU with ID=0
-                    config = tf.ConfigProto()
+                    if args.use_cpu:
+                        kwargs = dict(device_count={'GPU': 0})
+                    else:
+                        kwargs = dict()
+                    config = tf.ConfigProto(**kwargs)
                     config.gpu_options.per_process_gpu_memory_fraction = 0.5  # maximum alloc gpu50% of MEM
                     config.gpu_options.allow_growth = True  # allocate dynamically
                     with tf.Session(config=config) as session:
