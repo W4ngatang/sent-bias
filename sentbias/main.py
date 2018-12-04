@@ -207,7 +207,8 @@ def main(arguments):
                 raise Exception('glove_path must be specified for {} model'.format(model_name))
             if args.gensen_dir is None:
                 raise Exception('gensen_dir must be specified for {} model'.format(model_name))
-            if len(args.gensen_version) > 2:
+            gensen_version_list = split_comma_and_check(args.gensen_version, GENSEN_VERSIONS, "gensen_prefix")
+            if len(gensen_version_list) > 2:
                 raise ValueError('gensen_version can only have one or two elements')
             model_options = 'version=' + args.gensen_version
         elif model_name == ModelName.GUSE.value:
@@ -275,22 +276,19 @@ def main(arguments):
                     encs_attr2 = infersent.encode(model, encs["attr2"]["examples"])
 
                 elif model_name == ModelName.GENSEN.value:
-                    prefixes = split_comma_and_check(args.gensen_version, GENSEN_VERSIONS, "gensen_prefix")
-
                     if model is None:
-                        model_folder = os.path.join(args.gensen_dir, 'models')
                         glove_h5_path = os.path.join(args.glove_path, 'glove.840B.300d.h5')
                         gensen_1 = gensen.GenSenSingle(
-                            model_folder=model_folder,
-                            filename_prefix=prefixes[0],
+                            model_folder=args.gensen_dir,
+                            filename_prefix=gensen_version_list[0],
                             pretrained_emb=glove_h5_path,
                             cuda=True)
                         model = gensen_1
 
-                        if len(prefixes) == 2:
+                        if len(gensen_version_list) == 2:
                             gensen_2 = gensen.GenSenSingle(
-                                model_folder=model_folder,
-                                filename_prefix=prefixes[1],
+                                model_folder=args.gensen_dir,
+                                filename_prefix=gensen_version_list[1],
                                 pretrained_emb=glove_h5_path,
                                 cuda=True)
                             model = gensen.GenSen(gensen_1, gensen_2)
@@ -300,10 +298,6 @@ def main(arguments):
                         for set_name in ('targ1', 'targ2', 'attr1', 'attr2')
                         for s in encs[set_name]["examples"]
                     ])
-
-                    params_senteval = {'task_path': args.gensen_dir, 'usepytorch': True, 'kfold': 10}
-                    params_senteval['classifier'] = {'nhid': 0, 'optim': 'adam', 'batch_size': 64,
-                                                     'tenacity': 5, 'epoch_size': 4}
 
                     model.vocab_expansion(vocab)
 
