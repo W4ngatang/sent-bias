@@ -95,12 +95,10 @@ def handle_arguments(arguments):
     parser.add_argument('--glove_path', '-g', type=str,
                         help="File to GloVe vectors in .txt format. "
                              "Required if bow or infersent models are specified.")
-
-    elmo_group = parser.add_argument_group(ModelName.ELMO.value, 'Options for ELMo model')
-    elmo_group.add_argument('--combine_method', type=str, choices=["max", "mean", "last", "concat"],
-                            help="How to combine word representations in ELMo", default="max")
-    elmo_group.add_argument('--elmo_combine', type=str, choices=["add", "concat"],
-                            help="How to combine layers in ELMo", default="add")
+    parser.add_argument('--time_combine_method', type=str, choices=["max", "mean", "concat", "last"],
+                        help="How to combine word representations in ELMo and ULMFiT", default="max")
+    parser.add_argument('--layer_combine_method', type=str, choices=["add", "mean", "concat", "last"],
+                        help="How to combine layers in ELMo and ULMFiT", default="add")
 
     infersent_group = parser.add_argument_group(ModelName.INFERSENT.value, 'Options for InferSent model')
     infersent_group.add_argument('--infersent_dir', type=str,
@@ -228,10 +226,8 @@ def main(arguments):
                 raise Exception('cove_encs must be specified for {} model'.format(model_name))
             model_options = ''
         elif model_name == ModelName.ELMO.value:
-            elmo_layer_combine = args.elmo_combine
-            elmo_time_combine = args.combine_method
             model_options = 'time_combine={};layer_combine={}'.format(
-                elmo_time_combine, elmo_layer_combine)
+                args.time_combine_method, args.layer_combine_method)
         elif model_name == ModelName.BERT.value:
             model_options = 'version=' + args.bert_version
         elif model_name == ModelName.OPENAI.value:
@@ -241,7 +237,8 @@ def main(arguments):
         elif model_name == ModelName.ULMFIT.value:
             if args.ulmfit_dir is None:
                 raise Exception('ulmfit_dir must be specified for {} model'.format(model_name))
-            model_options = ''
+            model_options = 'time_combine={};layer_combine={}'.format(
+                args.time_combine_method, args.layer_combine_method)
         else:
             raise ValueError("Model %s not found!" % model_name)
 
@@ -366,7 +363,8 @@ def main(arguments):
                     encs = load_jiant_encodings(load_encs_from, n_header=1)
 
                 elif model_name == ModelName.ELMO.value:
-                    kwargs = dict(time_combine_method=elmo_time_combine, layer_combine_method=elmo_layer_combine)
+                    kwargs = dict(time_combine_method=args.time_combine_method,
+                                  layer_combine_method=args.layer_combine_method)
                     encs_targ1 = elmo.encode(encs["targ1"]["examples"], **kwargs)
                     encs_targ2 = elmo.encode(encs["targ2"]["examples"], **kwargs)
                     encs_attr1 = elmo.encode(encs["attr1"]["examples"], **kwargs)
@@ -387,7 +385,11 @@ def main(arguments):
                     encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
 
                 elif model_name == ModelName.ULMFIT.value:
-                    kwargs = dict(use_cpu=args.use_cpu)
+                    kwargs = dict(model_dir=args.ulmfit_dir,
+                                  use_cpu=args.use_cpu,
+                                  tokenize=True,
+                                  time_combine_method=args.time_combine_method,
+                                  layer_combine_method=args.layer_combine_method)
                     encs_targ1 = ulmfit.encode(encs["targ1"]["examples"], **kwargs)
                     encs_targ2 = ulmfit.encode(encs["targ2"]["examples"], **kwargs)
                     encs_attr1 = ulmfit.encode(encs["attr1"]["examples"], **kwargs)

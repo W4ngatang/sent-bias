@@ -9,7 +9,9 @@ def get_word_dict(sentences, tokenize):
     word_dict = {}
     if tokenize:
         from nltk.tokenize import word_tokenize
-    tokenized_sents = [s.split() if not tokenize else word_tokenize(s) for s in sentences]
+    else:
+        word_tokenize = str.split
+    tokenized_sents = [word_tokenize(s) for s in sentences]
     for sent in tokenized_sents:
         for word in sent:
             if word not in word_dict:
