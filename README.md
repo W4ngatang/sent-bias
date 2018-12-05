@@ -8,11 +8,12 @@ use `environment.yml` to create a conda environment with all necessary
 code dependencies: `conda env create -f environment.yml`.
 Activate the environment with `source activate sentbias`.
 
-Then, in the environment, download the NLTK punkt tokenization
-resource:
+Then, in the environment, download the NLTK punkt and spacy en
+resources:
 
 ```
 python -c 'import nltk; nltk.download("punkt")'
+python -m spacy download en
 ```
 
 You will also need to download pretrained model weights for each model

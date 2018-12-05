@@ -385,15 +385,14 @@ def main(arguments):
                     encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
 
                 elif model_name == ModelName.ULMFIT.value:
-                    kwargs = dict(model_dir=args.ulmfit_dir,
-                                  use_cpu=args.use_cpu,
-                                  tokenize=True,
+                    kwargs = dict(tokenize=True,
                                   time_combine_method=args.time_combine_method,
                                   layer_combine_method=args.layer_combine_method)
-                    encs_targ1 = ulmfit.encode(encs["targ1"]["examples"], **kwargs)
-                    encs_targ2 = ulmfit.encode(encs["targ2"]["examples"], **kwargs)
-                    encs_attr1 = ulmfit.encode(encs["attr1"]["examples"], **kwargs)
-                    encs_attr2 = ulmfit.encode(encs["attr2"]["examples"], **kwargs)
+                    model = ulmfit.ULMFiT(args.ulmfit_dir, use_cpu=args.use_cpu)
+                    encs_targ1 = model.encode(encs["targ1"]["examples"], **kwargs)
+                    encs_targ2 = model.encode(encs["targ2"]["examples"], **kwargs)
+                    encs_attr1 = model.encode(encs["attr1"]["examples"], **kwargs)
+                    encs_attr2 = model.encode(encs["attr2"]["examples"], **kwargs)
 
                 else:
                     raise ValueError("Model %s not found!" % model_name)
