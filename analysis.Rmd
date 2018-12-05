@@ -7,23 +7,6 @@ output: html_notebook
 library(tidyverse)
 ```
 
-## Name-like name filtering
-
-We may want to filter the least name-like names, following Caliskan, but note that black-associated names are farther apart (and their distances are more stratified) than white-associated names to begin with:
-
-```{r}
-read_csv('tests-meta/sweeney_2013_name_distances_glove_840B_300d.csv') %>%
-  group_by(centroid, group) %>%
-  mutate(rank=dense_rank(distance),
-         race=str_extract(group, '^[a-z]+'),
-         gender=str_extract(group, '[a-z]+$')) %>%
-  ungroup %>%
-  ggplot(aes(x=rank, y=distance)) +
-  geom_point() +
-  facet_grid(centroid ~ group)
-ggsave('sweeney_2013_name_distances_glove_840B_300d.pdf')
-```
-
 ## Controlling for multiple hypothesis tests
 
 Use Holm-Bonferroni procedure:
