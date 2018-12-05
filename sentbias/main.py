@@ -6,7 +6,6 @@ import random
 import re
 import argparse
 import logging as log
-log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
 from csv import DictWriter
 from enum import Enum
@@ -24,6 +23,9 @@ import encoders.infersent as infersent
 import encoders.gensen as gensen
 import encoders.elmo as elmo
 import encoders.bert as bert
+import encoders.ulmfit as ulmfit
+
+log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
 class ModelName(Enum):
     INFERSENT = 'infersent'
@@ -34,6 +36,7 @@ class ModelName(Enum):
     BERT = 'bert'
     COVE = 'cove'
     OPENAI = 'openai'
+    ULMFIT = 'ulmfit'
 
 TEST_EXT = '.jsonl'
 MODEL_NAMES = [m.value for m in ModelName]
@@ -90,19 +93,20 @@ def handle_arguments(arguments):
     parser.add_argument('--use_cpu', action='store_true',
                         help='Use CPU to encode sentences.')
     parser.add_argument('--glove_path', '-g', type=str,
-                        help="File to GloVe vectors. Required if bow, gensen, or infersent models are specified.")
-
-    elmo_group = parser.add_argument_group(ModelName.ELMO.value, 'Options for ELMo model')
-    elmo_group.add_argument('--combine_method', type=str, choices=["max", "mean", "last", "concat"],
-                            help="How to combine word representations in ELMo", default="max")
-    elmo_group.add_argument('--elmo_combine', type=str, choices=["add", "concat"],
-                            help="How to combine layers in ELMo", default="add")
+                        help="File to GloVe vectors in .txt format. "
+                             "Required if bow or infersent models are specified.")
+    parser.add_argument('--time_combine_method', type=str, choices=["max", "mean", "concat", "last"],
+                        help="How to combine word representations in ELMo and ULMFiT", default="max")
+    parser.add_argument('--layer_combine_method', type=str, choices=["add", "mean", "concat", "last"],
+                        help="How to combine layers in ELMo and ULMFiT", default="add")
 
     infersent_group = parser.add_argument_group(ModelName.INFERSENT.value, 'Options for InferSent model')
     infersent_group.add_argument('--infersent_dir', type=str,
                                  help="Directory containing model files. Required if infersent model is specified.")
 
     gensen_group = parser.add_argument_group(ModelName.GENSEN.value, 'Options for GenSen model')
+    gensen_group.add_argument('--glove_h5_path', type=str,
+                              help="File to GloVe vectors in .h5 (HDF5) format.")
     gensen_group.add_argument('--gensen_dir', type=str,
                               help="Directory containing model files. Required if gensen model is specified.")
     gensen_group.add_argument('--gensen_version', type=str,
@@ -124,6 +128,10 @@ def handle_arguments(arguments):
     bert_group = parser.add_argument_group(ModelName.BERT.value, 'Options for BERT model')
     bert_group.add_argument('--bert_version', type=str, choices=["base", "large"],
                             help="Version of BERT to use.", default="base")
+
+    ulmfit_group = parser.add_argument_group(ModelName.ULMFIT.value, 'Options for ULMFiT model')
+    ulmfit_group.add_argument('--ulmfit_dir', type=str,
+                              help="Directory containing model files. Required if ulmfit model is specified.")
 
     return parser.parse_args(arguments)
 
@@ -203,11 +211,12 @@ def main(arguments):
                 raise Exception('infersent_dir must be specified for {} model'.format(model_name))
             model_options = ''
         elif model_name == ModelName.GENSEN.value:
-            if args.glove_path is None:
-                raise Exception('glove_path must be specified for {} model'.format(model_name))
+            if args.glove_h5_path is None:
+                raise Exception('glove_h5_path must be specified for {} model'.format(model_name))
             if args.gensen_dir is None:
                 raise Exception('gensen_dir must be specified for {} model'.format(model_name))
-            if len(args.gensen_version) > 2:
+            gensen_version_list = split_comma_and_check(args.gensen_version, GENSEN_VERSIONS, "gensen_prefix")
+            if len(gensen_version_list) > 2:
                 raise ValueError('gensen_version can only have one or two elements')
             model_options = 'version=' + args.gensen_version
         elif model_name == ModelName.GUSE.value:
@@ -217,16 +226,19 @@ def main(arguments):
                 raise Exception('cove_encs must be specified for {} model'.format(model_name))
             model_options = ''
         elif model_name == ModelName.ELMO.value:
-            elmo_layer_combine = args.elmo_combine
-            elmo_time_combine = args.combine_method
             model_options = 'time_combine={};layer_combine={}'.format(
-                elmo_time_combine, elmo_layer_combine)
+                args.time_combine_method, args.layer_combine_method)
         elif model_name == ModelName.BERT.value:
             model_options = 'version=' + args.bert_version
         elif model_name == ModelName.OPENAI.value:
             if args.openai_encs is None:
                 raise Exception('openai_encs must be specified for {} model'.format(model_name))
             model_options = ''
+        elif model_name == ModelName.ULMFIT.value:
+            if args.ulmfit_dir is None:
+                raise Exception('ulmfit_dir must be specified for {} model'.format(model_name))
+            model_options = 'time_combine={};layer_combine={}'.format(
+                args.time_combine_method, args.layer_combine_method)
         else:
             raise ValueError("Model %s not found!" % model_name)
 
@@ -275,24 +287,20 @@ def main(arguments):
                     encs_attr2 = infersent.encode(model, encs["attr2"]["examples"])
 
                 elif model_name == ModelName.GENSEN.value:
-                    prefixes = split_comma_and_check(args.gensen_version, GENSEN_VERSIONS, "gensen_prefix")
-
                     if model is None:
-                        model_folder = os.path.join(args.gensen_dir, 'models')
-                        glove_h5_path = os.path.join(args.glove_path, 'glove.840B.300d.h5')
                         gensen_1 = gensen.GenSenSingle(
-                            model_folder=model_folder,
-                            filename_prefix=prefixes[0],
-                            pretrained_emb=glove_h5_path,
-                            cuda=True)
+                            model_folder=args.gensen_dir,
+                            filename_prefix=gensen_version_list[0],
+                            pretrained_emb=args.glove_h5_path,
+                            cuda=not args.use_cpu)
                         model = gensen_1
 
-                        if len(prefixes) == 2:
+                        if len(gensen_version_list) == 2:
                             gensen_2 = gensen.GenSenSingle(
-                                model_folder=model_folder,
-                                filename_prefix=prefixes[1],
-                                pretrained_emb=glove_h5_path,
-                                cuda=True)
+                                model_folder=args.gensen_dir,
+                                filename_prefix=gensen_version_list[1],
+                                pretrained_emb=args.glove_h5_path,
+                                cuda=not args.use_cpu)
                             model = gensen.GenSen(gensen_1, gensen_2)
 
                     vocab = gensen.build_vocab([
@@ -300,10 +308,6 @@ def main(arguments):
                         for set_name in ('targ1', 'targ2', 'attr1', 'attr2')
                         for s in encs[set_name]["examples"]
                     ])
-
-                    params_senteval = {'task_path': args.gensen_dir, 'usepytorch': True, 'kfold': 10}
-                    params_senteval['classifier'] = {'nhid': 0, 'optim': 'adam', 'batch_size': 64,
-                                                     'tenacity': 5, 'epoch_size': 4}
 
                     model.vocab_expansion(vocab)
 
@@ -314,8 +318,11 @@ def main(arguments):
 
                 elif model_name == ModelName.GUSE.value:
                     model = hub.Module("https://tfhub.dev/google/universal-sentence-encoder/2")
-                    os.environ["CUDA_VISIBLE_DEVICES"] = '0'  # use GPU with ID=0
-                    config = tf.ConfigProto()
+                    if args.use_cpu:
+                        kwargs = dict(device_count={'GPU': 0})
+                    else:
+                        kwargs = dict()
+                    config = tf.ConfigProto(**kwargs)
                     config.gpu_options.per_process_gpu_memory_fraction = 0.5  # maximum alloc gpu50% of MEM
                     config.gpu_options.allow_growth = True  # allocate dynamically
                     with tf.Session(config=config) as session:
@@ -356,7 +363,8 @@ def main(arguments):
                     encs = load_jiant_encodings(load_encs_from, n_header=1)
 
                 elif model_name == ModelName.ELMO.value:
-                    kwargs = dict(time_combine_method=elmo_time_combine, layer_combine_method=elmo_layer_combine)
+                    kwargs = dict(time_combine_method=args.time_combine_method,
+                                  layer_combine_method=args.layer_combine_method)
                     encs_targ1 = elmo.encode(encs["targ1"]["examples"], **kwargs)
                     encs_targ2 = elmo.encode(encs["targ2"]["examples"], **kwargs)
                     encs_attr1 = elmo.encode(encs["attr1"]["examples"], **kwargs)
@@ -375,6 +383,16 @@ def main(arguments):
                 elif model_name == ModelName.OPENAI.value:
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
+
+                elif model_name == ModelName.ULMFIT.value:
+                    kwargs = dict(tokenize=True,
+                                  time_combine_method=args.time_combine_method,
+                                  layer_combine_method=args.layer_combine_method)
+                    model = ulmfit.ULMFiT(args.ulmfit_dir, use_cpu=args.use_cpu)
+                    encs_targ1 = model.encode(encs["targ1"]["examples"], **kwargs)
+                    encs_targ2 = model.encode(encs["targ2"]["examples"], **kwargs)
+                    encs_attr1 = model.encode(encs["attr1"]["examples"], **kwargs)
+                    encs_attr2 = model.encode(encs["attr2"]["examples"], **kwargs)
 
                 else:
                     raise ValueError("Model %s not found!" % model_name)

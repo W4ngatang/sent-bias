@@ -6,6 +6,7 @@ import numpy as np
 import pickle
 import os
 import copy
+import logging as log
 
 import torch
 import torch.nn as nn
@@ -36,11 +37,12 @@ class Encoder(nn.Module):
 
     def __init__(
         self, vocab_size, embedding_dim,
-        hidden_dim, num_layers, rnn_type='GRU'
+        hidden_dim, num_layers, rnn_type='GRU', cuda=False,
     ):
         """Initialize params."""
         super(Encoder, self).__init__()
         self.rnn_type = rnn_type
+        self.cuda = cuda
         rnn = getattr(nn, rnn_type)
         self.src_embedding = nn.Embedding(
             num_embeddings=vocab_size,
@@ -60,7 +62,7 @@ class Encoder(nn.Module):
         if embedding_matrix.shape[0] != self.src_embedding.weight.size(0) or \
                 embedding_matrix.shape[1] != self.src_embedding.weight.size(1):
             """
-            print('''
+            log.warning('''
                 Warning pretrained embedding shape mismatch %d x %d
                 expected %d x %d''' % (
                 embedding_matrix.shape[0], embedding_matrix.shape[1],
@@ -78,7 +80,8 @@ class Encoder(nn.Module):
         except BaseException:
             self.src_embedding.weight.data.set_(torch.from_numpy(embedding_matrix).cuda())
 
-        self.src_embedding.cuda()
+        if self.cuda:
+            self.src_embedding.cuda()
 
     def forward(self, input, lengths, return_all=False, pool='last'):
         """Propogate input through the encoder."""
@@ -162,17 +165,21 @@ class GenSenSingle(nn.Module):
 
         path = os.path.join(self.model_folder, '%s_vocab.pkl' % (self.filename_prefix))
 
-        print(path)
+        log.info(path)
         model_vocab = pickle.load(open(path, 'rb'), encoding='latin')
         self.word2id = model_vocab['word2id']
         self.id2word = model_vocab['id2word']
         self.task_word2id = self.word2id
         self.id2word = self.id2word
 
+        if self.cuda:
+            kwargs = dict()
+        else:
+            kwargs = dict(map_location='cpu')
         encoder_model = torch.load(os.path.join(
             self.model_folder,
-            '%s.model' % (self.filename_prefix)
-        ))
+            '%s.model' % (self.filename_prefix),
+        ), **kwargs)
 
         # Initialize encoders
         self.encoder = Encoder(
@@ -180,7 +187,8 @@ class GenSenSingle(nn.Module):
             embedding_dim=encoder_model['src_embedding.weight'].size(1),
             hidden_dim=encoder_model['encoder.weight_hh_l0'].size(1),
             num_layers=1 if len(encoder_model) < 10 else 2,
-            rnn_type=self.rnn_type
+            rnn_type=self.rnn_type,
+            cuda=self.cuda
         )
 
         # Load pretrained sentence encoder weights
@@ -200,7 +208,7 @@ class GenSenSingle(nn.Module):
     def first_expansion(self):
         """Traing linear regression model for the first time."""
         # Read pre-trained word embedding h5 file
-        print('Loading pretrained word embeddings')
+        log.info('Loading pretrained word embeddings')
         pretrained_embeddings = h5py.File(self.pretrained_emb)
         pretrained_embedding_matrix = pretrained_embeddings['embedding'].value
         pretrain_vocab = \
@@ -222,7 +230,7 @@ class GenSenSingle(nn.Module):
                     pretrained_embedding_matrix[pretrain_word2id[word]]
                 )
 
-        print('Training vocab expansion on model')
+        log.info('Training vocab expansion on model')
         lreg = LinearRegression()
         lreg.fit(pretrain_train, model_train)
         self.lreg = lreg
@@ -277,8 +285,8 @@ class GenSenSingle(nn.Module):
                     self.model_embedding_matrix[self.word2id['<unk>']]
                 )
 
-        print('Found %d task OOVs ' % (oov_task))
-        print('Found %d pretrain OOVs ' % (oov_pretrain))
+        log.info('Found %d task OOVs ' % (oov_task))
+        log.info('Found %d pretrain OOVs ' % (oov_pretrain))
         task_embeddings = np.stack(task_embeddings)
         self.encoder.set_pretrained_embeddings(task_embeddings)
         self.vocab_expanded = True

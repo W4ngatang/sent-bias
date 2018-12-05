@@ -8,18 +8,19 @@ use `environment.yml` to create a conda environment with all necessary
 code dependencies: `conda env create -f environment.yml`.
 Activate the environment with `source activate sentbias`.
 
-Then, in the environment, download the NLTK punkt tokenization
-resource:
+Then, in the environment, download the NLTK punkt and spacy en
+resources:
 
 ```
 python -c 'import nltk; nltk.download("punkt")'
+python -m spacy download en
 ```
 
 You will also need to download pretrained model weights for each model
 you want to test.  Instructions for each supported model are as
 follows.
 
-### Bag-of-words (bow), others
+### Bag-of-words (bow); also GenSen and InferSent
 
 Several models require GloVe words vectors.
 Download and unzip the [GloVe Common Crawl 840B 300d
@@ -28,6 +29,25 @@ vectors](http://nlp.stanford.edu/data/glove.840B.300d.zip) from the
 page](https://nlp.stanford.edu/projects/glove/).  Make note of the
 path to the resultant text file; you will need to pass it to `sentbias/main.py` using the `--glove_path` flag.
 
+### BERT
+
+BERT weights will be downloaded and cached at runtime.  Set `PYTORCH_PRETRAINED_BERT_CACHE` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `~/.pytorch_pretrained_bert`.  For example, if using bash, run this before running BERT bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
+
+```
+export PYTORCH_PRETRAINED_BERT_CACHE=/data/bert_cache
+```
+
+### CoVe, OpenAI
+
+CoVe and OpenAI are supported through the jiant project.  To test these models, first initialize jiant:
+
+```
+git submodule init
+git submodule update
+```
+
+TODO
+
 ### ELMo
 
 ELMo weights will be downloaded and cached at runtime.  Set `ALLENNLP_CACHE_ROOT` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `~/.allennlp`.  For example, if using bash, run this before running ELMo bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
@@ -35,17 +55,6 @@ ELMo weights will be downloaded and cached at runtime.  Set `ALLENNLP_CACHE_ROOT
 ```
 export ALLENNLP_CACHE_ROOT=/data/allennlp_cache
 ```
-
-### Infersent
-
-Download the model checkpoints from the [InferSent repo](https://github.com/facebookresearch/InferSent):
-
-```
-wget https://s3.amazonaws.com/senteval/infersent/infersent.allnli.pickle
-wget https://s3.amazonaws.com/senteval/infersent/infersent.snli.pickle
-```
-
-Make a note of the directory you download them to; you will need to pass it to `sentbias/main.py` using the `--infersent_dir` flag.
 
 ### GenSen
 
@@ -70,12 +79,34 @@ You will also need to process your GloVe word vectors into an HDF5 format.  To d
 python scripts/glove2h5.py path/to/glove/vectors.txt
 ```
 
-### BERT
+### Infersent
 
-BERT weights will be downloaded and cached at runtime.  Set `PYTORCH_PRETRAINED_BERT_CACHE` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `~/.pytorch_pretrained_bert`.  For example, if using bash, run this before running BERT bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
+Download the model checkpoints from the [InferSent repo](https://github.com/facebookresearch/InferSent):
 
 ```
-export PYTORCH_PRETRAINED_BERT_CACHE=/data/bert_cache
+wget https://s3.amazonaws.com/senteval/infersent/infersent.allnli.pickle
+wget https://s3.amazonaws.com/senteval/infersent/infersent.snli.pickle
+```
+
+Make a note of the directory you download them to; you will need to pass it to `sentbias/main.py` using the `--infersent_dir` flag.
+
+### ULMFiT
+
+Download the model files from [the fast.ai website](http://nlp.fast.ai/category/classification.html):
+
+```
+wget http://files.fast.ai/models/wt103/fwd_wt103.h5
+wget http://files.fast.ai/models/wt103/itos_wt103.pkl
+```
+
+Make a note of the directory you download them to; you will need to pass it to `sentbias/main.py` using the `--ulmfit_dir` flag.
+
+### Universal Sentence Encoder (Google)
+
+Universal Sentence Encoder weights will be downloaded and cached at runtime.  Set `TFHUB_CACHE_DIR` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `/tmp/tfhub_modules`.  For example, if using bash, run this before running Universal Sentence Encoder bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
+
+```
+export TFHUB_CACHE_DIR=/data/tfhub_cache
 ```
 
 ## Running Bias Tests
