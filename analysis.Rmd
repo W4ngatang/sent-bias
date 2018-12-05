@@ -1,0 +1,40 @@
+---
+title: "Sentence Bias Analysis"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+## Name-like name filtering
+
+We may want to filter the least name-like names, following Caliskan, but note that black-associated names are farther apart (and their distances are more stratified) than white-associated names to begin with:
+
+```{r}
+read_csv('tests-meta/sweeney_2013_name_distances_glove_840B_300d.csv') %>%
+  group_by(centroid, group) %>%
+  mutate(rank=dense_rank(distance),
+         race=str_extract(group, '^[a-z]+'),
+         gender=str_extract(group, '[a-z]+$')) %>%
+  ungroup %>%
+  ggplot(aes(x=rank, y=distance)) +
+  geom_point() +
+  facet_grid(centroid ~ group)
+ggsave('sweeney_2013_name_distances_glove_840B_300d.pdf')
+```
+
+## Controlling for multiple hypothesis tests
+
+Use Holm-Bonferroni procedure:
+
+```{r}
+read_tsv('results.tsv') %>%
+  arrange(p_value) %>%
+  mutate(rank=row_number(),
+         p_value_threshold=0.01/(n() + 1 - rank),
+         reject=rank < min(which(p_value > p_value_threshold))) %>%
+  filter(reject) %>%
+  arrange(model, options, test)
+```
+
