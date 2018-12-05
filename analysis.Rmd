@@ -7,6 +7,14 @@ output: html_notebook
 library(tidyverse)
 ```
 
+## Set sizes
+
+```{r}
+read_tsv('results.tsv') %>%
+  select(test, num_targ1, num_targ2, num_attr1, num_attr2) %>%
+  unique
+```
+
 ## Controlling for multiple hypothesis tests
 
 Use Holm-Bonferroni procedure:
