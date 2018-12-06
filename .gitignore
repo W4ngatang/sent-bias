@@ -14,3 +14,8 @@
 *.Rproj
 *.nb.html
 .Rhistory
+/log
+/log.*
+/results.tsv
+/results.tsv.*
+/*.o*
