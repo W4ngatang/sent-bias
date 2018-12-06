@@ -64,7 +64,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
         # reflect that.
         total_true += 1
         total += 1
-        log.info('Drawing {} samples (and biasing by 1)'.format(n_samples))
+        log.info('Drawing {} samples (and biasing by 1)'.format(n_samples - total))
         while total < n_samples:
             random.shuffle(XY)
             Xi = XY[:size]
