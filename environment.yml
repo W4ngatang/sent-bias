@@ -64,8 +64,8 @@ dependencies:
     - babygdcli==0.2b11
     - backcall==0.1.0
     - boto==2.49.0
-    - boto3==1.9.4
-    - botocore==1.12.4
+    - boto3==1.9.61
+    - botocore==1.12.61
     - bottleneck==1.2.1
     - cachetools==2.1.0
     - chardet==3.0.4
@@ -149,13 +149,13 @@ dependencies:
     - pygments==2.2.0
     - pyparsing==2.2.0
     - pytest==3.8.0
-    - python-dateutil==2.7.3
+    - python-dateutil==2.7.5
     - python-jose==2.0.2
-    - pytorch-pretrained-bert==0.2.0
+    - pytorch-pretrained-bert==0.3.0
     - pytz==2017.3
     - pyyaml==3.13
     - regex==2017.4.5
-    - requests==2.19.1
+    - requests==2.20.1
     - responses==0.9.0
     - rsa==3.4.2
     - s3transfer==0.1.13
@@ -170,13 +170,13 @@ dependencies:
     - torch==0.4.1
     - torchtext==0.3.1
     - torchvision-nightly==0.2.1
-    - tqdm==4.26.0
+    - tqdm==4.28.1
     - traitlets==4.3.2
     - typing==3.6.6
     - ujson==1.35
     - unidecode==1.0.22
     - uritemplate==3.0.0
-    - urllib3==1.23
+    - urllib3==1.24.1
     - wcwidth==0.1.7
     - websocket-client==0.53.0
     - wrapt==1.10.11

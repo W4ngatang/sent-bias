@@ -41,6 +41,7 @@ class ModelName(Enum):
 TEST_EXT = '.jsonl'
 MODEL_NAMES = [m.value for m in ModelName]
 GENSEN_VERSIONS = ["nli_large_bothskip", "nli_large_bothskip_parse", "nli_large_bothskip_2layer", "nli_large"]
+BERT_VERSIONS = ["bert-base-uncased", "bert-large-uncased", "bert-base-cased", "bert-large-cased"]
 
 
 def test_sort_key(test):
@@ -126,8 +127,8 @@ def handle_arguments(arguments):
                                    "Required if openai model is specified.")
 
     bert_group = parser.add_argument_group(ModelName.BERT.value, 'Options for BERT model')
-    bert_group.add_argument('--bert_version', type=str, choices=["base", "large"],
-                            help="Version of BERT to use.", default="base")
+    bert_group.add_argument('--bert_version', type=str, choices=BERT_VERSIONS,
+                            help="Version of BERT to use.", default="bert-base-uncased")
 
     ulmfit_group = parser.add_argument_group(ModelName.ULMFIT.value, 'Options for ULMFiT model')
     ulmfit_group.add_argument('--ulmfit_dir', type=str,
@@ -371,10 +372,7 @@ def main(arguments):
                     encs_attr2 = elmo.encode(encs["attr2"]["examples"], **kwargs)
 
                 elif model_name == ModelName.BERT.value:
-                    if args.bert_version == "large":
-                        model, tokenizer = bert.load_model('bert-large-uncased')
-                    else:
-                        model, tokenizer = bert.load_model('bert-base-uncased')
+                    model, tokenizer = bert.load_model(args.bert_version)
                     encs_targ1 = bert.encode(model, tokenizer, encs["targ1"]["examples"])
                     encs_targ2 = bert.encode(model, tokenizer, encs["targ2"]["examples"])
                     encs_attr1 = bert.encode(model, tokenizer, encs["attr1"]["examples"])
