@@ -9,4 +9,4 @@ source ~/.bashrc
 source activate sentbias
 export TFHUB_CACHE_DIR=/export/b02/cmay14/sentbias/tfhub_cache
 suffix=".$(date '+%Y%m%d%H%M%S').${JOB_ID}"
-python sentbias/main.py -m ulmfit --use_cpu --log_file sent-word.log$suffix --results_path results.sent-word.tsv$suffix --ulmfit_dir /export/b02/cmay14/sentbias/ulmfit --layer_combine_method last
+python sentbias/main.py -m ulmfit --use_cpu --log_file log$suffix --results_path results.sent-word.tsv$suffix --ulmfit_dir /export/b02/cmay14/sentbias/ulmfit --layer_combine_method last
