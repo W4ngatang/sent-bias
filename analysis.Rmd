@@ -1,0 +1,31 @@
+---
+title: "Sentence Bias Analysis"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+## Set sizes
+
+```{r}
+read_tsv('results.tsv') %>%
+  select(test, num_targ1, num_targ2, num_attr1, num_attr2) %>%
+  unique
+```
+
+## Controlling for multiple hypothesis tests
+
+Use Holm-Bonferroni procedure:
+
+```{r}
+read_tsv('results.tsv') %>%
+  arrange(p_value) %>%
+  mutate(rank=row_number(),
+         p_value_threshold=0.01/(n() + 1 - rank),
+         reject=rank < min(which(p_value > p_value_threshold))) %>%
+  filter(reject) %>%
+  arrange(model, options, test)
+```
+

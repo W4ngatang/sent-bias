@@ -9,3 +9,8 @@
 /output
 /.pytest_cache
 *.tsv
+.Rproj.user
+/.idea
+*.Rproj
+*.nb.html
+.Rhistory
