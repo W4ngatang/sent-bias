@@ -55,6 +55,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
     assoc = s_XYAB(X, Y, A, B, cossims=cossims)
     XY = X + Y
     total_true = 0
+    total_equal = 0
     total = 0
 
     if scipy.special.binom(2 * len(X), len(X)) > n_samples:
@@ -70,10 +71,10 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
             Yi = XY[size:]
             assert len(Xi) == len(Yi)
             s = s_XYAB(Xi, Yi, A, B, cossims=cossims)
-            if s > assoc:
+            if s >= assoc:  # use conservative test
                 total_true += 1
             elif s == assoc:
-                log.warning('Got equality on permutation {}, {}'.format(Xi, Yi))
+                total_equal += 1
             total += 1
     else:
         log.info('Using exact test')
@@ -83,11 +84,14 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
             Yi = list(XY_set.difference(Xi))
             assert len(Xi) == len(Yi)
             s = s_XYAB(Xi, Yi, A, B, cossims=cossims)
-            if s > assoc:
+            if s >= assoc:  # use conservative test
                 total_true += 1
             elif s == assoc:
-                log.warning('Got equality on permutation {}, {}'.format(Xi, Yi))
+                total_equal += 1
             total += 1
+
+    if total_equal:
+        log.warning('Equalities contributed {}/{} to p-value'.format(total_equal, total))
 
     return total_true / total
 
