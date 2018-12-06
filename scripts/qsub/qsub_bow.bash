@@ -9,4 +9,4 @@ source ~/.bashrc
 source activate sentbias
 export TFHUB_CACHE_DIR=/export/b02/cmay14/sentbias/tfhub_cache
 suffix=".$(date '+%Y%m%d%H%M%S').${JOB_ID}"
-python sentbias/main.py -m bow --use_cpu --log_file log$suffix --results_path results.sent-word.tsv$suffix --glove_path /export/b02/cmay14/sentbias/glove.840B.300d.txt
+python sentbias/main.py -m bow --use_cpu --log_file log$suffix --results_path results.tsv$suffix --glove_path /export/b02/cmay14/sentbias/glove.840B.300d.txt
