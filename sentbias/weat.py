@@ -69,8 +69,11 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
             Xi = XY[:size]
             Yi = XY[size:]
             assert len(Xi) == len(Yi)
-            if s_XYAB(Xi, Yi, A, B, cossims=cossims) > assoc:
+            s = s_XYAB(Xi, Yi, A, B, cossims=cossims)
+            if s > assoc:
                 total_true += 1
+            elif s == assoc:
+                log.warning('Got equality on permutation {}, {}'.format(Xi, Yi))
             total += 1
     else:
         log.info('Using exact test')
@@ -79,8 +82,11 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
             Xi = list(Xi)
             Yi = list(XY_set.difference(Xi))
             assert len(Xi) == len(Yi)
-            if s_XYAB(Xi, Yi, A, B, cossims=cossims) >= assoc:
+            s = s_XYAB(Xi, Yi, A, B, cossims=cossims)
+            if s > assoc:
                 total_true += 1
+            elif s == assoc:
+                log.warning('Got equality on permutation {}, {}'.format(Xi, Yi))
             total += 1
 
     return total_true / total
