@@ -71,9 +71,10 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
             Yi = XY[size:]
             assert len(Xi) == len(Yi)
             s = s_XYAB(Xi, Yi, A, B, cossims=cossims)
-            if s >= assoc:  # use conservative test
+            if s > assoc:
                 total_true += 1
-            elif s == assoc:
+            elif s == assoc:  # use conservative test
+                total_true += 1
                 total_equal += 1
             total += 1
     else:
@@ -84,9 +85,10 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
             Yi = list(XY_set.difference(Xi))
             assert len(Xi) == len(Yi)
             s = s_XYAB(Xi, Yi, A, B, cossims=cossims)
-            if s >= assoc:  # use conservative test
+            if s > assoc:
                 total_true += 1
-            elif s == assoc:
+            elif s == assoc:  # use conservative test
+                total_true += 1
                 total_equal += 1
             total += 1
 
