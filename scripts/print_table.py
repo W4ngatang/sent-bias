@@ -33,10 +33,10 @@ TESTS = (
     (None, None, None),
     ('heilman_double_bind_competent_one_word', 'DB: Competent', 'word'),
     ('heilman_double_bind_competent_one_sentence', 'DB: Competent', 'sent'),
-    ('heilman_double_bind_competent_1-', 'DB: Competent', 'sent+'),
+    ('heilman_double_bind_competent_1-', 'DB: Competent', 'para'),
     ('heilman_double_bind_likable_one_word', 'DB: Likable', 'word'),
     ('heilman_double_bind_likable_one_sentence', 'DB: Likable', 'sent'),
-    ('heilman_double_bind_likable_1-', 'DB: Likable', 'sent+'),
+    ('heilman_double_bind_likable_1-', 'DB: Likable', 'para'),
 )
 
 
