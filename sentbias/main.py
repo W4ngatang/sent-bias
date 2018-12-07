@@ -380,7 +380,8 @@ def main(arguments):
 
                 elif model_name == ModelName.OPENAI.value:
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)
-                    encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
+                    #encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
+                    encs = load_encodings(load_encs_from)
 
                 elif model_name == ModelName.ULMFIT.value:
                     kwargs = dict(tokenize=True,
