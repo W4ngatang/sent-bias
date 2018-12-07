@@ -23,7 +23,6 @@ import encoders.infersent as infersent
 import encoders.gensen as gensen
 import encoders.elmo as elmo
 import encoders.bert as bert
-import encoders.ulmfit as ulmfit
 
 log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
@@ -36,7 +35,6 @@ class ModelName(Enum):
     BERT = 'bert'
     COVE = 'cove'
     OPENAI = 'openai'
-    ULMFIT = 'ulmfit'
 
 TEST_EXT = '.jsonl'
 MODEL_NAMES = [m.value for m in ModelName]
@@ -96,10 +94,12 @@ def handle_arguments(arguments):
     parser.add_argument('--glove_path', '-g', type=str,
                         help="File to GloVe vectors in .txt format. "
                              "Required if bow or infersent models are specified.")
-    parser.add_argument('--time_combine_method', type=str, choices=["max", "mean", "concat", "last"],
-                        help="How to combine word representations in ELMo and ULMFiT", default="max")
-    parser.add_argument('--layer_combine_method', type=str, choices=["add", "mean", "concat", "last"],
-                        help="How to combine layers in ELMo and ULMFiT", default="add")
+
+    elmo_group = parser.add_argument_group(ModelName.ELMO.value, 'Options for ELMo model')
+    elmo_group.add_argument('--time_combine_method', type=str, choices=["max", "mean", "concat", "last"],
+                            help="How to combine word representations in ELMo", default="max")
+    elmo_group.add_argument('--layer_combine_method', type=str, choices=["add", "mean", "concat", "last"],
+                            help="How to combine layers in ELMo", default="add")
 
     infersent_group = parser.add_argument_group(ModelName.INFERSENT.value, 'Options for InferSent model')
     infersent_group.add_argument('--infersent_dir', type=str,
@@ -129,10 +129,6 @@ def handle_arguments(arguments):
     bert_group = parser.add_argument_group(ModelName.BERT.value, 'Options for BERT model')
     bert_group.add_argument('--bert_version', type=str, choices=BERT_VERSIONS,
                             help="Version of BERT to use.", default="bert-base-uncased")
-
-    ulmfit_group = parser.add_argument_group(ModelName.ULMFIT.value, 'Options for ULMFiT model')
-    ulmfit_group.add_argument('--ulmfit_dir', type=str,
-                              help="Directory containing model files. Required if ulmfit model is specified.")
 
     return parser.parse_args(arguments)
 
@@ -235,11 +231,6 @@ def main(arguments):
             if args.openai_encs is None:
                 raise Exception('openai_encs must be specified for {} model'.format(model_name))
             model_options = ''
-        elif model_name == ModelName.ULMFIT.value:
-            if args.ulmfit_dir is None:
-                raise Exception('ulmfit_dir must be specified for {} model'.format(model_name))
-            model_options = 'time_combine={};layer_combine={}'.format(
-                args.time_combine_method, args.layer_combine_method)
         else:
             raise ValueError("Model %s not found!" % model_name)
 
@@ -381,16 +372,6 @@ def main(arguments):
                 elif model_name == ModelName.OPENAI.value:
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
-
-                elif model_name == ModelName.ULMFIT.value:
-                    kwargs = dict(tokenize=True,
-                                  time_combine_method=args.time_combine_method,
-                                  layer_combine_method=args.layer_combine_method)
-                    model = ulmfit.ULMFiT(args.ulmfit_dir, use_cpu=args.use_cpu)
-                    encs_targ1 = model.encode(encs["targ1"]["examples"], **kwargs)
-                    encs_targ2 = model.encode(encs["targ2"]["examples"], **kwargs)
-                    encs_attr1 = model.encode(encs["attr1"]["examples"], **kwargs)
-                    encs_attr2 = model.encode(encs["attr2"]["examples"], **kwargs)
 
                 else:
                     raise ValueError("Model %s not found!" % model_name)
