@@ -19,3 +19,4 @@
 /results.tsv
 /results.tsv.*
 /*.o*
+.nfs*
