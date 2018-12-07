@@ -86,7 +86,6 @@ dependencies:
     - ecdsa==0.13
     - editdistance==0.5.2
     - en-core-web-sm==2.0.0
-    - fastai==1.0.32
     - fastprogress==0.1.16
     - flake8==3.6.0
     - flaky==3.4.0
