@@ -4,9 +4,15 @@ from csv import DictReader
 
 
 STAR_THRESHOLD = 0.01
-STAR = '^*'
-STAR_SPACE = r'\phantom{^*}'
+SINGLE_STAR = r'^{*\phantom{*}}'
+DOUBLE_STAR = r'^{**}'
+STAR_SPACE = r'\phantom{^{**}}'
+
 SIGNIFICANT_FIGURES = 2
+
+CTX_WORD = 'word'
+CTX_SENT = 'sentence'
+CTX_PARA = 'paragraph'
 
 MODELS = (
     ('bow', ''),
@@ -19,24 +25,24 @@ MODELS = (
 )
 
 TESTS = (
-    ('weat1', 'C1: Flowers/Insects', 'word'),
-    ('sent-weat1', 'C1: Flowers/Insects', 'sent'),
-    ('weat2', 'C2: Instruments/Weapons', 'word'),
-    ('sent-weat2', 'C2: Instruments/Weapons', 'sent'),
-    ('weat3', 'C3: EA/AA Names', 'word'),
-    ('sent-weat3', 'C3: EA/AA Names', 'sent'),
-    ('weat6', 'C6: M/F Names, Career', 'word'),
-    ('sent-weat6', 'C6: M/F Names, Career', 'sent'),
+    ('weat1', 'C1: Flowers/Insects', CTX_WORD),
+    ('sent-weat1', 'C1: Flowers/Insects', CTX_SENT),
+    ('weat2', 'C2: Instruments/Weapons', CTX_WORD),
+    ('sent-weat2', 'C2: Instruments/Weapons', CTX_SENT),
+    ('weat3', 'C3: EA/AA Names', CTX_WORD),
+    ('sent-weat3', 'C3: EA/AA Names', CTX_SENT),
+    ('weat6', 'C6: M/F Names, Career', CTX_WORD),
+    ('sent-weat6', 'C6: M/F Names, Career', CTX_SENT),
     (None, None, None),
-    ('angry_black_woman_stereotype', 'ABW', 'word'),
-    ('sent-angry_black_woman_stereotype', 'ABW', 'sent'),
+    ('angry_black_woman_stereotype', 'Angry Black Woman', CTX_WORD),
+    ('sent-angry_black_woman_stereotype', 'Angry Black Woman', CTX_SENT),
     (None, None, None),
-    ('heilman_double_bind_competent_one_word', 'DB: Competent', 'word'),
-    ('heilman_double_bind_competent_one_sentence', 'DB: Competent', 'sent'),
-    ('heilman_double_bind_competent_1-', 'DB: Competent', 'para'),
-    ('heilman_double_bind_likable_one_word', 'DB: Likable', 'word'),
-    ('heilman_double_bind_likable_one_sentence', 'DB: Likable', 'sent'),
-    ('heilman_double_bind_likable_1-', 'DB: Likable', 'para'),
+    ('heilman_double_bind_competent_one_word', 'Double Bind: Competent', CTX_WORD),
+    ('heilman_double_bind_competent_one_sentence', 'Double Bind: Competent', CTX_SENT),
+    ('heilman_double_bind_competent_1-', 'Double Bind: Competent', CTX_PARA),
+    ('heilman_double_bind_likable_one_word', 'Double Bind: Likable', CTX_WORD),
+    ('heilman_double_bind_likable_one_sentence', 'Double Bind: Likable', CTX_SENT),
+    ('heilman_double_bind_likable_1-', 'Double Bind: Likable', CTX_PARA),
 )
 
 
@@ -54,10 +60,22 @@ def main():
     with open(args.results_path) as f:
         reader = DictReader(f, delimiter='\t')
         for row in reader:
-            key = (row['model'], row['options'], row['test'])
-            if key in results:
-                raise Exception('duplicate key: {}'.format(key))
-            results[key] = row
+            for k in ('p_value', 'effect_size'):
+                row[k] = float(row[k])
+            for k in ('num_targ1', 'num_targ2', 'num_attr1', 'num_attr2'):
+                row[k] = int(row[k])
+
+            k = (row['model'], row['options'], row['test'])
+            if k in results:
+                raise Exception('duplicate key: {}'.format(k))
+            results[k] = row
+
+    results_list = sorted(results.items(), key=lambda p: p[1]['p_value'])
+    reject = True
+    for (i, (k, row)) in enumerate(results_list):
+        if row['p_value'] > STAR_THRESHOLD / (len(results_list) - i):
+            reject = False
+        row['reject'] = reject
 
     for (test_name, test_description, context_level) in TESTS:
         if test_name is None:
@@ -69,8 +87,10 @@ def main():
                     print(' & ', end='')
                 else:
                     row = results[(model, options, test_name)]
-                    effect_size = float(row['effect_size'])
-                    star = STAR if float(row['p_value']) <= STAR_THRESHOLD else STAR_SPACE
+                    effect_size = row['effect_size']
+                    star = DOUBLE_STAR if row['reject'] else (
+                        SINGLE_STAR if row['p_value'] <= STAR_THRESHOLD else STAR_SPACE
+                    )
                     print(' & ${effect_size:.{precision}f}{star}$'.format(
                         effect_size=effect_size,
                         star=star,
