@@ -10,6 +10,7 @@ from __future__ import absolute_import, division, unicode_literals
 import numpy as np
 import time
 import io
+import logging as log
 
 import torch
 from torch.autograd import Variable
@@ -98,8 +99,8 @@ class BLSTMEncoder(nn.Module):
                 word, vec = line.split(' ', 1)
                 if word in word_dict:
                     word_vec[word] = np.fromstring(vec, sep=' ')
-        print('Found {0}(/{1}) words with glove vectors'
-              .format(len(word_vec), len(word_dict)))
+        log.info('Found {0}(/{1}) words with glove vectors'
+                 .format(len(word_vec), len(word_dict)))
         return word_vec
 
     def get_glove_k(self, K):
