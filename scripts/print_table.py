@@ -5,7 +5,7 @@ from csv import DictReader
 
 STAR_THRESHOLD = 0.01
 STAR = '^*'
-STAR_SPACE = '\phantom{^*}'
+STAR_SPACE = r'\phantom{^*}'
 SIGNIFICANT_FIGURES = 2
 
 MODELS = (
