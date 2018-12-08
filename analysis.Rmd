@@ -5,27 +5,33 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+results <- read_tsv('results.tsv')
 ```
 
 ## Set sizes
 
 ```{r}
-read_tsv('results.tsv') %>%
+results %>%
   select(test, num_targ1, num_targ2, num_attr1, num_attr2) %>%
   unique
 ```
 
 ## Controlling for multiple hypothesis tests
 
+### Overall
+
 Use Holm-Bonferroni procedure:
 
 ```{r}
-read_tsv('results.tsv') %>%
-  arrange(p_value) %>%
-  mutate(rank=row_number(),
-         p_value_threshold=0.01/(n() + 1 - rank),
-         reject=rank < min(which(p_value > p_value_threshold))) %>%
-  filter(reject) %>%
-  arrange(model, options, test)
+hb <- function(data) {
+  data %>%
+    arrange(p_value) %>%
+    mutate(rank=row_number(),
+           p_value_threshold=0.01/(n() + 1 - rank),
+           reject=rank < min(which(p_value > p_value_threshold))) %>%
+    arrange(model, options, test)
+}
+results %>%
+  hb %>%
+  filter(reject)
 ```
-
