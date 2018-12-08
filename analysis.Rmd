@@ -6,6 +6,36 @@ output: html_notebook
 ```{r}
 library(tidyverse)
 results <- read_tsv('results.tsv')
+hb <- function(data) {
+  data %>%
+    arrange(p_value) %>%
+    mutate(rank=row_number(),
+           p_value_threshold=0.01/(n() + 1 - rank),
+           reject=rank < min(which(p_value > p_value_threshold))) %>%
+    arrange(model, options, test)
+}
+```
+
+## Exploration
+
+```{r fig.width=8,fig.height=16}
+selected_model_options = c(
+   'bow',
+   'infersent',
+   'guse',
+   'gensen;version=nli_large_bothskip_parse,nli_large_bothskip',
+   'elmo;time_combine=mean;layer_combine=add',
+   'bert;version=bert-large-cased')
+results %>%
+  hb %>%
+  mutate(model_options=ifelse(is.na(options), model, str_c(model, ';', options))) %>%
+  #filter(model_options %in% selected_model_options) %>%
+  #mutate(model_options=factor(model_options, levels=selected_model_options)) %>%
+  mutate(p_value_bin=1 + (p_value <= 0.01) + reject) %>%
+  ggplot() +
+  geom_tile(aes(x=model_options, y=test, fill=p_value_bin)) +
+  theme_bw() +
+  theme(axis.text.x=element_text(angle=45, hjust=1))
 ```
 
 ## Set sizes
@@ -23,14 +53,6 @@ results %>%
 Use Holm-Bonferroni procedure:
 
 ```{r}
-hb <- function(data) {
-  data %>%
-    arrange(p_value) %>%
-    mutate(rank=row_number(),
-           p_value_threshold=0.01/(n() + 1 - rank),
-           reject=rank < min(which(p_value > p_value_threshold))) %>%
-    arrange(model, options, test)
-}
 results %>%
   hb %>%
   filter(reject)
