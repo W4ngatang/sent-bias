@@ -6,6 +6,9 @@ import random
 import re
 import argparse
 import logging as log
+# NOTE(Alex): please leave the config here because other libraries will try to set config
+# and I find their config annoying
+log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
 from csv import DictWriter
 from enum import Enum
@@ -24,7 +27,6 @@ import encoders.gensen as gensen
 import encoders.elmo as elmo
 import encoders.bert as bert
 
-log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
 
 class ModelName(Enum):
     INFERSENT = 'infersent'
@@ -373,6 +375,10 @@ def main(arguments):
                     load_encs_from = os.path.join(args.openai_encs, "%s.encs" % test)
                     #encs = load_jiant_encodings(load_encs_from, n_header=1, is_openai=True)
                     encs = load_encodings(load_encs_from)
+                    encs_targ1 = encs["targ1"]["encs"]
+                    encs_targ2 = encs["targ2"]["encs"]
+                    encs_attr1 = encs["attr1"]["encs"]
+                    encs_attr2 = encs["attr2"]["encs"]
 
                 else:
                     raise ValueError("Model %s not found!" % model_name)
