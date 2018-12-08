@@ -250,16 +250,15 @@ def main(arguments):
                 encs_attr2 = encs['attr2']
             else:
                 # load the test data
-                encs = load_json(os.path.join(args.data_dir, "%s%s" % (test, TEST_EXT)),
-                                 split_sentence_into_list=False)
+                encs = load_json(os.path.join(args.data_dir, "%s%s" % (test, TEST_EXT)))
 
                 # load the model and do model-specific encoding procedure
                 log.info('Computing sentence encodings')
                 if model_name == ModelName.BOW.value:
-                    encs_targ1 = bow.encode(encs["targ1"]["examples"], args.glove_path, tokenize=True)
-                    encs_targ2 = bow.encode(encs["targ2"]["examples"], args.glove_path, tokenize=True)
-                    encs_attr1 = bow.encode(encs["attr1"]["examples"], args.glove_path, tokenize=True)
-                    encs_attr2 = bow.encode(encs["attr2"]["examples"], args.glove_path, tokenize=True)
+                    encs_targ1 = bow.encode(encs["targ1"]["examples"], args.glove_path)
+                    encs_targ2 = bow.encode(encs["targ2"]["examples"], args.glove_path)
+                    encs_attr1 = bow.encode(encs["attr1"]["examples"], args.glove_path)
+                    encs_attr2 = bow.encode(encs["attr2"]["examples"], args.glove_path)
 
                 elif model_name == ModelName.INFERSENT.value:
                     if model is None:
@@ -271,7 +270,7 @@ def main(arguments):
                             for k in ('targ1', 'targ2', 'attr1', 'attr2')
                             for example in encs[k]['examples']
                         ],
-                        tokenize=False)
+                        tokenize=True)
                     log.info("Encoding sentences for test %s with model %s...", test, model_name)
                     encs_targ1 = infersent.encode(model, encs["targ1"]["examples"])
                     encs_targ2 = infersent.encode(model, encs["targ2"]["examples"])

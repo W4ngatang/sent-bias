@@ -4,7 +4,7 @@ import logging as log
 import numpy as np
 
 
-def get_word_dict(sentences, tokenize):
+def get_word_dict(sentences, tokenize=True):
     ''' From sentences create vocab of words '''
     word_dict = {}
     if tokenize:
@@ -54,9 +54,9 @@ def get_glove(vocab, glove_path):
     return word_vecs, dim
 
 
-def encode(sentences, glove_path, tokenize=False):
+def encode(sentences, glove_path, tokenize=True):
     ''' Encode sentences into BoW representation '''
-    sents, vocab = get_word_dict(sentences, tokenize)
+    sents, vocab = get_word_dict(sentences, tokenize=tokenize)
 
     word_vecs, dim = get_glove(vocab, glove_path)
 

@@ -8,16 +8,13 @@ WEAT_SETS = ["targ1", "targ2", "attr1", "attr2"]
 CATEGORY = "category"
 
 
-def load_json(sent_file, split_sentence_into_list=True):
+def load_json(sent_file):
     ''' Load from json. We expect a certain format later, so do some post processing '''
     log.info("Loading %s..." % sent_file)
     all_data = json.load(open(sent_file, 'r'))
     data = {}
     for k, v in all_data.items():
-        if split_sentence_into_list:
-            examples = [e.split() for e in v["examples"]]
-        else:
-            examples = v["examples"]
+        examples = v["examples"]
         data[k] = examples
         v["examples"] = examples
     return all_data  # data

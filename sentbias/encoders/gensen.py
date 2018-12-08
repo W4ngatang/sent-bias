@@ -14,19 +14,24 @@ from torch.autograd import Variable
 from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
 
 
-def encode(model, sents):
+def encode(model, sents, tokenize=True):
     ''' Use model to encode gensen sents '''
     sent2vec = {}
-    reps_h, reps_h_t = model.get_representation(sents, pool='last', return_numpy=True, tokenize=True)
+    reps_h, reps_h_t = model.get_representation(sents, pool='last', return_numpy=True, tokenize=tokenize)
     for j in range(0, len(sents)):
         sent2vec[sents[j]] = reps_h_t[j]
     return sent2vec
 
 
-def build_vocab(sentences):
+def build_vocab(sentences, tokenize=True):
     vocab = []
+    if tokenize:
+        from nltk.tokenize import word_tokenize
+    else:
+        def word_tokenize(s):
+            return s.replace('.', ' ').split()
     for s in sentences:
-        words = s.replace('.', ' ').split()
+        words = word_tokenize(s)
         for w in words:
             vocab.append(w)
     return set(vocab)

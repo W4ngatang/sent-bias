@@ -8,21 +8,11 @@ PATH_PREFIX = '/scratch/sb6416/senteval/infersent/encoder'
 INFERSENT_PATHS = {'all': 'infersent.allnli.pickle', 'snli': 'infersent.snli.pickle'}
 
 
-def encode(model, sents):
+def encode(model, sents, tokenize=True):
     ''' Use model to encode sents '''
-    encs = model.encode(sents, bsize=1, tokenize=False)
+    encs = model.encode(sents, bsize=1, tokenize=tokenize)
     sent2enc = {sent: enc for sent, enc in zip(sents, encs)}
     return sent2enc
-
-
-def prepare(params, samples):
-    params.infersent.build_vocab([' '.join(s) for s in samples], tokenize=False)
-
-
-def batcher(params, batch):
-    sentences = [' '.join(s) for s in batch]
-    embeddings = params.infersent.encode(sentences, bsize=params.batch_size, tokenize=False)
-    return embeddings
 
 
 def load_infersent(path_prefix, glove_path, train_data='all', use_cpu=False):
