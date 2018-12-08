@@ -20,7 +20,7 @@ MODELS = (
     ('gensen', 'version=nli_large_bothskip_parse,nli_large_bothskip'),
     ('guse', ''),
     ('elmo', 'time_combine=mean;layer_combine=add'),
-    (None, None),
+    ('openai', ''),
     ('bert', 'version=bert-large-cased'),
 )
 
