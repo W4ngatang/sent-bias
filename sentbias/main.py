@@ -329,26 +329,6 @@ def main(arguments):
                         encs_attr1 = guse_encode(encs["attr1"]["examples"])
                         encs_attr2 = guse_encode(encs["attr2"]["examples"])
 
-
-
-                    #for i, sent in enumerate(encs):  # iterate through the four word sets
-                    #    embeddings = model(sent)  # embed the word set
-                    #    with tf.Session(config=config) as session:
-                    #        session.run([tf.global_variables_initializer(), tf.tables_initializer()])
-                    #        enc[i] = session.run(embeddings)
-                    #        if i == 0:
-                    #            for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                    #                encs_targ1[sent[j]] = embedding
-                    #        elif i == 1:
-                    #            for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                    #                encs_targ2[sent[j]] = embedding
-                    #        elif i == 2:
-                    #            for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                    #                encs_attr1[sent[j]] = embedding
-                    #        elif i == 3:
-                    #            for j, embedding in enumerate(np.array(enc[i]).tolist()):
-                    #                encs_attr2[sent[j]] = embedding
-
                 elif model_name == ModelName.COVE.value:
                     load_encs_from = os.path.join(args.cove_encs, "%s.encs" % test)
                     encs = load_jiant_encodings(load_encs_from, n_header=1)
