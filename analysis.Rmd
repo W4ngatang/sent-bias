@@ -39,6 +39,17 @@ results %>%
   theme(axis.text.x=element_text(angle=45, hjust=1))
 ```
 
+```{r}
+results %>%
+  hb %>%
+  mutate(model_options=ifelse(is.na(options), model, str_c(model, ';', options))) %>%
+  filter(str_detect(test, 'weat[3-5]$')) %>%
+  ggplot() +
+  geom_tile(aes(x=model_options, y=test, fill=-log10(p_value))) +
+  theme_bw() +
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+```
+
 ## Set sizes
 
 ```{r}
