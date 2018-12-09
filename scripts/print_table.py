@@ -27,8 +27,6 @@ MODELS = (
 TESTS = (
     ('weat1', 'C1: Flowers/Insects', CTX_WORD),
     ('sent-weat1', 'C1: Flowers/Insects', CTX_SENT),
-    ('weat2', 'C2: Instruments/Weapons', CTX_WORD),
-    ('sent-weat2', 'C2: Instruments/Weapons', CTX_SENT),
     ('weat3', 'C3: EA/AA Names', CTX_WORD),
     ('sent-weat3', 'C3: EA/AA Names', CTX_SENT),
     ('weat6', 'C6: M/F Names, Career', CTX_WORD),
