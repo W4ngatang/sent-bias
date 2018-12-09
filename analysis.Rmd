@@ -62,10 +62,38 @@ results %>%
 
 ### Overall
 
-Use Holm-Bonferroni procedure:
+Using Holm-Bonferroni procedure:
 
 ```{r}
 results %>%
   hb %>%
   filter(reject)
 ```
+
+### Caliskan et al. (2017) tests
+
+```{r}
+results %>%
+  filter(str_detect(test, 'weat')) %>%
+  hb %>%
+  filter(reject)
+```
+
+### Angry black woman
+
+```{r}
+results %>%
+  filter(str_detect(test, 'angry_black_woman')) %>%
+  hb %>%
+  filter(reject)
+```
+
+### Double bind
+
+```{r}
+results %>%
+  filter(str_detect(test, 'double_bind')) %>%
+  hb %>%
+  filter(reject)
+```
+
