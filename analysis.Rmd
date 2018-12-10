@@ -18,6 +18,8 @@ hb <- function(data) {
 
 ## Exploration
 
+### All combinations
+
 ```{r fig.width=8,fig.height=16}
 selected_model_options = c(
    'bow',
@@ -39,6 +41,8 @@ results %>%
   theme(axis.text.x=element_text(angle=45, hjust=1))
 ```
 
+### WEAT 3-5
+
 ```{r}
 results %>%
   hb %>%
@@ -48,6 +52,47 @@ results %>%
   geom_tile(aes(x=model_options, y=test, fill=-log10(p_value))) +
   theme_bw() +
   theme(axis.text.x=element_text(angle=45, hjust=1))
+```
+
+```{r}
+results %>%
+  hb %>%
+  mutate(model_options=ifelse(is.na(options), model, str_c(model, ';', options))) %>%
+  filter(str_detect(test, 'weat[3-5]$')) %>%
+  select(model_options, test, p_value) %>%
+  spread(model_options, p_value)
+```
+
+### WEAT 7-8
+
+```{r}
+results %>%
+  hb %>%
+  mutate(model_options=ifelse(is.na(options), model, str_c(model, ';', options))) %>%
+  filter(str_detect(test, 'weat[7-8]$')) %>%
+  ggplot() +
+  geom_tile(aes(x=model_options, y=test, fill=-log10(p_value))) +
+  theme_bw() +
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+```
+
+```{r}
+results %>%
+  hb %>%
+  mutate(model_options=ifelse(is.na(options), model, str_c(model, ';', options))) %>%
+  filter(str_detect(test, 'weat[7-8]$')) %>%
+  select(model_options, test, p_value) %>%
+  spread(model_options, p_value)
+```
+
+### BOW, WEAT word-level
+
+```{r}
+results %>%
+  hb %>%
+  filter(model == 'bow', str_detect(test, '^weat[0-9]+$')) %>%
+  arrange(as.numeric(str_extract(test, '[0-9]+'))) %>%
+  select(test, p_value, effect_size)
 ```
 
 ## Set sizes
