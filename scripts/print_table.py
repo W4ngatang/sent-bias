@@ -12,8 +12,9 @@ STAR_SPACE = r'\phantom{^{**}}'
 SIGNIFICANT_FIGURES = 2
 
 CTX_WORD = 'word'
-CTX_SENT = 'sentence'
-CTX_PARA = 'paragraph'
+CTX_SENT = 'sent'
+CTX_SENT_UNBLEACHED = 'sent (u)'
+CTX_PARA = 'para'
 
 MODELS = (
     ('bow', ''),
@@ -37,11 +38,11 @@ TESTS = (
     ('sent-angry_black_woman_stereotype', 'Angry Black Woman', CTX_SENT),
     (None, None, None),
     ('heilman_double_bind_competent_one_word', 'Double Bind: Competent', CTX_WORD),
-    ('heilman_double_bind_competent_one_sentence', 'Double Bind: Competent', CTX_SENT),
-    ('heilman_double_bind_competent_1-', 'Double Bind: Competent', CTX_PARA),
+    ('sent-heilman_double_bind_competent_one_word', 'Double Bind: Competent', CTX_SENT),
+    ('heilman_double_bind_competent_one_sentence', 'Double Bind: Competent', CTX_SENT_UNBLEACHED),
     ('heilman_double_bind_likable_one_word', 'Double Bind: Likable', CTX_WORD),
-    ('heilman_double_bind_likable_one_sentence', 'Double Bind: Likable', CTX_SENT),
-    ('heilman_double_bind_likable_1-', 'Double Bind: Likable', CTX_PARA),
+    ('sent-heilman_double_bind_likable_one_word', 'Double Bind: Likable', CTX_SENT),
+    ('heilman_double_bind_likable_one_sentence', 'Double Bind: Likable', CTX_SENT_UNBLEACHED),
 )
 
 

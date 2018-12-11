@@ -6,9 +6,7 @@ import random
 import re
 import argparse
 import logging as log
-# NOTE(Alex): please leave the config here because other libraries will try to set config
-# and I find their config annoying
-log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)
+log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d %I:%M:%S %p', level=log.INFO)  # noqa
 
 from csv import DictWriter
 from enum import Enum
