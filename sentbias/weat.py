@@ -29,15 +29,46 @@ def construct_cossim_lookup(XY, AB):
     return cossims
 
 
-def s_XYAB(X, Y, A, B, cossims):
-    r"""
-    Caliskan: "...measures the differential association of the two sets of
-    target words with the attribute."
-    Formally, \sum_{x in X} s(x, A, B) - \sum_{y in Y} s(y, A, B)
-        where s(x, A, B) = mean_{a in A} cos(x, a) - mean_{b in B} cos(x, b)
+def s_wAB(A, B, cossims):
     """
-    s_wAB = cossims[:, A].mean(axis=1) - cossims[:, B].mean(axis=1)
-    return s_wAB[X].sum() - s_wAB[Y].sum()
+    Return vector of s(w, A, B) across w, where
+        s(w, A, B) = mean_{a in A} cos(w, a) - mean_{b in B} cos(w, b).
+    """
+    return cossims[:, A].mean(axis=1) - cossims[:, B].mean(axis=1)
+
+
+def s_XAB(X, s_wAB_memo):
+    r"""
+    Given indices of target concept X and precomputed s_wAB values,
+    return slightly more computationally efficient version of WEAT
+    statistic for p-value computation.
+
+    Caliskan defines the WEAT statistic s(X, Y, A, B) as
+        sum_{x in X} s(x, A, B) - sum_{y in Y} s(y, A, B)
+    where s(w, A, B) is defined as
+        mean_{a in A} cos(w, a) - mean_{b in B} cos(w, b).
+    The p-value is computed using a permutation test on (X, Y) over all
+    partitions (X', Y') of X union Y with |X'| = |Y'|.
+
+    However, for all partitions (X', Y') of X union Y,
+        s(X', Y', A, B)
+      = sum_{x in X'} s(x, A, B) + sum_{y in Y'} s(y, A, B)
+      = C,
+    a constant.  Thus
+        sum_{x in X'} s(x, A, B) + sum_{y in Y'} s(y, A, B)
+      = sum_{x in X'} s(x, A, B) + (C - sum_{x in X'} s(x, A, B))
+      = C + 2 sum_{x in X'} s(x, A, B).
+
+    By monotonicity,
+        s(X', Y', A, B) > s(X, Y, A, B)
+    if and only if
+        [s(X', Y', A, B) - C] / 2 > [s(X, Y, A, B) - C] / 2,
+    that is,
+        sum_{x in X'} s(x, A, B) > sum_{x in X} s(x, A, B).
+    Thus we only need use the first component of s(X, Y, A, B) as our
+    test statistic.
+    """
+    return s_wAB_memo[X].sum()
 
 
 def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
@@ -45,49 +76,48 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
         the probability that a random even partition X_i, Y_i of X u Y
         satisfies P[s(X_i, Y_i, A, B) > s(X, Y, A, B)]
     '''
-    X = list(X)
-    Y = list(Y)
-    A = list(A)
-    B = list(B)
+    X = np.array(list(X), dtype=np.int)
+    Y = np.array(list(Y), dtype=np.int)
+    A = np.array(list(A), dtype=np.int)
+    B = np.array(list(B), dtype=np.int)
 
     assert len(X) == len(Y)
     size = len(X)
-    assoc = s_XYAB(X, Y, A, B, cossims=cossims)
-    XY = X + Y
+    s_wAB_memo = s_wAB(A, B, cossims=cossims)
+    s = s_XAB(X, s_wAB_memo)
+    XY = np.concatenate((X, Y))
     total_true = 0
     total_equal = 0
     total = 0
 
-    if scipy.special.binom(2 * len(X), len(X)) > n_samples:
+    num_partitions = int(scipy.special.binom(2 * len(X), len(X)))
+    if num_partitions > n_samples:
         # We only have as much precision as the number of samples drawn;
         # bias the p-value (hallucinate a positive observation) to
         # reflect that.
         total_true += 1
         total += 1
         log.info('Drawing {} samples (and biasing by 1)'.format(n_samples - total))
-        while total < n_samples:
-            random.shuffle(XY)
+        for _ in range(n_samples - 1):
+            np.random.shuffle(XY)
             Xi = XY[:size]
-            Yi = XY[size:]
-            assert len(Xi) == len(Yi)
-            s = s_XYAB(Xi, Yi, A, B, cossims=cossims)
-            if s > assoc:
+            assert 2 * len(Xi) == len(XY)
+            si = s_XAB(Xi, s_wAB_memo)
+            if si > s:
                 total_true += 1
-            elif s == assoc:  # use conservative test
+            elif si == s:  # use conservative test
                 total_true += 1
                 total_equal += 1
             total += 1
     else:
-        log.info('Using exact test')
-        XY_set = set(XY)
+        log.info('Using exact test ({} partitions)'.format(num_partitions))
         for Xi in it.combinations(XY, len(X)):
-            Xi = list(Xi)
-            Yi = list(XY_set.difference(Xi))
-            assert len(Xi) == len(Yi)
-            s = s_XYAB(Xi, Yi, A, B, cossims=cossims)
-            if s > assoc:
+            Xi = np.array(Xi, dtype=np.int)
+            assert 2 * len(Xi) == len(XY)
+            si = s_XAB(Xi, s_wAB_memo)
+            if si > s:
                 total_true += 1
-            elif s == assoc:  # use conservative test
+            elif si == s:  # use conservative test
                 total_true += 1
                 total_equal += 1
             total += 1
@@ -99,11 +129,11 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
 
 
 def mean_s_wAB(X, A, B, cossims):
-    return np.mean(cossims[X][:, A].mean(axis=1) - cossims[X][:, B].mean(axis=1))
+    return np.mean(s_wAB(A, B, cossims[X]))
 
 
 def stdev_s_wAB(X, A, B, cossims):
-    return np.std(cossims[X][:, A].mean(axis=1) - cossims[X][:, B].mean(axis=1), ddof=1)
+    return np.std(s_wAB(A, B, cossims[X]), ddof=1)
 
 
 def effect_size(X, Y, A, B, cossims):
