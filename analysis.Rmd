@@ -112,6 +112,16 @@ results %>%
   select(test, p_value, effect_size)
 ```
 
+### USE, WEAT word-level
+
+```{r}
+results %>%
+  hb %>%
+  filter(model == 'guse', str_detect(test, '^weat[0-9]+$')) %>%
+  arrange(as.numeric(str_extract(test, '[0-9]+'))) %>%
+  select(test, p_value, effect_size)
+```
+
 ## Set sizes
 
 ```{r}
