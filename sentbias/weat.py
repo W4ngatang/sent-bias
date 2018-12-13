@@ -1,10 +1,10 @@
 ''' Implements the WEAT tests '''
 import logging as log
 import math
-import random
 import itertools as it
 import numpy as np
 import scipy.special
+import scipy.stats
 
 # X and Y are two sets of target words of equal size.
 # A and B are two sets of attribute words.
@@ -71,7 +71,15 @@ def s_XAB(X, s_wAB_memo):
     return s_wAB_memo[X].sum()
 
 
-def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
+def s_XYAB(X, Y, s_wAB_memo):
+    r"""
+    Given indices of target concept X and precomputed s_wAB values,
+    the WEAT test statistic for p-value computation.
+    """
+    return s_XAB(X, s_wAB_memo) - s_XAB(Y, s_wAB_memo)
+
+
+def p_val_permutation_test(X, Y, A, B, n_samples, cossims, parametric=False):
     ''' Compute the p-val for the permutation test, which is defined as
         the probability that a random even partition X_i, Y_i of X u Y
         satisfies P[s(X_i, Y_i, A, B) > s(X, Y, A, B)]
@@ -84,48 +92,79 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims):
     assert len(X) == len(Y)
     size = len(X)
     s_wAB_memo = s_wAB(A, B, cossims=cossims)
-    s = s_XAB(X, s_wAB_memo)
     XY = np.concatenate((X, Y))
-    total_true = 0
-    total_equal = 0
-    total = 0
 
-    num_partitions = int(scipy.special.binom(2 * len(X), len(X)))
-    if num_partitions > n_samples:
-        # We only have as much precision as the number of samples drawn;
-        # bias the p-value (hallucinate a positive observation) to
-        # reflect that.
-        total_true += 1
-        total += 1
-        log.info('Drawing {} samples (and biasing by 1)'.format(n_samples - total))
-        for _ in range(n_samples - 1):
+    if parametric:
+        log.info('Using parametric test')
+        s = s_XYAB(X, Y, s_wAB_memo)
+
+        log.info('Drawing {} samples'.format(n_samples))
+        samples = []
+        for _ in range(n_samples):
             np.random.shuffle(XY)
             Xi = XY[:size]
-            assert 2 * len(Xi) == len(XY)
-            si = s_XAB(Xi, s_wAB_memo)
-            if si > s:
-                total_true += 1
-            elif si == s:  # use conservative test
-                total_true += 1
-                total_equal += 1
-            total += 1
+            Yi = XY[size:]
+            assert len(Xi) == len(Yi)
+            si = s_XYAB(Xi, Yi, s_wAB_memo)
+            samples.append(si)
+
+        # Compute sample standard deviation and compute p-value by
+        # assuming normality of null distribution
+        log.info('Inferring p-value based on normal distribution')
+        (shapiro_test_stat, shapiro_p_val) = scipy.stats.shapiro(samples)
+        log.info('Shapiro-Wilk normality test statistic: {:.2g}, p-value: {:.2g}'.format(
+            shapiro_test_stat, shapiro_p_val))
+        sample_mean = np.mean(samples)
+        sample_std = np.std(samples, ddof=1)
+        log.info('Sample mean: {:.2g}, sample standard deviation: {:.2g}'.format(
+            sample_mean, sample_std))
+        p_val = scipy.stats.norm.sf(s, loc=sample_mean, scale=sample_std)
+        return p_val
+
     else:
-        log.info('Using exact test ({} partitions)'.format(num_partitions))
-        for Xi in it.combinations(XY, len(X)):
-            Xi = np.array(Xi, dtype=np.int)
-            assert 2 * len(Xi) == len(XY)
-            si = s_XAB(Xi, s_wAB_memo)
-            if si > s:
-                total_true += 1
-            elif si == s:  # use conservative test
-                total_true += 1
-                total_equal += 1
+        log.info('Using non-parametric test')
+        s = s_XAB(X, s_wAB_memo)
+        total_true = 0
+        total_equal = 0
+        total = 0
+
+        num_partitions = int(scipy.special.binom(2 * len(X), len(X)))
+        if num_partitions > n_samples:
+            # We only have as much precision as the number of samples drawn;
+            # bias the p-value (hallucinate a positive observation) to
+            # reflect that.
+            total_true += 1
             total += 1
+            log.info('Drawing {} samples (and biasing by 1)'.format(n_samples - total))
+            for _ in range(n_samples - 1):
+                np.random.shuffle(XY)
+                Xi = XY[:size]
+                assert 2 * len(Xi) == len(XY)
+                si = s_XAB(Xi, s_wAB_memo)
+                if si > s:
+                    total_true += 1
+                elif si == s:  # use conservative test
+                    total_true += 1
+                    total_equal += 1
+                total += 1
 
-    if total_equal:
-        log.warning('Equalities contributed {}/{} to p-value'.format(total_equal, total))
+        else:
+            log.info('Using exact test ({} partitions)'.format(num_partitions))
+            for Xi in it.combinations(XY, len(X)):
+                Xi = np.array(Xi, dtype=np.int)
+                assert 2 * len(Xi) == len(XY)
+                si = s_XAB(Xi, s_wAB_memo)
+                if si > s:
+                    total_true += 1
+                elif si == s:  # use conservative test
+                    total_true += 1
+                    total_equal += 1
+                total += 1
 
-    return total_true / total
+        if total_equal:
+            log.warning('Equalities contributed {}/{} to p-value'.format(total_equal, total))
+
+        return total_true / total
 
 
 def mean_s_wAB(X, A, B, cossims):
@@ -161,8 +200,7 @@ def convert_keys_to_ints(X, Y):
     )
 
 
-# def run_test(A, B, X, Y, names, n_samples):
-def run_test(encs, n_samples):
+def run_test(encs, n_samples, parametric=False):
     ''' Run a WEAT.
     args:
         - encs (Dict[str: Dict]): dictionary mapping targ1, targ2, attr1, attr2
@@ -190,7 +228,7 @@ def run_test(encs, n_samples):
              encs["targ1"]["category"], encs["targ2"]["category"],
              encs["attr1"]["category"], encs["attr2"]["category"])
     log.info("Computing pval...")
-    pval = p_val_permutation_test(X, Y, A, B, n_samples, cossims=cossims)
+    pval = p_val_permutation_test(X, Y, A, B, n_samples, cossims=cossims, parametric=parametric)
     log.info("pval: %g", pval)
 
     log.info("computing effect size...")

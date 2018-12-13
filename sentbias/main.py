@@ -89,6 +89,8 @@ def handle_arguments(arguments):
                         help="Number of permutation test samples used when estimate p-values (exact test is used if "
                              "there are fewer than this many permutations)",
                         default=100000)
+    parser.add_argument('--parametric', action='store_true',
+                        help='Use parametric test (normal assumption) to compute p-values.')
     parser.add_argument('--use_cpu', action='store_true',
                         help='Use CPU to encode sentences.')
     parser.add_argument('--glove_path', '-g', type=str,
@@ -376,7 +378,7 @@ def main(arguments):
             # run the test on the encodings
             log.info("Running SEAT...")
             log.info("Representation dimension: {}".format(d_rep))
-            esize, pval = weat.run_test(encs, n_samples=args.n_samples)
+            esize, pval = weat.run_test(encs, n_samples=args.n_samples, parametric=args.parametric)
             results.append(dict(
                 model=model_name,
                 options=model_options,
@@ -391,7 +393,7 @@ def main(arguments):
         log.info("Model: %s", model_name)
         log.info('Options: {}'.format(model_options))
         for r in results:
-            log.info("\tTest {test}:\tp-val: {p_value:.5f}\tesize: {effect_size:.5f}".format(**r))
+            log.info("\tTest {test}:\tp-val: {p_value:.9f}\tesize: {effect_size:.2f}".format(**r))
 
     if args.results_path is not None:
         log.info('Writing results to {}'.format(args.results_path))
