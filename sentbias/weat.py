@@ -111,6 +111,9 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims, parametric=False):
         # Compute sample standard deviation and compute p-value by
         # assuming normality of null distribution
         log.info('Inferring p-value based on normal distribution')
+        (shapiro_test_stat, shapiro_p_val) = scipy.stats.shapiro(samples)
+        log.info('Shapiro-Wilk normality test statistic: {:.2g}, p-value: {:.2g}'.format(
+            shapiro_test_stat, shapiro_p_val))
         sample_mean = np.mean(samples)
         sample_std = np.std(samples, ddof=1)
         log.info('Sample mean: {:.2g}, sample standard deviation: {:.2g}'.format(
