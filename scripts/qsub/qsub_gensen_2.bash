@@ -9,4 +9,4 @@ source ~/.bashrc
 source activate sentbias
 export TFHUB_CACHE_DIR=/export/b02/cmay14/sentbias/tfhub_cache
 suffix=".$(date '+%Y%m%d%H%M%S').${JOB_ID}"
-python sentbias/main.py -m gensen --use_cpu --log_file log$suffix --results_path results.tsv$suffix --glove_h5_path /export/b02/cmay14/sentbias/glove.840B.300d.h5 --gensen_dir /export/b02/cmay14/sentbias/gensen --gensen_version nli_large_bothskip
+python sentbias/main.py --parametric -m gensen --use_cpu --log_file log$suffix --results_path results.tsv$suffix --glove_h5_path /export/b02/cmay14/sentbias/glove.840B.300d.h5 --gensen_dir /export/b02/cmay14/sentbias/gensen --gensen_version nli_large_bothskip
