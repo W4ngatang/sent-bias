@@ -16,7 +16,7 @@
 .Rhistory
 /log
 /log.*
-/results.tsv
-/results.tsv.*
 /*.o*
 .nfs*
+*.tab
+/results*
