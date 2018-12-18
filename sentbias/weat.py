@@ -193,7 +193,7 @@ def effect_size(X, Y, A, B, cossims):
 
     numerator = mean_s_wAB(X, A, B, cossims=cossims) - mean_s_wAB(Y, A, B, cossims=cossims)
     denominator = stdev_s_wAB(X + Y, A, B, cossims=cossims)
-    return (numerator / denominator, zip(s_wAB(A, B, cossims[X]), s_wAB(A, B, cossims[Y])))
+    return (numerator / denominator, list(zip(s_wAB(A, B, cossims[X]), s_wAB(A, B, cossims[Y]))))
 
 
 def convert_keys_to_ints(X, Y):
