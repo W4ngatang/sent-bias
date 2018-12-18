@@ -99,14 +99,17 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims, parametric=False):
         s = s_XYAB(X, Y, s_wAB_memo)
 
         log.info('Drawing {} samples'.format(n_samples))
+        paired_samples = []
         samples = []
         for _ in range(n_samples):
             np.random.shuffle(XY)
             Xi = XY[:size]
             Yi = XY[size:]
             assert len(Xi) == len(Yi)
-            si = s_XYAB(Xi, Yi, s_wAB_memo)
-            samples.append(si)
+            sxi = s_XAB(Xi, s_wAB_memo)
+            syi = s_XAB(Yi, s_wAB_memo)
+            paired_samples.append((sxi, syi))
+            samples.append(sxi - syi)
 
         # Compute sample standard deviation and compute p-value by
         # assuming normality of null distribution
@@ -119,7 +122,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims, parametric=False):
         log.info('Sample mean: {:.2g}, sample standard deviation: {:.2g}'.format(
             sample_mean, sample_std))
         p_val = scipy.stats.norm.sf(s, loc=sample_mean, scale=sample_std)
-        return p_val
+        return (p_val, paired_samples)
 
     else:
         log.info('Using non-parametric test')
@@ -164,7 +167,7 @@ def p_val_permutation_test(X, Y, A, B, n_samples, cossims, parametric=False):
         if total_equal:
             log.warning('Equalities contributed {}/{} to p-value'.format(total_equal, total))
 
-        return total_true / total
+        return (total_true / total, None)
 
 
 def mean_s_wAB(X, A, B, cossims):
@@ -228,13 +231,14 @@ def run_test(encs, n_samples, parametric=False):
              encs["targ1"]["category"], encs["targ2"]["category"],
              encs["attr1"]["category"], encs["attr2"]["category"])
     log.info("Computing pval...")
-    pval = p_val_permutation_test(X, Y, A, B, n_samples, cossims=cossims, parametric=parametric)
+    (pval, paired_samples) = p_val_permutation_test(
+        X, Y, A, B, n_samples, cossims=cossims, parametric=parametric)
     log.info("pval: %g", pval)
 
     log.info("computing effect size...")
     esize = effect_size(X, Y, A, B, cossims=cossims)
     log.info("esize: %g", esize)
-    return esize, pval
+    return esize, pval, paired_samples
 
 
 if __name__ == "__main__":
@@ -255,7 +259,7 @@ if __name__ == "__main__":
 
     cossims = construct_cossim_lookup(XY, AB)
     log.info("computing pval...")
-    pval = p_val_permutation_test(X, Y, A, B, cossims=cossims, n_samples=10000)
+    pval, _ = p_val_permutation_test(X, Y, A, B, cossims=cossims, n_samples=10000)
     log.info("pval: %g", pval)
 
     log.info("computing effect size...")
