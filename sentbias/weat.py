@@ -193,7 +193,7 @@ def effect_size(X, Y, A, B, cossims):
 
     numerator = mean_s_wAB(X, A, B, cossims=cossims) - mean_s_wAB(Y, A, B, cossims=cossims)
     denominator = stdev_s_wAB(X + Y, A, B, cossims=cossims)
-    return numerator / denominator
+    return (numerator / denominator, zip(s_wAB(A, B, cossims[X]), s_wAB(A, B, cossims[Y])))
 
 
 def convert_keys_to_ints(X, Y):
@@ -231,14 +231,14 @@ def run_test(encs, n_samples, parametric=False):
              encs["targ1"]["category"], encs["targ2"]["category"],
              encs["attr1"]["category"], encs["attr2"]["category"])
     log.info("Computing pval...")
-    (pval, paired_samples) = p_val_permutation_test(
+    (pval, psamples) = p_val_permutation_test(
         X, Y, A, B, n_samples, cossims=cossims, parametric=parametric)
     log.info("pval: %g", pval)
 
     log.info("computing effect size...")
-    esize = effect_size(X, Y, A, B, cossims=cossims)
+    (esize, esamples) = effect_size(X, Y, A, B, cossims=cossims)
     log.info("esize: %g", esize)
-    return esize, pval, paired_samples
+    return esize, pval, esamples, psamples
 
 
 if __name__ == "__main__":
@@ -263,5 +263,5 @@ if __name__ == "__main__":
     log.info("pval: %g", pval)
 
     log.info("computing effect size...")
-    esize = effect_size(X, Y, A, B, cossims=cossims)
+    esize, _ = effect_size(X, Y, A, B, cossims=cossims)
     log.info("esize: %g", esize)

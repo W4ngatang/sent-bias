@@ -378,7 +378,7 @@ def main(arguments):
             # run the test on the encodings
             log.info("Running SEAT...")
             log.info("Representation dimension: {}".format(d_rep))
-            esize, pval, paired_samples = weat.run_test(
+            esize, pval, esamples, psamples = weat.run_test(
                 encs, n_samples=args.n_samples, parametric=args.parametric)
             results.append(dict(
                 model=model_name,
@@ -390,8 +390,10 @@ def main(arguments):
                 num_targ2=len(encs['targ2']['encs']),
                 num_attr1=len(encs['attr1']['encs']),
                 num_attr2=len(encs['attr2']['encs']),
-                sx_samples=','.join(str(sx) for (sx, sy) in paired_samples),
-                sy_samples=','.join(str(sy) for (sx, sy) in paired_samples)))
+                p_sxi_sums=','.join(str(sxi) for (sxi, syi) in psamples),
+                p_syi_sums=','.join(str(syi) for (sxi, syi) in psamples),
+                es_sx=','.join(str(sx) for (sx, sy) in esamples),
+                es_sy=','.join(str(sy) for (sx, sy) in esamples)))
 
         log.info("Model: %s", model_name)
         log.info('Options: {}'.format(model_options))
