@@ -180,7 +180,7 @@ We provide a script that demonstrates how to run the bias tests for each model. 
 GLOVE_PATH=path/to/glove.840B.300d.txt
 ```
 
-Then copy `scripts/run_tests.sh` to another location, edit as desired, and run it with `bash`.
+Then copy `scripts/run_tests.sh` to a temporary location, edit as desired, and run it with `bash`.
 
 ### Details
 
@@ -190,6 +190,7 @@ To run bias tests directly, run `main` with one or more tests and one or more mo
 python sentbias/main.py -m bow,elmo --glove_path $GLOVE_PATH
 ```
 
+By default, output will be written to `output` in the current directory.
 Run `python sentbias/main.py --help` to see a full list of options.
 
 ## Code Tests
