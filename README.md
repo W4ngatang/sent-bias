@@ -1,14 +1,23 @@
 # sent-bias
 
-## Setup 
+## Setup
 
 First, install Anaconda and a C++ compiler (for example, `g++`) if you
 do not have them.  Then
 use `environment.yml` to create a conda environment with all necessary
-code dependencies: `conda env create -f environment.yml`.
-Activate the environment with `source activate sentbias`.
+code dependencies:
 
-Then, in the environment, download the NLTK punkt and spacy en
+```
+conda env create -f environment.yml
+```
+
+Activate the environment:
+
+```
+source activate sentbias
+```
+
+Now, in the environment, download the NLTK punkt and spacy en
 resources:
 
 ```
@@ -22,12 +31,17 @@ follows.
 
 ### Bag-of-words (bow); also GenSen and InferSent
 
-Several models require GloVe words vectors.
-Download and unzip the [GloVe Common Crawl 840B 300d
-vectors](http://nlp.stanford.edu/data/glove.840B.300d.zip) from the
-[Stanford NLP GloVe web
-page](https://nlp.stanford.edu/projects/glove/).  Make note of the
-path to the resultant text file; you will need to pass it to `sentbias/main.py` using the `--glove_path` flag.
+Several models require GloVe words vectors.  Download and unzip the
+GloVe Common Crawl 840B 300d vectors from the [Stanford NLP GloVe web
+page](https://nlp.stanford.edu/projects/glove/):
+
+```
+wget http://nlp.stanford.edu/data/glove.840B.300d.zip
+unzip glove.840B.300d.zip
+```
+
+Make note of the path to the resultant text file; you will need to pass
+it to `sentbias/main.py` using the `--glove_path` flag.
 
 ### BERT
 
@@ -136,7 +150,7 @@ Make a note of the directory you download them to; you will need to pass it to `
 You will also need to process your GloVe word vectors into an HDF5 format.  To do this run `scripts/glove2h5.py` on the path to your GloVe vectors:
 
 ```
-python scripts/glove2h5.py path/to/glove/vectors.txt
+python scripts/glove2h5.py path/to/glove.840B.300d.txt
 ```
 
 ### Infersent
@@ -161,11 +175,11 @@ export TFHUB_CACHE_DIR=/data/tfhub_cache
 ## Running Bias Tests
 
 We provide a script that demonstrates how to run the bias tests for each model.  To use it, minimally set the path to the GloVe vectors as `GLOVE_PATH` in a file called `user_config.sh`:
- 
+
 ```
-GLOVE_PATH=path/to/glove/vectors.txt
+GLOVE_PATH=path/to/glove.840B.300d.txt
 ```
- 
+
 Then copy `scripts/run_tests.sh` to another location, edit as desired, and run it with `bash`.
 
 ### Details
@@ -173,8 +187,7 @@ Then copy `scripts/run_tests.sh` to another location, edit as desired, and run i
 To run bias tests directly, run `main` with one or more tests and one or more models.  Note that each model may require additional command-line flags specifying locations of resources and other options. For example, to run all tests against the bag-of-words (GloVe) and ELMo models:
 
 ```
-python sentbias/main.py -m bow,elmo
-    --glove_path path/to/glove/vectors.txt
+python sentbias/main.py -m bow,elmo --glove_path $GLOVE_PATH
 ```
 
 Run `python sentbias/main.py --help` to see a full list of options.
@@ -187,9 +200,3 @@ To run tests on the code do the following:
 pytest
 flake8
 ```
-
-## TODO
-
-- track down NaNs in GenSen [Shikha]: looks like the denominator (stddev) of the effect size is 0 because a lot of the vectors are the same...possibly a problem with OOV, but all these words should be in GloVe (base word representations used). Can you make sure the vocab expansion method they implemented is being used?
-- add options for concatenation of GenSen models [Shikha]
-- implement SkipThought [Shikha]
