@@ -7,3 +7,4 @@
 [submodule "jiant"]
 	path = jiant
 	url = git@github.com:jsalt18-sentence-repl/jiant.git
+	branch = sentbias
