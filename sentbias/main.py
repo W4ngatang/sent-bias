@@ -99,7 +99,7 @@ def handle_arguments(arguments):
 
     elmo_group = parser.add_argument_group(ModelName.ELMO.value, 'Options for ELMo model')
     elmo_group.add_argument('--time_combine_method', type=str, choices=["max", "mean", "concat", "last"],
-                            help="How to combine word representations in ELMo", default="max")
+                            help="How to combine word representations in ELMo", default="mean")
     elmo_group.add_argument('--layer_combine_method', type=str, choices=["add", "mean", "concat", "last"],
                             help="How to combine layers in ELMo", default="add")
 
@@ -116,7 +116,7 @@ def handle_arguments(arguments):
                               help="Version of gensen to use.  Two versions may be passed, separated by commas, in "
                                    "which case the respective models will be concatenated.  "
                                    "Options: {}".format(','.join(GENSEN_VERSIONS)),
-                              default="nli_large_bothskip_parse")
+                              default="nli_large_bothskip_parse,nli_large_bothskip")
 
     cove_group = parser.add_argument_group(ModelName.COVE.value, 'Options for CoVe model')
     cove_group.add_argument('--cove_encs', type=str,
@@ -130,7 +130,7 @@ def handle_arguments(arguments):
 
     bert_group = parser.add_argument_group(ModelName.BERT.value, 'Options for BERT model')
     bert_group.add_argument('--bert_version', type=str, choices=BERT_VERSIONS,
-                            help="Version of BERT to use.", default="bert-base-uncased")
+                            help="Version of BERT to use.", default="bert-large-cased")
 
     return parser.parse_args(arguments)
 
