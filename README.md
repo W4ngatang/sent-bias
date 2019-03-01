@@ -116,11 +116,13 @@ Now we put a comma-separated list of the jiant *tasks* we want to run in `target
 target_tasks=angry_black_woman_stereotype-openai,angry_black_woman_stereotype_b-openai,sent-angry_black_woman_stereotype-openai,sent-angry_black_woman_stereotype_b-openai,heilman_double_bind_competent_1-openai,heilman_double_bind_competent_1+3--openai,heilman_double_bind_competent_1--openai,heilman_double_bind_competent_one_sentence-openai,heilman_double_bind_competent_one_word-openai,sent-heilman_double_bind_competent_one_word-openai,heilman_double_bind_likable_1-openai,heilman_double_bind_likable_1+3--openai,heilman_double_bind_likable_1--openai,heilman_double_bind_likable_one_sentence-openai,heilman_double_bind_likable_one_word-openai,sent-heilman_double_bind_likable_one_word-openai,weat1-openai,weat2-openai,weat3-openai,weat3b-openai,weat4-openai,weat5-openai,weat5b-openai,weat6b-openai,weat6-openai,weat7-openai,weat7b-openai,weat8-openai,weat8b-openai,weat9-openai,weat10-openai,sent-weat1-openai,sent-weat2-openai,sent-weat3-openai,sent-weat3b-openai,sent-weat4-openai,sent-weat5-openai,sent-weat5b-openai,sent-weat6-openai,sent-weat6b-openai,sent-weat7-openai,sent-weat7b-openai,sent-weat8-openai,sent-weat8b-openai,sent-weat9-openai,sent-weat10-openai
 ```
 
-Finally, we run `extract_repr.py` on those tasks (this may take a while):
+Finally, to produce the GPT representations of the SEAT data, run `extract_repr.py` on those tasks (this may take a while):
 
 ```
 python extract_repr.py --config config/bias.conf --overrides "target_tasks = \"$target_tasks\", exp_name = sentbias-openai, run_name = openai, word_embs = none, elmo = 0, openai_transformer = 1, sent_enc = \"null\", skip_embs = 1, sep_embs_for_skip = 1, allow_missing_task_map = 1, combine_method = last"
 ```
+
+The path to the directory containing the representations should be passed to `sentbias/main.py` using the `--openai_encs` flag.
 
 ### ELMo
 
