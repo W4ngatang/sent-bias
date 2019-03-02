@@ -149,7 +149,8 @@ Finally, to produce the GPT representations of the SEAT data, run `extract_repr.
 python extract_repr.py --config config/bias.conf --overrides "target_tasks = \"$target_tasks\", exp_name = sentbias-openai, run_name = openai, word_embs = none, elmo = 0, openai_transformer = 1, sent_enc = \"null\", skip_embs = 1, sep_embs_for_skip = 1, allow_missing_task_map = 1, combine_method = last"
 ```
 
-The path to the directory containing the representations should be passed to `sentbias/main.py` using the `--openai_encs` flag.
+The representations will be saved to files of the form `TASK.encs` (for example, `angry_black_woman_stereotype-openai.encs`) in the directory `$JIANT_PROJECT_PREFIX/sentbias-openai/openai`.
+This directory should be passed to `sentbias/main.py` using the `--openai_encs` flag.
 
 ### ELMo
 
