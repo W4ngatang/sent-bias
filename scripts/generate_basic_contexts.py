@@ -156,6 +156,7 @@ MASS_NOUNS = {
     'geometry',
     'always',
     'forever',
+    'vomit',
 }
 
 PLURAL_NOUNS = {
@@ -258,7 +259,7 @@ PLURAL_PERSON_TEMPLATES = (
 )
 
 SINGULAR_THING_TEMPLATES = (
-    'A {term} is a thing.',
+    '{article} {term} is a thing.',
     'It is {article} {term}.',
 )
 
@@ -271,8 +272,10 @@ def fill_template(template, term):
     article = (
         'an'
         if (
-            any(
-                term.startswith(c) for c in 'aeiouAEIOU'
+            (
+                term.startswith('honor') or any(
+                    term.startswith(c) for c in 'aeiouAEIOU'
+                )
             ) and not (
                 term.startswith('European') or term.startswith('Ukrainian')
             )

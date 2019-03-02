@@ -25,24 +25,24 @@
   "targ2": {
     "category": "PhysicalDisease",
     "examples": [
-      "They are sick.",
-      "The illness is here.",
-      "These are illnesses.",
+      "Here is an illness.",
+      "The illness is there.",
+      "An illness is a thing.",
       "Those are illnesses.",
       "They are illnesses.",
-      "These are influenzas.",
+      "This is an influenza.",
       "They are influenzas.",
-      "That is a disease.",
-      "The disease is here.",
-      "These are diseases.",
-      "Those are diseases.",
-      "The virus is here.",
+      "The influenzas are there.",
+      "It is a disease.",
+      "The diseases are here.",
+      "The diseases are there.",
       "The virus is there.",
-      "Those are viruses.",
+      "It is a virus.",
+      "These are viruses.",
+      "They are viruses.",
       "The viruses are here.",
-      "The viruses are there.",
-      "It is a cancer.",
-      "Those are cancers."
+      "There is a cancer.",
+      "The cancer is there."
     ]
   },
   "attr1": {
