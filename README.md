@@ -184,11 +184,10 @@ python scripts/glove2h5.py path/to/glove.840B.300d.txt
 
 ### Infersent
 
-Download the model checkpoints from the [InferSent repo](https://github.com/facebookresearch/InferSent):
+Download the AllNLI [InferSent](https://github.com/facebookresearch/InferSent) model checkpoint (Facebook has deleted this version; we are temporarily hosting a copy):
 
 ```
-wget https://s3.amazonaws.com/senteval/infersent/infersent.allnli.pickle
-wget https://s3.amazonaws.com/senteval/infersent/infersent.snli.pickle
+wget http://sent-bias.s3-website-us-east-1.amazonaws.com/infersent.allnli.pickle
 ```
 
 Make a note of the directory you download them to; you will need to pass it to `sentbias/main.py` using the `--infersent_dir` flag.
