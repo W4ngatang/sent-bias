@@ -2,22 +2,49 @@
 
 ## Setup
 
+### Environment setup
+
 First, install Anaconda and a C++ compiler (for example, `g++`) if you
-do not have them.  Then
-use `environment.yml` to create a conda environment with all necessary
+do not have them.
+
+#### Using the prespecified environment
+
+Use `environment.yml` to create a conda environment with all necessary
 code dependencies:
 
 ```
 conda env create -f environment.yml
 ```
 
-Activate the environment:
+Activate the environment as follows:
 
 ```
 source activate sentbias
 ```
 
-Now, in the environment, download the NLTK punkt and spacy en
+#### Recreating the environment
+
+Alternatively (for example,
+if you have problems using the prespecified environment), follow
+approximately the following steps to recreate it.  First, create a new
+environment with Python 3.6:
+
+```
+conda create -n sentbias python=3.6
+```
+
+Then activate the environment and add the remaining dependencies:
+
+```
+source activate sentbias
+conda install pytorch=0.4.1 cuda90 -c pytorch
+conda install tensorflow
+pip install allennlp gensim tensorflow-hub pytorch-pretrained-bert numpy scipy nltk spacy h5py scikit-learn
+```
+
+#### Environment postsetup
+
+Now, with the environment activated, download the NLTK punkt and spacy en
 resources:
 
 ```
