@@ -227,7 +227,7 @@ To run bias tests directly, run `main` with one or more tests and one or more mo
 python sentbias/main.py -m bow,elmo --glove_path $GLOVE_PATH
 ```
 
-By default, output will be written to `output` in the current directory.
+If they are available, cached sentence representations in the `output` directory will be loaded and used; if they are not available, they will be computed (and cached under `output`).
 Run `python sentbias/main.py --help` to see a full list of options.
 
 ## Code Tests
