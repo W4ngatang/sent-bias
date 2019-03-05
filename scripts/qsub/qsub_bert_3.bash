@@ -3,7 +3,7 @@
 #$ -cwd
 #$ -j y
 #$ -N sentbias_bert_3
-#$ -l h_rt=24:00:00,num_proc=1,mem_free=16G,ram_free=16G
+#$ -l h_rt=24:00:00,num_proc=1,mem_free=32G,ram_free=32G
 
 SENTBIAS_ROOT=/export/b02/cmay14/sentbias
 
