@@ -232,15 +232,14 @@ Run `python sentbias/main.py --help` to see a full list of options.
 
 ## Code Tests
 
-To run tests on the code, first install `pytest` and `flake8`:
+To run style checks, first install `flake8`:
 
 ```
-pip install pytest flake8
+pip install flake8
 ```
 
-Then run them as follows:
+Then run it as follows:
 
 ```
-pytest
 flake8
 ```
