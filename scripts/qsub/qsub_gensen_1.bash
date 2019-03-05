@@ -5,8 +5,12 @@
 #$ -N sentbias_gensen_1
 #$ -l h_rt=24:00:00,num_proc=1,mem_free=16G,ram_free=16G
 
+SENTBIAS_ROOT=/export/b02/cmay14/sentbias
+
 source ~/.bashrc
 source activate sentbias
-export TFHUB_CACHE_DIR=/export/b02/cmay14/sentbias/tfhub_cache
+export TFHUB_CACHE_DIR=$SENTBIAS_ROOT/tfhub_cache
+export ALLENNLP_CACHE_ROOT=$SENTBIAS_ROOT/allennlp_cache
+export PYTORCH_PRETRAINED_BERT_CACHE=$SENTBIAS_ROOT/bert_cache
 suffix=".$(date '+%Y%m%d%H%M%S').${JOB_ID}"
-python sentbias/main.py -m gensen --use_cpu --log_file log$suffix --results_path results.tsv$suffix --glove_h5_path /export/b02/cmay14/sentbias/glove.840B.300d.h5 --gensen_dir /export/b02/cmay14/sentbias/gensen --gensen_version nli_large_bothskip_parse
+python sentbias/main.py -m gensen --use_cpu --log_file log$suffix --results_path results.tsv$suffix --glove_h5_path $SENTBIAS_ROOT/glove.840B.300d.h5 --gensen_dir $SENTBIAS_ROOT/gensen --gensen_version nli_large_bothskip_parse
