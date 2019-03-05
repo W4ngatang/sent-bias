@@ -224,7 +224,7 @@ Then copy `scripts/run_tests.sh` to a temporary location, edit as desired, and r
 To run bias tests directly, run `main` with one or more tests and one or more models.  Note that each model may require additional command-line flags specifying locations of resources and other options. For example, to run all tests against the bag-of-words (GloVe) and ELMo models:
 
 ```
-python sentbias/main.py -m bow,elmo --glove_path $GLOVE_PATH
+python sentbias/main.py -m bow,elmo --glove_path path/to/glove.840B.300d.txt
 ```
 
 If they are available, cached sentence representations in the `output` directory will be loaded and used; if they are not available, they will be computed (and cached under `output`).
