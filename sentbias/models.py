@@ -128,14 +128,14 @@ class BLSTMEncoder(nn.Module):
             you need to set_glove_path(glove_path)'
         word_dict = self.get_word_dict(sentences, tokenize)
         self.word_vec = self.get_glove(word_dict)
-        print('Vocab size : {0}'.format(len(self.word_vec)))
+        log.info('Vocab size : {0}'.format(len(self.word_vec)))
 
     # build GloVe vocab with k most frequent words
     def build_vocab_k_words(self, K):
         assert hasattr(self, 'glove_path'), 'warning: \
             you need to set_glove_path(glove_path)'
         self.word_vec = self.get_glove_k(K)
-        print('Vocab size : {0}'.format(K))
+        log.info('Vocab size : {0}'.format(K))
 
     def update_vocab(self, sentences, tokenize=True):
         assert hasattr(self, 'glove_path'), 'warning: \
@@ -152,8 +152,8 @@ class BLSTMEncoder(nn.Module):
         if word_dict:
             new_word_vec = self.get_glove(word_dict)
             self.word_vec.update(new_word_vec)
-        print('New vocab size : {0} (added {1} words)'
-              .format(len(self.word_vec), len(new_word_vec)))
+        log.info('New vocab size : {0} (added {1} words)'
+                 .format(len(self.word_vec), len(new_word_vec)))
 
     def get_batch(self, batch):
         # sent in batch in decreasing order of lengths
@@ -187,8 +187,8 @@ class BLSTMEncoder(nn.Module):
         lengths = np.array([len(s) for s in sentences])
         n_wk = np.sum(lengths)
         if verbose:
-            print('Nb words kept : {0}/{1} ({2} %)'
-                  .format(n_wk, n_w, round((100.0 * n_wk) / n_w, 2)))
+            log.info('Nb words kept : {0}/{1} ({2} %)'
+                     .format(n_wk, n_w, round((100.0 * n_wk) / n_w, 2)))
 
         # sort by decreasing length
         lengths, idx_sort = np.sort(lengths)[::-1], np.argsort(-lengths)
@@ -210,9 +210,9 @@ class BLSTMEncoder(nn.Module):
         embeddings = embeddings[idx_unsort]
 
         if verbose:
-            print('Speed : {0} sentences/s ({1} mode, bsize={2})'
-                  .format(round(len(embeddings) / (time.time() - tic), 2),
-                          'gpu' if self.use_cuda else 'cpu', bsize))
+            log.info('Speed : {0} sentences/s ({1} mode, bsize={2})'
+                     .format(round(len(embeddings) / (time.time() - tic), 2),
+                             'gpu' if self.use_cuda else 'cpu', bsize))
         return embeddings
 
     def visualize(self, sent, tokenize=True):
