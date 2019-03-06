@@ -125,6 +125,8 @@ def main():
                         help='Name of set of models to report.')
     parser.add_argument('--p_values_only', action='store_true',
                         help='Report p-values only (default: effect sizes with stars).')
+    parser.add_argument('--header', action='store_true',
+                        help='Print header row.')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO)
@@ -163,6 +165,15 @@ def main():
         results.update(db_results)
     else:
         results = holm_bonferroni(results)
+
+    if args.header:
+        print('Test & Context', end='')
+        for (model, options) in MODEL_SETS[args.model_set]:
+            if model is None:
+                print(' & ', end='')
+            else:
+                print(' & {}'.format(model), end='')
+        print(' \\\\')
 
     for (test_name, test_description, context_level) in TEST_SETS[args.test_set]:
         if test_name is None:
