@@ -72,7 +72,7 @@ it to `sentbias/main.py` using the `--glove_path` flag.
 
 ### BERT
 
-BERT weights will be downloaded and cached at runtime.  Set `PYTORCH_PRETRAINED_BERT_CACHE` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `~/.pytorch_pretrained_bert`.  For example, if using bash, run this before running BERT bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
+BERT weights will be downloaded [Bert repo](https://github.com/huggingface/pytorch-pretrained-BERT) and cached at runtime.  Set `PYTORCH_PRETRAINED_BERT_CACHE` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `~/.pytorch_pretrained_bert`.  For example, if using bash, run this before running BERT bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
 
 ```
 export PYTORCH_PRETRAINED_BERT_CACHE=/data/bert_cache
@@ -162,7 +162,7 @@ Finally, pass the directory path `$JIANT_PROJECT_PREFIX/sentbias-openai/openai` 
 
 ### ELMo
 
-ELMo weights will be downloaded and cached at runtime.  Set `ALLENNLP_CACHE_ROOT` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `~/.allennlp`.  For example, if using bash, run this before running ELMo bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
+ELMo weights will be downloaded from [allennlp repo] (https://github.com/allenai/allennlp/tree/master/allennlp)  and cached at runtime.  Set `ALLENNLP_CACHE_ROOT` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `~/.allennlp`.  For example, if using bash, run this before running ELMo bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
 
 ```
 export ALLENNLP_CACHE_ROOT=/data/allennlp_cache
@@ -203,7 +203,7 @@ Make a note of the directory you download them to; you will need to pass it to `
 
 ### Universal Sentence Encoder (Google)
 
-Universal Sentence Encoder weights will be downloaded and cached at runtime.  Set `TFHUB_CACHE_DIR` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `/tmp/tfhub_modules`.  For example, if using bash, run this before running Universal Sentence Encoder bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
+Universal Sentence Encoder weights will be downloaded from [Universal Sentence Encoder repo] (https://github.com/tensorflow/tfjs-models/tree/master/universal-sentence-encoder) and cached at runtime.  Set `TFHUB_CACHE_DIR` in your environment to a directory you'd like them to be saved to; otherwise they will be saved to `/tmp/tfhub_modules`.  For example, if using bash, run this before running Universal Sentence Encoder bias tests or put it in your `~/.bashrc` and start a new shell session to run bias tests:
 
 ```
 export TFHUB_CACHE_DIR=/data/tfhub_cache
