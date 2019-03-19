@@ -250,7 +250,7 @@ This code is distributed under the Creative Commons
 Attribution-NonCommercial 4.0 International license, which can be found
 in the `LICENSE` file in this directory.
 
-The file `sentbias/models.py` is based on [models.py in InferSent](https://github.com/facebookresearch/InferSent/blob/74990f5f9aa46d2e549eeb7b80bd64dbf338407d/models.py) with small modifications by us (May, Wang, Bordia, Bowman, and Rudinger); the original file is copyright Facebook, Inc. under the Creative Commons Attribution-NonCommercial 4.0 International license.
+The file `sentbias/models.py` is based on [`models.py` in InferSent](https://github.com/facebookresearch/InferSent/blob/74990f5f9aa46d2e549eeb7b80bd64dbf338407d/models.py) with small modifications by us (May, Wang, Bordia, Bowman, and Rudinger); the original file is copyright Facebook, Inc. under the Creative Commons Attribution-NonCommercial 4.0 International license.
 
 
-The file `sentbias/encoders/gensen.py` is based on [gensen.py in gensen](https://github.com/Maluuba/gensen/blob/8e6948af62c4b9b1ba77bc000abf70ab68b4663d/gensen.py) with small modifications by us (May, Wang, Bordia, Bowman, and Rudinger); the original file is copyright Microsoft Corporation under the MIT license.
+The file `sentbias/encoders/gensen.py` is based on [`gensen.py` in gensen](https://github.com/Maluuba/gensen/blob/8e6948af62c4b9b1ba77bc000abf70ab68b4663d/gensen.py) with small modifications by us (May, Wang, Bordia, Bowman, and Rudinger); the original file is copyright Microsoft Corporation under the MIT license.
