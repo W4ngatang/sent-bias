@@ -1,4 +1,7 @@
-# This file is based on https://github.com/facebookresearch/InferSent/blob/74990f5f9aa46d2e549eeb7b80bd64dbf338407d/models.py with small modifications by us (May, Wang, Bordia, Bowman, and Rudinger); the original file is licensed by Facebook, Inc. as follows:
+# This file is based on
+# https://github.com/facebookresearch/InferSent/blob/74990f5f9aa46d2e549eeb7b80bd64dbf338407d/models.py
+# with small modifications by us (May, Wang, Bordia, Bowman, and Rudinger); the
+# original file is licensed by Facebook, Inc. as follows:
 #
 # Attribution-NonCommercial 4.0 International
 #
