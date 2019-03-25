@@ -1,5 +1,7 @@
 # sent-bias
 
+This repository contains the code and data for the paper "On Measuring Social Biases in Sentence Encoders" by Chandler May, Alex Wang, Shikha Bordia, Samuel R. Bowman and Rachel Rudinger.
+
 ## Setup
 
 ### Environment setup
