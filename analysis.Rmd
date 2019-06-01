@@ -212,43 +212,34 @@ signif_results <- results %>%
   mutate(effect_size=ifelse(reject, effect_size, 0))
 ```
 
-#### Word-level tests
-
-```{r fig.width=4,fig.height=4}
-signif_results %>%
+```{r fig.width=5,fig.height=3.5}
+clean_word_effects <- signif_results %>%
   filter(! str_detect(test, '[0-9]b$'), ! str_detect(test, '_b$'), ! str_detect(test, '_1[+-3]*$')) %>%
   filter(! str_detect(test, '^sent-'), ! str_detect(test, '_one_sentence$')) %>%
   mutate(model_options=ifelse(is.na(options), model, str_c(model, ';', options))) %>%
   filter(model_options %in% selected_model_options) %>%
   rowwise() %>% 
   mutate(model=factor(rename_model(model), levels=model_levels),
-         test=factor(rename_test(test), test_levels)) %>%
-  ggplot() +
-  geom_tile(aes(x=model, y=test, fill=effect_size)) +
-  theme_bw() +
-  theme(axis.text.x=element_text(angle=45, hjust=1)) +
-  scale_fill_gradient(low='white', high='black', limits=c(0,2))
-ggsave('significant_word_effects.png', width=4, height=4)
-```
-
-
-#### Sentence-level tests
-
-```{r fig.width=4,fig.height=4}
-signif_results %>%
+         test=factor(rename_test(test), levels=test_levels),
+         level='word-level')
+clean_sent_effects <- signif_results %>%
   filter(! str_detect(test, '[0-9]b$'), ! str_detect(test, '_b$'), ! str_detect(test, '_1[+-3]*$')) %>%
   filter(str_detect(test, '^sent-')) %>%
   mutate(model_options=ifelse(is.na(options), model, str_c(model, ';', options))) %>%
   filter(model_options %in% selected_model_options) %>%
   rowwise() %>% 
   mutate(model=factor(rename_model(model), levels=model_levels),
-         test=factor(rename_test(test), test_levels)) %>%
+         test=factor(rename_test(test), levels=test_levels),
+         level='sentence-level')
+clean_word_effects %>%
+  rbind(clean_sent_effects) %>%
   ggplot() +
   geom_tile(aes(x=model, y=test, fill=effect_size)) +
   theme_bw() +
   theme(axis.text.x=element_text(angle=45, hjust=1)) +
-  scale_fill_gradient(low='white', high='black', limits=c(0,2))
-ggsave('significant_sentence_effects.png', width=4, height=4)
+  scale_fill_gradient(low='white', high='black', limits=c(0,2)) +
+  facet_grid(. ~ level)
+ggsave('significant_effects.png', width=5, height=3.5)
 ```
 
 ## Validity
@@ -256,6 +247,9 @@ ggsave('significant_sentence_effects.png', width=4, height=4)
 ### Validity 1
 
 ```{r fig.width=4,fig.height=2.5}
+v1_test_map <- c('Caliskan 5'='16,8',
+                 'Caliskan 4'='16,25',
+                 'Caliskan 3'='32,25')
 results %>%
   filter(model %in% c('elmo', 'bow'),
          test %in% c('weat3', 'weat4', 'weat5', 'sent-weat3', 'sent-weat4', 'sent-weat5')) %>%
@@ -266,8 +260,8 @@ results %>%
          level=ifelse(sent, 'sentence-level', 'word-level')) %>%
   rowwise() %>% 
   mutate(model=factor(rename_model(model), levels=model_levels),
-         test=factor(rename_test(test), test_levels)) %>%
-  ggplot(aes(x=test, group=model, colour=model, shape=model, y=p_value)) +
+         sample_size=factor(v1_test_map[rename_test(test)], v1_test_map)) %>%
+  ggplot(aes(x=sample_size, group=model, colour=model, shape=model, y=p_value)) +
   geom_line(size=1) +
   geom_point(size=4) +
   scale_y_log10() +
