@@ -224,7 +224,7 @@ clean_word_effects <- signif_results %>%
          level='word-level')
 clean_sent_effects <- signif_results %>%
   filter(! str_detect(test, '[0-9]b$'), ! str_detect(test, '_b$'), ! str_detect(test, '_1[+-3]*$')) %>%
-  filter(str_detect(test, '^sent-')) %>%
+  filter(str_detect(test, '^sent-') | str_detect(test, '_one_sentence$'), ! str_detect(test, '^sent-heilman')) %>%
   mutate(model_options=ifelse(is.na(options), model, str_c(model, ';', options))) %>%
   filter(model_options %in% selected_model_options) %>%
   rowwise() %>% 
@@ -237,7 +237,7 @@ clean_word_effects %>%
   geom_tile(aes(x=model, y=test, fill=effect_size)) +
   theme_bw() +
   theme(axis.text.x=element_text(angle=45, hjust=1)) +
-  scale_fill_gradient(low='white', high='black', limits=c(0,2)) +
+  scale_fill_gradient(low='white', high='darkblue', limits=c(0,2)) +
   facet_grid(. ~ level)
 ggsave('significant_effects.png', width=5, height=3.5)
 ```
